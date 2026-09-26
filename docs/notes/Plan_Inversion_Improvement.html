@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModEM 3D MT Inversion Improvement Plan - Llucmajor</title>
+    <style>
+        :root {
+            --primary: #1a5276;
+            --primary-light: #2980b9;
+            --accent: #e74c3c;
+            --accent-light: #f1948a;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
+            --border: #dee2e6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .header .meta {
+            margin-top: 16px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Diagnosis banner */
+        .diagnosis {
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            color: white;
+            margin: 30px auto;
+            max-width: 1000px;
+            padding: 28px 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .diagnosis h2 {
+            font-size: 1.5em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .diagnosis p { font-size: 1.05em; line-height: 1.7; }
+        .diagnosis strong { color: #ffeaa7; }
+
+        /* RMS chart area */
+        .rms-section {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .rms-section h3 {
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-size: 1.2em;
+        }
+
+        .rms-chart {
+            width: 100%;
+            height: 260px;
+            position: relative;
+            border-left: 2px solid var(--text);
+            border-bottom: 2px solid var(--text);
+            margin: 20px 0 10px 40px;
+            padding-right: 20px;
+        }
+
+        .rms-bar-container {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            gap: 2px;
+            padding: 0 5px;
+        }
+
+        .rms-bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--accent) 0%, #c0392b 100%);
+            border-radius: 2px 2px 0 0;
+            min-width: 4px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .rms-bar:hover {
+            opacity: 0.8;
+        }
+
+        .rms-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-left: 40px;
+            margin-right: 20px;
+            font-size: 0.8em;
+            color: var(--text-light);
+        }
+
+        .y-labels {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: var(--text-light);
+            width: 35px;
+            text-align: right;
+        }
+
+        .target-line {
+            position: absolute;
+            bottom: 2.5%;
+            left: 0;
+            right: 0;
+            border-top: 2px dashed var(--success);
+            z-index: 1;
+        }
+
+        .target-label {
+            position: absolute;
+            bottom: 1%;
+            right: 0;
+            background: var(--success);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            z-index: 2;
+        }
+
+        .lambda-note {
+            text-align: center;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 8px;
+            font-size: 0.95em;
+        }
+
+        /* Current parameters */
+        .current-params {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .current-params h3 {
+            color: var(--primary);
+            margin-bottom: 16px;
+            font-size: 1.2em;
+        }
+
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .param-card {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid var(--primary-light);
+        }
+
+        .param-card .label {
+            font-size: 0.8em;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .param-card .value {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 4px 0;
+        }
+
+        .param-card .detail {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        /* Phase sections */
+        .phase {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .phase-header {
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .phase-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .phase-critical .phase-number { background: var(--accent); }
+        .phase-important .phase-number { background: var(--warning); }
+        .phase-optional .phase-number { background: var(--text-light); }
+
+        .phase-header h2 {
+            font-size: 1.3em;
+            color: var(--text);
+        }
+
+        .phase-header .priority {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .phase-critical .priority {
+            background: #fde8e8;
+            color: var(--accent);
+        }
+
+        .phase-important .priority {
+            background: #fef9e7;
+            color: #d4920b;
+        }
+
+        .phase-optional .priority {
+            background: #eaecee;
+            color: var(--text-light);
+        }
+
+        .phase-body {
+            padding: 0 32px 28px;
+        }
+
+        .phase-body p {
+            margin-bottom: 12px;
+            color: #555;
+        }
+
+        .file-ref {
+            display: inline-block;
+            background: #eaf2f8;
+            color: var(--primary);
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        /* Parameter change table */
+        .change-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.95em;
+        }
+
+        .change-table th {
+            background: var(--primary);
+            color: white;
+            padding: 10px 14px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .change-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .change-table tr:hover { background: #f5f8fa; }
+
+        .change-table .old-val {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: line-through;
+            font-family: 'Courier New', monospace;
+        }
+
+        .change-table .new-val {
+            color: var(--success);
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .change-table .reasoning {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        /* Code block */
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.8;
+            overflow-x: auto;
+            margin: 16px 0;
+            position: relative;
+        }
+
+        .code-block .code-title {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--primary-light);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 0 8px 0 8px;
+            font-size: 0.8em;
+        }
+
+        .code-highlight { color: #2ecc71; font-weight: 700; }
+        .code-comment { color: #7f8c8d; }
+
+        /* Bullet list */
+        .phase-body ul, .phase-body ol {
+            margin: 12px 0 12px 20px;
+        }
+
+        .phase-body li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .phase-body li strong {
+            color: var(--text);
+        }
+
+        /* Execution strategy */
+        .execution {
+            max-width: 1000px;
+            margin: 40px auto;
+        }
+
+        .execution h2 {
+            text-align: center;
+            color: var(--primary);
+            font-size: 1.6em;
+            margin-bottom: 30px;
+        }
+
+        .run-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .run-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-top: 4px solid;
+        }
+
+        .run-card:nth-child(1) { border-color: var(--accent); }
+        .run-card:nth-child(2) { border-color: var(--warning); }
+        .run-card:nth-child(3) { border-color: var(--text-light); }
+
+        .run-card h3 {
+            font-size: 1.1em;
+            margin-bottom: 4px;
+        }
+
+        .run-card .run-condition {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .run-card ol {
+            margin-left: 16px;
+            font-size: 0.9em;
+        }
+
+        .run-card li {
+            margin-bottom: 6px;
+            color: #555;
+        }
+
+        /* Verification */
+        .verification {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 28px 32px;
+        }
+
+        .verification h2 {
+            font-size: 1.4em;
+            margin-bottom: 16px;
+        }
+
+        .verification ol {
+            margin-left: 20px;
+        }
+
+        .verification li {
+            margin-bottom: 8px;
+            font-size: 1.0em;
+        }
+
+        /* Files summary */
+        .files-summary {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .files-summary h2 {
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .file-item:last-child { border-bottom: none; }
+
+        .file-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #eaf2f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .file-path {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: var(--primary);
+        }
+
+        .file-desc {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            .run-cards { grid-template-columns: 1fr; }
+            .params-grid { grid-template-columns: 1fr 1fr; }
+            .header h1 { font-size: 1.6em; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+    <div class="container">
+        <h1>ModEM 3D MT Inversion Improvement Plan</h1>
+        <div class="subtitle">Llucmajor Magnetotelluric Survey &mdash; Mallorca, Spain</div>
+        <div class="meta">Universitat de les Illes Balears &bull; TFG &bull; Albert Rius &bull; March 2026</div>
+    </div>
+</div>
+
+<!-- Diagnosis -->
+<div class="container">
+    <div class="diagnosis">
+        <h2>&#9888; Root Cause Diagnosis</h2>
+        <p>
+            The inversion converged at <strong>RMS &asymp; 20.7 after 50 iterations</strong> (target: 1.0&ndash;2.0).
+            The damping parameter <strong>&lambda; stayed at 100 for ALL 50 iterations and never decreased</strong>.
+            This means the model was heavily <strong>over-regularized</strong> &mdash; the regularization penalty dominated the objective function
+            and the model could barely deviate from the starting 100 &Omega;&middot;m half-space.
+            The restart criterion (RMS diff &lt; 0.002) was never triggered because RMS was still decreasing
+            at ~0.02/iteration at the end &mdash; a rate above the threshold, but far too slow to reach the target.
+        </p>
+    </div>
+</div>
+
+<!-- RMS Convergence Chart -->
+<div class="rms-section container">
+    <h3>RMS Convergence History (50 Iterations)</h3>
+    <div style="position: relative;">
+        <div class="y-labels">
+            <span>80</span>
+            <span>60</span>
+            <span>40</span>
+            <span>20</span>
+            <span>0</span>
+        </div>
+        <div class="rms-chart">
+            <div class="target-line"></div>
+            <div class="target-label">Target RMS &asymp; 1.5</div>
+            <div class="rms-bar-container">
+                <!-- 50 bars representing RMS at each iteration -->
+                <div class="rms-bar" style="height:97.5%" title="Iter 0: RMS=77.98"></div>
+                <div class="rms-bar" style="height:71.6%" title="Iter 1: RMS=57.27"></div>
+                <div class="rms-bar" style="height:61.2%" title="Iter 2: RMS=48.97"></div>
+                <div class="rms-bar" style="height:58.0%" title="Iter 3: RMS=46.37"></div>
+                <div class="rms-bar" style="height:53.9%" title="Iter 4: RMS=43.12"></div>
+                <div class="rms-bar" style="height:54.2%" title="Iter 5: RMS=43.34"></div>
+                <div class="rms-bar" style="height:54.1%" title="Iter 6: RMS=43.29"></div>
+                <div class="rms-bar" style="height:53.4%" title="Iter 7: RMS=42.75"></div>
+                <div class="rms-bar" style="height:52.1%" title="Iter 8: RMS=41.65"></div>
+                <div class="rms-bar" style="height:48.7%" title="Iter 9: RMS=38.99"></div>
+                <div class="rms-bar" style="height:46.0%" title="Iter 10: RMS=36.80"></div>
+                <div class="rms-bar" style="height:43.3%" title="Iter 11: RMS=34.62"></div>
+                <div class="rms-bar" style="height:42.1%" title="Iter 12: RMS=33.70"></div>
+                <div class="rms-bar" style="height:39.9%" title="Iter 13: RMS=31.89"></div>
+                <div class="rms-bar" style="height:38.9%" title="Iter 14: RMS=31.13"></div>
+                <div class="rms-bar" style="height:38.5%" title="Iter 15: RMS=30.82"></div>
+                <div class="rms-bar" style="height:37.5%" title="Iter 16: RMS=30.03"></div>
+                <div class="rms-bar" style="height:37.0%" title="Iter 17: RMS=29.59"></div>
+                <div class="rms-bar" style="height:36.6%" title="Iter 18: RMS=29.26"></div>
+                <div class="rms-bar" style="height:36.3%" title="Iter 19: RMS=29.02"></div>
+                <div class="rms-bar" style="height:35.9%" title="Iter 20: RMS=28.73"></div>
+                <div class="rms-bar" style="height:35.4%" title="Iter 21: RMS=28.29"></div>
+                <div class="rms-bar" style="height:34.3%" title="Iter 22: RMS=27.44"></div>
+                <div class="rms-bar" style="height:32.8%" title="Iter 23: RMS=26.23"></div>
+                <div class="rms-bar" style="height:31.7%" title="Iter 24: RMS=25.35"></div>
+                <div class="rms-bar" style="height:30.6%" title="Iter 25: RMS=24.48"></div>
+                <div class="rms-bar" style="height:29.1%" title="Iter 26: RMS=23.24"></div>
+                <div class="rms-bar" style="height:28.8%" title="Iter 27: RMS=23.07"></div>
+                <div class="rms-bar" style="height:28.4%" title="Iter 28: RMS=22.72"></div>
+                <div class="rms-bar" style="height:28.0%" title="Iter 29: RMS=22.40"></div>
+                <div class="rms-bar" style="height:27.6%" title="Iter 30: RMS=22.08"></div>
+                <div class="rms-bar" style="height:27.5%" title="Iter 31: RMS=21.98"></div>
+                <div class="rms-bar" style="height:27.3%" title="Iter 32: RMS=21.85"></div>
+                <div class="rms-bar" style="height:27.2%" title="Iter 33: RMS=21.78"></div>
+                <div class="rms-bar" style="height:27.2%" title="Iter 34: RMS=21.72"></div>
+                <div class="rms-bar" style="height:27.0%" title="Iter 35: RMS=21.58"></div>
+                <div class="rms-bar" style="height:26.9%" title="Iter 36: RMS=21.52"></div>
+                <div class="rms-bar" style="height:26.9%" title="Iter 37: RMS=21.50"></div>
+                <div class="rms-bar" style="height:26.8%" title="Iter 38: RMS=21.47"></div>
+                <div class="rms-bar" style="height:26.8%" title="Iter 39: RMS=21.42"></div>
+                <div class="rms-bar" style="height:26.7%" title="Iter 40: RMS=21.36"></div>
+                <div class="rms-bar" style="height:26.5%" title="Iter 41: RMS=21.21"></div>
+                <div class="rms-bar" style="height:26.3%" title="Iter 42: RMS=21.04"></div>
+                <div class="rms-bar" style="height:26.2%" title="Iter 43: RMS=20.92"></div>
+                <div class="rms-bar" style="height:26.0%" title="Iter 44: RMS=20.82"></div>
+                <div class="rms-bar" style="height:26.0%" title="Iter 45: RMS=20.81"></div>
+                <div class="rms-bar" style="height:26.0%" title="Iter 46: RMS=20.78"></div>
+                <div class="rms-bar" style="height:25.9%" title="Iter 47: RMS=20.75"></div>
+                <div class="rms-bar" style="height:25.9%" title="Iter 48: RMS=20.72"></div>
+                <div class="rms-bar" style="height:25.9%" title="Iter 49: RMS=20.70"></div>
+                <div class="rms-bar" style="height:25.9%" title="Iter 50: RMS=20.70"></div>
+            </div>
+        </div>
+        <div class="rms-labels">
+            <span>Iter 0</span>
+            <span>Iter 10</span>
+            <span>Iter 20</span>
+            <span>Iter 30</span>
+            <span>Iter 40</span>
+            <span>Iter 50</span>
+        </div>
+    </div>
+    <div class="lambda-note">&lambda; = 100 throughout all iterations &mdash; NEVER decreased</div>
+</div>
+
+<!-- Current Parameters -->
+<div class="current-params container">
+    <h3>Current Inversion Setup</h3>
+    <div class="params-grid">
+        <div class="param-card">
+            <div class="label">Stations</div>
+            <div class="value">41</div>
+            <div class="detail">mall01&ndash;mall67</div>
+        </div>
+        <div class="param-card">
+            <div class="label">Frequencies</div>
+            <div class="value">58</div>
+            <div class="detail">Full impedance only</div>
+        </div>
+        <div class="param-card">
+            <div class="label">Grid</div>
+            <div class="value">67&times;67&times;50</div>
+            <div class="detail">224,450 cells, 200m core</div>
+        </div>
+        <div class="param-card">
+            <div class="label">Starting Model</div>
+            <div class="value">100 &Omega;&middot;m</div>
+            <div class="detail">Uniform half-space</div>
+        </div>
+        <div class="param-card">
+            <div class="label">Smoothing</div>
+            <div class="value">0.2</div>
+            <div class="detail">X, Y, Z &mdash; 2 passes</div>
+        </div>
+        <div class="param-card">
+            <div class="label">Lambda (&lambda;)</div>
+            <div class="value">100</div>
+            <div class="detail">Initial damping factor</div>
+        </div>
+        <div class="param-card">
+            <div class="label">Error Floor</div>
+            <div class="value">5%</div>
+            <div class="detail">Applied in 3D_Grid_Academic</div>
+        </div>
+        <div class="param-card">
+            <div class="label">Final RMS</div>
+            <div class="value" style="color: var(--accent);">20.7</div>
+            <div class="detail">After 50 NLCG iterations</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PHASE 1 ============ -->
+<div class="phase phase-critical container">
+    <div class="phase-header">
+        <div class="phase-number">1</div>
+        <h2>Fix Inversion Control Parameters</h2>
+        <span class="priority">Critical</span>
+    </div>
+    <div class="phase-body">
+        <span class="file-ref">ModEM_config/invCtrl_mallorca</span>
+        <p>This is the single most impactful change. The damping parameter &lambda; controls the trade-off between data fit and model smoothness. At &lambda;=100, the regularization completely dominates and the model has almost no freedom to fit the data.</p>
+
+        <table class="change-table">
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Current</th>
+                    <th>New</th>
+                    <th>Reasoning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Initial &lambda;</strong></td>
+                    <td class="old-val">100</td>
+                    <td class="new-val">10</td>
+                    <td class="reasoning">&lambda;=100 is far too high. Starting at 10 gives the model freedom to evolve while maintaining regularization stability.</td>
+                </tr>
+                <tr>
+                    <td><strong>&lambda; divide by</strong></td>
+                    <td class="old-val">10</td>
+                    <td class="new-val">5</td>
+                    <td class="reasoning">Smaller divisor = more gradual &lambda; reduction = more stable convergence. Steps: 10 &rarr; 2 &rarr; 0.4 &rarr; ...</td>
+                </tr>
+                <tr>
+                    <td><strong>Restart RMS diff</strong></td>
+                    <td class="old-val">2.0e-3</td>
+                    <td class="new-val">5.0e-2</td>
+                    <td class="reasoning">Current threshold (0.002) is too tight &mdash; requires RMS to essentially stop changing. With 0.05, &lambda; reduces when convergence slows significantly.</td>
+                </tr>
+                <tr>
+                    <td><strong>Search step</strong></td>
+                    <td class="old-val">20</td>
+                    <td class="new-val">10</td>
+                    <td class="reasoning">Smaller initial step for more stable line search behaviour with lower &lambda;.</td>
+                </tr>
+                <tr>
+                    <td><strong>Max iterations</strong></td>
+                    <td class="old-val">50</td>
+                    <td class="new-val">200</td>
+                    <td class="reasoning">50 was not enough. With proper &lambda; reduction, 100&ndash;200 iterations needed for full convergence through multiple &lambda; stages.</td>
+                </tr>
+                <tr>
+                    <td><strong>Target RMS</strong></td>
+                    <td class="old-val">1.05</td>
+                    <td class="new-val">1.5</td>
+                    <td class="reasoning">1.05 is very ambitious for 3D MT with real data. Start with 1.5 as a realistic first goal.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="code-block">
+            <span class="code-title">invCtrl_mallorca (new)</span>
+            <span class="code-comment"># ModEM Inversion Control File - Llucmajor</span><br>
+            Model and data output file name   : mallorca_inv<br>
+            Initial damping factor lambda      : <span class="code-highlight">10.</span><br>
+            To update lambda divide by         : <span class="code-highlight">5.</span><br>
+            Initial search step in model units : <span class="code-highlight">10.</span><br>
+            Restart when rms diff is less than : <span class="code-highlight">5.0e-2</span><br>
+            Exit search when rms is less than  : <span class="code-highlight">1.5</span><br>
+            Exit when lambda is less than      : 1.0e-8<br>
+            Maximum number of iterations       : <span class="code-highlight">200</span>
+        </div>
+    </div>
+</div>
+
+<!-- ============ PHASE 2 ============ -->
+<div class="phase phase-critical container">
+    <div class="phase-header">
+        <div class="phase-number">2</div>
+        <h2>Increase Covariance Smoothing</h2>
+        <span class="priority">Critical</span>
+    </div>
+    <div class="phase-body">
+        <span class="file-ref">ModEM_config/3D_Grid/covariance.cov</span>
+        <p>With lower &lambda;, the model has more freedom and needs additional smoothing to prevent artifacts. Increasing from 0.2 to 0.3 provides a good balance &mdash; 0.3 is a standard value in ModEM practice.</p>
+
+        <table class="change-table">
+            <thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Current</th>
+                    <th>New</th>
+                    <th>Reasoning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>X smoothing (all layers)</strong></td>
+                    <td class="old-val">0.2</td>
+                    <td class="new-val">0.3</td>
+                    <td class="reasoning">Standard value; compensates for lower &lambda; to prevent model artifacts.</td>
+                </tr>
+                <tr>
+                    <td><strong>Y smoothing (all layers)</strong></td>
+                    <td class="old-val">0.2</td>
+                    <td class="new-val">0.3</td>
+                    <td class="reasoning">Same as X for isotropic horizontal smoothing.</td>
+                </tr>
+                <tr>
+                    <td><strong>Vertical smoothing</strong></td>
+                    <td class="old-val">0.2</td>
+                    <td class="new-val">0.3</td>
+                    <td class="reasoning">Vertical stability needs same increase.</td>
+                </tr>
+                <tr>
+                    <td><strong>Smoothing passes</strong></td>
+                    <td class="old-val">2</td>
+                    <td class="new-val">2</td>
+                    <td class="reasoning">Keep at 2 (standard for ModEM).</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p>Edit lines 20&ndash;22 of <code>covariance.cov</code>: replace all <code>0.2</code> values with <code>0.3</code>.</p>
+    </div>
+</div>
+
+<!-- ============ PHASE 3 ============ -->
+<div class="phase phase-important container">
+    <div class="phase-header">
+        <div class="phase-number">3</div>
+        <h2>Re-process Data: Add Tipper + Review Error Floors</h2>
+        <span class="priority">Important</span>
+    </div>
+    <div class="phase-body">
+        <span class="file-ref">ModEM_config/3D_Grid/mall_Z.dat</span>
+        <p><strong>Current state:</strong> 5% error floor, Full Impedance only (no tipper).</p>
+        <p>Tipper data (Tx, Ty) is confirmed available in the EDI files. Including it provides complementary sensitivity to lateral conductivity contrasts and significantly improves 3D imaging quality.</p>
+
+        <h4 style="margin: 16px 0 8px; color: var(--primary);">Changes needed:</h4>
+        <ol>
+            <li><strong>Include tipper data (Tx, Ty)</strong> &mdash; Re-run 3D_Grid_Academic selecting Full Impedance + Tipper.</li>
+            <li><strong>Off-diagonal impedance error floor (Zxy, Zyx):</strong> Keep at <strong>5%</strong> &mdash; this is standard practice.</li>
+            <li><strong>Diagonal impedance error floor (Zxx, Zyy):</strong> Increase to <strong>10&ndash;20%</strong> &mdash; diagonal components are noisier and shouldn't dominate the misfit.</li>
+            <li><strong>Tipper error floor:</strong> Set to <strong>0.03 absolute</strong> &mdash; standard for tipper transfer functions.</li>
+        </ol>
+
+        <p style="margin-top: 16px;"><strong>Action:</strong> Re-run 3D_Grid_Academic with the settings above to regenerate <code>mall_Z.dat</code>.</p>
+    </div>
+</div>
+
+<!-- ============ PHASE 4 ============ -->
+<div class="phase phase-important container">
+    <div class="phase-header">
+        <div class="phase-number">4</div>
+        <h2>Data Quality Control</h2>
+        <span class="priority">Important</span>
+    </div>
+    <div class="phase-body">
+        <p>Before re-running the inversion, review the data quality:</p>
+        <ol>
+            <li><strong>Remove noisy frequencies:</strong> Check EDI files for the highest and lowest frequencies. AMT data at extreme frequencies often has poor quality. Trim the frequency range if the highest/lowest bands show scattered data.</li>
+            <li><strong>Station QC:</strong> Check if any of the 41 stations have consistently poor data quality (high scatter in apparent resistivity curves, phase going outside 0&ndash;90&deg; range). Consider excluding the worst 2&ndash;3 stations.</li>
+            <li><strong>Reduce number of frequencies:</strong> The current 58 frequencies may include redundant information. Consider decimating to <strong>~15&ndash;20 well-distributed periods</strong> (4&ndash;5 per decade). This reduces computation time per iteration significantly while preserving resolution.</li>
+        </ol>
+    </div>
+</div>
+
+<!-- ============ PHASE 5 ============ -->
+<div class="phase phase-optional container">
+    <div class="phase-header">
+        <div class="phase-number">5</div>
+        <h2>Grid Refinement</h2>
+        <span class="priority">Optional</span>
+    </div>
+    <div class="phase-body">
+        <p>Current grid: 67&times;67&times;50, core cell 200m. <strong>Only apply if Phases 1&ndash;4 don't reach the target RMS.</strong></p>
+        <ul>
+            <li><strong>Reduce core cell size to 100m</strong> in the area of station coverage for better lateral resolution.</li>
+            <li><strong>Add more vertical layers near surface</strong> (5m first layer instead of 10m) for improved shallow structure resolution.</li>
+            <li><strong>Ensure padding extends at least 3&times; the maximum skin depth</strong> in all directions to avoid boundary effects.</li>
+        </ul>
+        <p style="margin-top: 12px; color: var(--warning); font-weight: 600;">Note: This will increase computation time significantly.</p>
+    </div>
+</div>
+
+<!-- ============ PHASE 6 ============ -->
+<div class="phase phase-optional container">
+    <div class="phase-header">
+        <div class="phase-number">6</div>
+        <h2>Starting Model Adjustment</h2>
+        <span class="priority">Optional</span>
+    </div>
+    <div class="phase-body">
+        <p>Current: uniform 100 &Omega;&middot;m half-space.</p>
+        <ul>
+            <li>Check the 1D inversion results in <code>1D_code_&amp;_Figures/</code> to see if a different average resistivity is more representative of the Llucmajor geology.</li>
+            <li>If 1D results suggest a different value (e.g., 50 or 300 &Omega;&middot;m), use that instead.</li>
+            <li>Alternative: use a <strong>layered starting model</strong> based on 1D results (requires editing the .rho file or generating with 3D_Grid_Academic).</li>
+        </ul>
+    </div>
+</div>
+
+<!-- ============ EXECUTION STRATEGY ============ -->
+<div class="execution container">
+    <h2>Execution Strategy</h2>
+    <div class="run-cards">
+        <div class="run-card">
+            <h3>Run 1: Fix Controls</h3>
+            <div class="run-condition">Phases 1 + 2 only</div>
+            <ol>
+                <li>Edit <code>invCtrl_mallorca</code> with new parameters</li>
+                <li>Edit <code>covariance.cov</code> to use 0.3 smoothing</li>
+                <li>Keep same data file and starting model</li>
+                <li>Submit to MAGMA (200 iters, 3 days)</li>
+                <li><strong>Verify:</strong> &lambda; should decrease during the run</li>
+            </ol>
+        </div>
+        <div class="run-card">
+            <h3>Run 2: Better Data</h3>
+            <div class="run-condition">If Run 1 RMS &gt; 5</div>
+            <ol>
+                <li>Re-process with 3D_Grid_Academic (tipper + error floors)</li>
+                <li>Remove noisy stations/frequencies</li>
+                <li>Include tipper data</li>
+                <li>Use best model from Run 1 as starting model</li>
+                <li>Submit new inversion</li>
+            </ol>
+        </div>
+        <div class="run-card">
+            <h3>Run 3: Refine Grid</h3>
+            <div class="run-condition">If Run 2 RMS &gt; 3</div>
+            <ol>
+                <li>Refine the mesh (100m core cells)</li>
+                <li>Use layered starting model from 1D results</li>
+                <li>Final inversion run</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<!-- ============ VERIFICATION ============ -->
+<div class="verification container">
+    <h2>&#10004; Verification Checklist</h2>
+    <ol>
+        <li>Check the <code>.log</code> file: verify &lambda; is <strong>decreasing</strong> across iterations</li>
+        <li>Plot RMS vs iteration: should show clear step-downs when &lambda; reduces</li>
+        <li>Compare observed vs predicted data in the final <code>.dat</code> output</li>
+        <li>Visualize the resulting resistivity model (<code>.rho</code> files) at different depth slices</li>
+        <li><strong>Target: RMS &lt; 2.0</strong> with geologically reasonable model structure</li>
+    </ol>
+</div>
+
+<!-- ============ FILES SUMMARY ============ -->
+<div class="files-summary container">
+    <h2>Files to Modify</h2>
+    <div class="file-item">
+        <div class="file-icon">&#128196;</div>
+        <div>
+            <div class="file-path">ModEM_config/invCtrl_mallorca</div>
+            <div class="file-desc">Inversion control parameters (&lambda;, iterations, restart criterion)</div>
+        </div>
+    </div>
+    <div class="file-item">
+        <div class="file-icon">&#128196;</div>
+        <div>
+            <div class="file-path">ModEM_config/3D_Grid/covariance.cov</div>
+            <div class="file-desc">Smoothing parameters (0.2 &rarr; 0.3)</div>
+        </div>
+    </div>
+    <div class="file-item">
+        <div class="file-icon">&#128260;</div>
+        <div>
+            <div class="file-path">ModEM_config/3D_Grid/mall_Z.dat</div>
+            <div class="file-desc">Regenerate with 3D_Grid_Academic (add tipper, adjust error floors)</div>
+        </div>
+    </div>
+    <div class="file-item">
+        <div class="file-icon">&#128196;</div>
+        <div>
+            <div class="file-path">ModEM_config/InvModEM_Mallorca.slurm</div>
+            <div class="file-desc">SLURM job script (update if needed for longer runs)</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>ModEM 3D MT Inversion Improvement Plan &mdash; Llucmajor, Mallorca &mdash; UIB TFG 2026</p>
+</div>
+
+</body>
+</html>

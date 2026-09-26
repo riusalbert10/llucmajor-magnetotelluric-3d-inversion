@@ -1,0 +1,59 @@
+========================================================================
+ CONDICIONS DE CONTORN I PROFUNDITAT DE MALLA EN MAGNETOTELLURICA
+========================================================================
+
+1) EQUACIO DE DIFUSIO (quasi-estatic, sigma >> omega*eps):
+      d2E/dz2 = i*omega*mu0*sigma * E
+
+2) SOLUCIO ONA PLANA (decaiment amb la profunditat):
+      E(z) = E(0) * exp(-z/delta) * exp(-i z/delta)
+      |E(z)|/|E(0)| = exp(-z/delta)
+
+3) SKIN DEPTH:
+      delta = sqrt(2*rho/(omega*mu0)) = sqrt(rho*T/(pi*mu0)) ~= 503*sqrt(rho*T) [m]
+
+4) CRITERI DE CONTORN:
+      el camp ha de decaure a una fraccio eps al fons z=H:
+          exp(-H/delta) <= eps   =>   H >= delta * ln(1/eps)
+      eps=5%%  -> ln(20)=3.0  -> H >= 3.0*delta
+      eps=1%%  -> ln(100)=4.6 -> H >= 4.6*delta
+      (d'aqui la 'regla del 3-5x skin depth')
+
+5) RESISTIVITAT: delta ~ sqrt(rho) -> mes penetracio en el medi MES RESISTIU
+   -> s'usa rho_max (cas pitjor). Aqui rho_max = 180 ohm-m.
+
+------------------------------------------------------------------------
+TAULA 1 - Skin depth delta(T)  [km]
+  T (s)       delta@100    delta@180
+  10             15.9 km       21.4 km
+  30             27.6 km       37.0 km
+  100            50.3 km       67.5 km
+  300            87.2 km      117.0 km
+  1000          159.2 km      213.5 km
+  2278          240.2 km      322.3 km
+
+TAULA 2 - Residu de camp al fons actual H=68 km:  exp(-H/delta)  (rho=180)
+  T (s)     delta(km)        H/delta     residu
+  10             21.4           3.18       4.1%  OK
+  30             37.0           1.84      15.9%  MALAMENT
+  100            67.5           1.01      36.5%  MALAMENT
+  300           117.0           0.58      55.9%  MALAMENT
+  1000          213.5           0.32      72.7%  MALAMENT
+  2278          322.3           0.21      81.0%  MALAMENT
+
+TAULA 3 - Profunditat requerida H_min = delta*ln(1/eps)  [km]  (rho=180)
+  T (s)         H(eps=5%)      H(eps=1%)
+  10                64 km          98 km
+  30               111 km         170 km
+  100              202 km         311 km
+  300              350 km         539 km
+  1000             640 km         983 km
+  2278             965 km        1484 km
+
+------------------------------------------------------------------------
+CONCLUSIO: la malla de 68 km compleix el contorn nomes fins a ~10 s
+(residu ~4%%). A 100 s el residu es 36%% i a la banda completa 81%%: el camp
+no ha decaigut i la condicio de contorn contamina la solucio.
+
+FORMULA RESUM:  H >= ln(1/eps) * sqrt(rho_max*T_max/(pi*mu0))
+                  ~= ln(1/eps) * 503 * sqrt(rho_max*T_max)

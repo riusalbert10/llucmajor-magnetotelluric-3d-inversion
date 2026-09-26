@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>De dónde vienen los errores de tus datos MT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --paper:    #f7f1e6;
+    --paper-d:  #ede4d2;
+    --ink:      #251f17;
+    --ink-soft: #4a3f30;
+    --rust:     #b54a2c;
+    --rust-d:   #8a3416;
+    --plum:     #6b3a5a;
+    --plum-d:   #4a1f3d;
+    --gold:     #b4842b;
+    --rule:     #d8cdb6;
+    --kbd-bg:   #2a2218;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif Pro', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 10% 5%, rgba(107,58,90,0.05) 0%, transparent 30%),
+      radial-gradient(circle at 90% 95%, rgba(180,132,43,0.04) 0%, transparent 35%);
+    background-attachment: fixed;
+  }
+  .frame { max-width: 880px; margin: 0 auto; padding: 80px 48px 120px; }
+
+  .cover { margin-bottom: 80px; padding-bottom: 50px; border-bottom: 1px solid var(--rule); position: relative; }
+  .cover .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--plum); margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400; font-size: 60px; line-height: 1.05;
+    margin: 0; letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+  .cover h1 em { font-style: italic; font-weight: 300; color: var(--plum-d); }
+  .cover .lede {
+    font-size: 21px; line-height: 1.5; color: var(--ink-soft);
+    max-width: 640px; margin-top: 22px; font-style: italic;
+  }
+  .cover .meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--ink-soft); margin-top: 32px;
+    display: flex; gap: 32px; flex-wrap: wrap;
+  }
+  .cover .meta span strong { color: var(--ink); margin-right: 6px; }
+  .cover::before {
+    content: ''; position: absolute; top: -10px; right: -20px;
+    width: 90px; height: 90px;
+    border: 1px solid var(--plum); opacity: 0.3; border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .toc {
+    background: var(--paper-d); padding: 28px 36px;
+    margin: 0 0 70px; border-left: 3px solid var(--plum);
+  }
+  .toc h2 {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin: 0 0 18px; color: var(--ink); font-weight: 700;
+  }
+  .toc ol { list-style: none; counter-reset: t; padding: 0; margin: 0; }
+  .toc li { counter-increment: t; padding: 6px 0; }
+  .toc li::before {
+    content: counter(t, decimal-leading-zero);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--plum); margin-right: 14px;
+  }
+  .toc a { color: var(--ink); text-decoration: none; font-size: 16px; }
+  .toc a:hover { color: var(--plum); }
+
+  section { margin: 0 0 80px; }
+  section > .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.15em; color: var(--plum);
+    margin-bottom: 8px; display: block;
+  }
+  section h2 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 500;
+    font-size: 34px; line-height: 1.15; margin: 0 0 12px;
+    letter-spacing: -0.015em;
+  }
+  section .subtitle {
+    font-style: italic; color: var(--ink-soft);
+    font-size: 17px; margin: 0 0 28px;
+  }
+  section h3 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 500;
+    font-size: 21px; line-height: 1.3; margin: 32px 0 12px;
+  }
+
+  p { margin: 0 0 16px; }
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--rust-d); }
+  a:hover { color: var(--rust); }
+
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
+    background: var(--paper-d); padding: 2px 6px; border-radius: 3px;
+    color: var(--rust-d);
+  }
+  pre {
+    background: var(--kbd-bg); color: #e8dfc9;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.55;
+    padding: 22px 26px; border-radius: 4px; overflow-x: auto;
+    margin: 20px 0;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  pre .c { color: #8a8270; font-style: italic; }
+
+  ul, ol { padding-left: 24px; margin: 16px 0; }
+  li { margin-bottom: 6px; }
+  li::marker { color: var(--plum); }
+
+  .callout {
+    background: var(--paper-d); padding: 18px 22px; margin: 24px 0;
+    font-size: 15.5px; line-height: 1.65;
+    border-left: 3px solid var(--gold);
+  }
+  .callout.key { border-left-color: var(--rust); }
+  .callout.note { border-left-color: var(--plum); }
+  .callout .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    display: block; margin-bottom: 8px; font-weight: 700;
+    color: var(--gold);
+  }
+  .callout.key .label { color: var(--rust); }
+  .callout.note .label { color: var(--plum); }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px;
+  }
+  th, td {
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--plum); border-bottom: 2px solid var(--rule); font-weight: 700;
+  }
+  td code { font-size: 12px; }
+
+  .figure { margin: 30px 0; text-align: center; }
+  .figure svg { max-width: 100%; height: auto; }
+  .figure .caption {
+    font-size: 13px; color: var(--ink-soft);
+    margin-top: 12px; font-style: italic; line-height: 1.5;
+    max-width: 700px; margin-left: auto; margin-right: auto;
+  }
+
+  .math-display { margin: 22px 0; text-align: center; font-size: 1.05em; }
+
+  hr.sep { border: 0; height: 1px; background: var(--rule); margin: 60px 0; }
+  hr.dingbat { border: 0; text-align: center; margin: 50px 0; }
+  hr.dingbat::after {
+    content: '◇ ◇ ◇'; font-size: 12px; letter-spacing: 1em; color: var(--gold);
+  }
+
+  .footer {
+    margin-top: 90px; padding-top: 28px; border-top: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-soft); letter-spacing: 0.05em;
+  }
+
+  .pipeline {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 26px 0; flex-wrap: wrap;
+  }
+  .pipeline .step {
+    flex: 1; min-width: 130px; text-align: center;
+    padding: 12px 14px; background: var(--paper-d);
+    border-top: 2px solid var(--plum); font-size: 13px;
+  }
+  .pipeline .step strong {
+    display: block; font-family: 'Fraunces', serif; font-size: 14px;
+    color: var(--ink); margin-bottom: 4px;
+  }
+  .pipeline .arrow {
+    font-size: 20px; color: var(--plum); flex-shrink: 0;
+  }
+
+  @media print {
+    body { background: white; }
+    .frame { padding: 0; }
+    pre { font-size: 11px; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="eyebrow">Notas técnicas · TFG · Mallorca MT · Vol. III</div>
+  <h1>De dónde vienen<br><em>los errores</em></h1>
+  <p class="lede">El número en la columna 11 de tu .dat no se inventa. Sale de un proceso bien definido que empieza con un voltímetro en el campo y termina en la inversión.</p>
+  <div class="meta">
+    <span><strong>Tema</strong>Procesado MT y estimación de errores</span>
+    <span><strong>Nivel</strong>Intermedio</span>
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h2>Recorrido</h2>
+  <ol>
+    <li><a href="#cadena">La cadena: del campo al .dat</a></li>
+    <li><a href="#estimacion">Cómo se estima la impedancia: espectros cruzados</a></li>
+    <li><a href="#varianza">De dónde sale la varianza espectral</a></li>
+    <li><a href="#coherencia">Coherencia, ruido y por qué Z<sub>xx</sub> tiene más error</a></li>
+    <li><a href="#dat">Cómo llega ese número a tu .dat de ModEM</a></li>
+  </ol>
+</nav>
+
+<!-- ============ §1 ============ -->
+<section id="cadena">
+  <span class="num">§ 1</span>
+  <h2>La cadena: del campo al .dat</h2>
+  <p class="subtitle">Cinco pasos, cuatro formatos de archivo.</p>
+
+  <p>Antes de hablar del error, conviene situar dónde se calcula. El número que ves en tu <code>.dat</code> es el resultado final de una cadena de procesado bien definida:</p>
+
+  <div class="pipeline">
+    <div class="step"><strong>Adquisición</strong>series temporales E(t), H(t)</div>
+    <div class="arrow">→</div>
+    <div class="step"><strong>Procesado MT</strong>FFT + estimación espectral</div>
+    <div class="arrow">→</div>
+    <div class="step"><strong>.edi</strong>Z(ω) ± σ por estación</div>
+    <div class="arrow">→</div>
+    <div class="step"><strong>Conversión</strong>MTpy / 3D Grid</div>
+    <div class="arrow">→</div>
+    <div class="step"><strong>.dat ModEM</strong>todo unificado</div>
+  </div>
+
+  <h3>Quién hace qué</h3>
+
+  <table>
+    <tr>
+      <th>Etapa</th>
+      <th>Software</th>
+      <th>Genera</th>
+    </tr>
+    <tr>
+      <td>Registro de campo</td>
+      <td>Equipo MT (Metronix, Phoenix, Lemi…)</td>
+      <td>Series temporales (.ats, .ts, etc.)</td>
+    </tr>
+    <tr>
+      <td>Procesado espectral</td>
+      <td>BIRRP, EMTF, ProcMT, MTpy.processing…</td>
+      <td>.edi (impedancia + errores por período)</td>
+    </tr>
+    <tr>
+      <td>Conversión a ModEM</td>
+      <td>MTpy o 3D Grid</td>
+      <td>.dat (multiestación)</td>
+    </tr>
+  </table>
+
+  <div class="callout key">
+    <span class="label">Aclaración importante</span>
+    Los errores que aparecen en tu <code>.dat</code> <strong>no los calcula MTpy ni 3D Grid</strong>. Esos programas solo leen lo que ya hay en los <code>.edi</code> y lo reformatean. El error de cada datum lo calculó el software de procesado MT en la etapa anterior, basándose en la dispersión estadística de las estimaciones espectrales. Esto significa que si los <code>.edi</code> tienen errores poco realistas (porque se subestimaron, se aplicó un suelo arbitrario, etc.), esos errores arrastran a la inversión.
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ============ §2 ============ -->
+<section id="estimacion">
+  <span class="num">§ 2</span>
+  <h2>Cómo se estima la impedancia: espectros cruzados</h2>
+  <p class="subtitle">El núcleo matemático del procesado MT.</p>
+
+  <p>Lo que se mide en el campo son <strong>series temporales</strong> de los campos eléctrico horizontal $\mathbf{E}(t) = (E_x, E_y)$ y magnético horizontal $\mathbf{H}(t) = (H_x, H_y)$ durante días o semanas. Esos registros tienen ruido cultural (trenes, líneas eléctricas, electrodos), variaciones diurnas, y la propia señal MT que es estocástica.</p>
+
+  <p>El primer paso es <strong>pasar al dominio de la frecuencia</strong> mediante FFT. Pero no se hace una sola FFT del registro entero — se trocea en muchas <em>ventanas</em> (típicamente de duración variable según el período de interés) y se hace FFT a cada una:</p>
+
+  <div class="math-display">
+    $$\hat{E}_x(\omega, k), \hat{E}_y(\omega, k), \hat{H}_x(\omega, k), \hat{H}_y(\omega, k)$$
+  </div>
+
+  <p>donde $k = 1, 2, \ldots, N$ indexa la ventana. Para cada frecuencia $\omega$ tenemos $N$ estimaciones complejas independientes de cada componente.</p>
+
+  <h3>El modelo de relación lineal</h3>
+
+  <p>La definición fundamental del tensor de impedancia dice que, para cada $\omega$, los campos están relacionados linealmente:</p>
+
+  <div class="math-display">
+    $$\begin{pmatrix} E_x \\ E_y \end{pmatrix}_{\omega,k} = \begin{pmatrix} Z_{xx} & Z_{xy} \\ Z_{yx} & Z_{yy} \end{pmatrix}_\omega \begin{pmatrix} H_x \\ H_y \end{pmatrix}_{\omega,k} + \begin{pmatrix} n_x \\ n_y \end{pmatrix}_{\omega,k}$$
+  </div>
+
+  <p>Donde $\mathbf{n}$ es ruido. Para cada $\omega$, $Z$ es una matriz constante (es lo que queremos estimar) y los $\mathbf{E}, \mathbf{H}$ varían entre ventanas porque la fuente MT es estocástica.</p>
+
+  <h3>Estimación por mínimos cuadrados ponderados</h3>
+
+  <p>Tratamos cada ventana como una observación independiente. Para la primera fila del tensor, $E_x = Z_{xx} H_x + Z_{xy} H_y + n_x$, multiplicamos a ambos lados por el conjugado complejo de $H_x$ y promediamos sobre todas las ventanas:</p>
+
+  <div class="math-display">
+    $$\langle E_x H_x^* \rangle = Z_{xx} \langle H_x H_x^* \rangle + Z_{xy} \langle H_y H_x^* \rangle$$
+  </div>
+
+  <p>donde $\langle \cdot \rangle = \frac{1}{N}\sum_{k=1}^{N}$ y el promedio del término de ruido se anula porque ruido y campo no están correlacionados (idealmente).</p>
+
+  <p>Hacemos lo mismo multiplicando por $H_y^*$:</p>
+
+  <div class="math-display">
+    $$\langle E_x H_y^* \rangle = Z_{xx} \langle H_x H_y^* \rangle + Z_{xy} \langle H_y H_y^* \rangle$$
+  </div>
+
+  <p>Esas dos ecuaciones forman un sistema 2×2. Definiendo los <strong>autoespectros y espectros cruzados</strong>:</p>
+
+  <div class="math-display">
+    $$S_{HH} = \begin{pmatrix} \langle H_x H_x^* \rangle & \langle H_y H_x^* \rangle \\ \langle H_x H_y^* \rangle & \langle H_y H_y^* \rangle \end{pmatrix}, \quad S_{EH} = \begin{pmatrix} \langle E_x H_x^* \rangle & \langle E_x H_y^* \rangle \\ \langle E_y H_x^* \rangle & \langle E_y H_y^* \rangle \end{pmatrix}$$
+  </div>
+
+  <p>la solución del sistema es:</p>
+
+  <div class="math-display">
+    $$\boxed{Z = S_{EH} \cdot S_{HH}^{-1}}$$
+  </div>
+
+  <p>Este es el <strong>estimador básico</strong> de impedancia. En la práctica se usan variantes más robustas (M-estimadores, jackknife, remote reference) que mejoran el comportamiento frente a outliers, pero el esqueleto es el mismo.</p>
+</section>
+
+<hr class="sep">
+
+<!-- ============ §3 ============ -->
+<section id="varianza">
+  <span class="num">§ 3</span>
+  <h2>De dónde sale la varianza espectral</h2>
+  <p class="subtitle">El error de Z viene de la dispersión entre ventanas.</p>
+
+  <p>Lo que vimos es que $Z$ se estima como $S_{EH} \cdot S_{HH}^{-1}$, donde los espectros son <em>promedios</em> de muchas ventanas. Como cualquier promedio estadístico, tiene una <strong>varianza muestral</strong> que se puede calcular.</p>
+
+  <h3>Varianza analítica del estimador</h3>
+
+  <p>Para el estimador de $Z_{xy}$ (y análogamente para los demás), la teoría clásica de procesado MT da una fórmula cerrada:</p>
+
+  <div class="math-display">
+    $$\text{Var}(Z_{xy}) \approx \frac{S_{EE} \, (1 - \gamma^2)}{(\nu - 4) \, \det(S_{HH})}$$
+  </div>
+
+  <p>donde:</p>
+  <ul>
+    <li>$S_{EE} = \langle E_x E_x^* \rangle$ es el autoespectro del campo eléctrico predicho.</li>
+    <li>$\gamma^2$ es la <strong>coherencia múltiple</strong> (entre 0 y 1, definida abajo).</li>
+    <li>$\nu = 2 N$ son los grados de libertad (N ventanas, factor 2 por parte real e imaginaria).</li>
+    <li>$\det(S_{HH})$ es el determinante de la matriz de autoespectros magnéticos.</li>
+  </ul>
+
+  <p>El error estándar es la raíz cuadrada: $\sigma_{Z_{xy}} = \sqrt{\text{Var}(Z_{xy})}$. Este es <strong>el número que aparece en la columna 11 de tu .dat</strong>.</p>
+
+  <h3>Lo que esa fórmula te dice</h3>
+
+  <p>Mirando la expresión, el error de $Z$ <strong>aumenta cuando</strong>:</p>
+  <ul>
+    <li>$\gamma^2 \to 0$: la coherencia es baja, hay mucho ruido. Si $\gamma^2 = 0.5$, el factor $(1-\gamma^2) = 0.5$ duplica el error frente a coherencia perfecta.</li>
+    <li>$N$ es pequeño: pocas ventanas → estimación poco robusta. Por eso los registros largos dan mejores errores.</li>
+    <li>$\det(S_{HH})$ es pequeño: las dos polarizaciones magnéticas están casi paralelas, son casi linealmente dependientes, y el problema mal condicionado.</li>
+    <li>$S_{EE}$ es grande: campos eléctricos grandes (no necesariamente malo, pero amplifica errores absolutos).</li>
+  </ul>
+
+  <h3>Estimación alternativa por jackknife</h3>
+
+  <p>En la práctica, los códigos modernos (BIRRP, MTpy) suelen usar <strong>jackknife</strong> en lugar de la fórmula analítica, porque es más robusto frente a no-Gaussianidad y outliers:</p>
+
+  <div class="math-display">
+    $$\sigma^2_{Z, \text{JK}} = \frac{N-1}{N} \sum_{k=1}^{N} \left( Z^{(k)} - \bar{Z} \right)^2$$
+  </div>
+
+  <p>donde $Z^{(k)}$ es la estimación de $Z$ <em>excluyendo</em> la ventana $k$, y $\bar{Z}$ es el promedio de todas las $Z^{(k)}$. La idea: si una ventana concreta está dominando el resultado (típicamente porque tiene un outlier), al quitarla la estimación cambia mucho, y la varianza jackknife capta ese efecto.</p>
+
+  <div class="callout note">
+    <span class="label">Por qué importa para tu inversión</span>
+    El error que ModEM ve en la columna 11 fue calculado <em>antes</em> de que tú lo vieras nunca. Es un número heredado del procesado original. Si el procesado fue cuidadoso (registros largos, cálculo robusto, suelo de error realista), los errores son fiables y la inversión los pesa correctamente. Si el procesado fue apresurado o aplicó un "error mínimo" arbitrario (típicamente 5%), los errores pueden estar inflados o subestimados, y eso afecta directamente al RMS final.
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ============ §4 ============ -->
+<section id="coherencia">
+  <span class="num">§ 4</span>
+  <h2>Coherencia, ruido y por qué Z<sub>xx</sub> tiene más error</h2>
+  <p class="subtitle">La intuición física detrás de los números de tu .dat.</p>
+
+  <p>La cantidad clave que controla el error de $Z$ es la <strong>coherencia múltiple</strong>, que mide qué fracción de la varianza del campo eléctrico es <em>explicada</em> por el campo magnético a través del modelo lineal:</p>
+
+  <div class="math-display">
+    $$\gamma^2_{\text{múltiple}} = \frac{\text{varianza de } E_x \text{ predicha por } H_x, H_y}{\text{varianza total de } E_x}$$
+  </div>
+
+  <p>Que se calcula explícitamente como:</p>
+
+  <div class="math-display">
+    $$\gamma^2_{x} = \frac{Z_{xx} \langle H_x E_x^* \rangle + Z_{xy} \langle H_y E_x^* \rangle}{\langle E_x E_x^* \rangle}$$
+  </div>
+
+  <p>El significado intuitivo:</p>
+  <ul>
+    <li>$\gamma^2 = 1$: todo $E_x$ se explica por $H_x, H_y$ a través de $Z$. Los datos son "puros MT", sin ruido. El error de $Z$ es muy pequeño.</li>
+    <li>$\gamma^2 = 0.5$: la mitad de $E_x$ es ruido no relacionado con $H$. Errores grandes.</li>
+    <li>$\gamma^2 = 0$: $E_x$ es puro ruido. $Z$ no tiene sentido.</li>
+  </ul>
+
+  <h3>Por qué Z<sub>xx</sub> y Z<sub>yy</sub> tienen errores relativos mucho mayores</h3>
+
+  <p>Aquí entra una sutileza física importante. En una Tierra <strong>idealmente 1D</strong>, las ecuaciones de Maxwell garantizan exactamente:</p>
+
+  <div class="math-display">
+    $$Z_{xx} = Z_{yy} = 0 \quad \text{(en 1D pura)}$$
+  </div>
+
+  <p>Las componentes diagonales son <em>físicamente</em> nulas en estructuras 1D y 2D bien orientadas. En el mundo real (2.5D, 3D moderado como Mallorca), $Z_{xx}$ y $Z_{yy}$ son distintos de cero pero <strong>pequeños</strong> en magnitud comparados con $Z_{xy}$ y $Z_{yx}$.</p>
+
+  <p>Esto crea una situación incómoda para el procesado:</p>
+  <ul>
+    <li>El error <em>absoluto</em> $\sigma_Z$ es similar para todas las componentes (depende del ruido del registro, no del valor).</li>
+    <li>El error <em>relativo</em> $\sigma_Z / |Z|$ es enorme para las diagonales porque $|Z_{xx}|$ es pequeño en el numerador.</li>
+  </ul>
+
+  <p>Por eso en tus datos veías:</p>
+
+  <table>
+    <tr><th>Componente</th><th>Magnitud típica</th><th>σ típica</th><th>Err. rel. típico</th></tr>
+    <tr><td>ZXY (off-diag.)</td><td>~1500</td><td>~5</td><td><strong>~0.3%</strong> 🟢</td></tr>
+    <tr><td>ZYX (off-diag.)</td><td>~1800</td><td>~6</td><td><strong>~0.3%</strong> 🟢</td></tr>
+    <tr><td>ZXX (diagonal)</td><td>~30</td><td>~5</td><td><strong>~17%</strong> 🟡</td></tr>
+    <tr><td>ZYY (diagonal)</td><td>~150</td><td>~6</td><td><strong>~4%</strong> 🟢</td></tr>
+  </table>
+
+  <p>El error absoluto es similar (~5-6 unidades) para las cuatro componentes, pero el error relativo es muy distinto porque las magnitudes son diferentes. <strong>Los altos errores relativos de las diagonales no significan que el procesado sea malo</strong> — significan que estás midiendo cantidades pequeñas con un ruido fijo, y eso es la naturaleza intrínseca del problema MT.</p>
+
+  <div class="callout">
+    <span class="label">Implicación para el filtrado</span>
+    Cuando filtras tus datos por error relativo > 50%, descartas predominantemente diagonales <em>en períodos donde Z<sub>xx</sub> es muy pequeño</em>. Eso es justo lo que quieres: si la magnitud cae al nivel del ruido, ese punto no aporta información y lo mejor es retirarlo. El filtrado más estricto (>30%) descarta más diagonales en períodos intermedios, lo que reduce el ruido pero también la información 3D real disponible.
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ============ §5 ============ -->
+<section id="dat">
+  <span class="num">§ 5</span>
+  <h2>Cómo llega ese número a tu .dat de ModEM</h2>
+  <p class="subtitle">El último eslabón del puente.</p>
+
+  <p>Una vez calculados $Z_{ij}$ y $\sigma_{Z_{ij}}$ para cada estación y cada período, los códigos de procesado MT los escriben en archivos <code>.edi</code> (Electrical Data Interchange). Cada estación tiene su <code>.edi</code> propio. Para cada período hay líneas como:</p>
+
+<pre><code><span class="c">>ZXYR ROT=ZROT // 58</span>
+1.234567E+03 1.245678E+03 ...   <span class="c"># real parts of ZXY at each period</span>
+<span class="c">>ZXYI ROT=ZROT // 58</span>
+9.876543E+02 9.765432E+02 ...   <span class="c"># imag parts</span>
+<span class="c">>ZXY.VAR ROT=ZROT // 58</span>
+2.534E+01 2.617E+01 ...         <span class="c"># VARIANCES (sigma squared)</span></code></pre>
+
+  <p>La sección <code>.VAR</code> contiene las <strong>varianzas</strong> $\sigma^2$ calculadas por el procesado, en las mismas unidades que $|Z|^2$.</p>
+
+  <h3>Conversión a formato ModEM</h3>
+
+  <p>Cuando MTpy o 3D Grid convierten estos <code>.edi</code> al formato <code>.dat</code> de ModEM, hacen tres operaciones:</p>
+
+  <ol>
+    <li><strong>Toman la raíz cuadrada</strong>: $\sigma = \sqrt{\sigma^2}$ porque ModEM espera el error estándar, no la varianza.</li>
+    <li><strong>Aplican posiblemente un suelo de error</strong>: muchos códigos implementan $\sigma_{\text{usado}} = \max(\sigma_{\text{nominal}}, p \cdot |Z|)$, donde $p$ es típicamente 5% (0.05). Esto previene que datos con errores absurdamente pequeños dominen la inversión.</li>
+    <li><strong>Concatenan todas las estaciones</strong> en un único <code>.dat</code> multiestación con la cabecera <code>&gt; Full_Impedance</code> que ya conoces.</li>
+  </ol>
+
+  <h3>Lo que ves al final en tu archivo</h3>
+
+<pre><code>1.250000E-04  mall01  39.476667  2.876944  -0.082  -1575.301  0.000  ZXY  1.554940E+3  1.173770E+3  5.272011E+0
+                                                                                ↑ Re Z       ↑ Im Z       ↑ σ</code></pre>
+
+  <p>El último número (5.272011E+0) es el error estándar derivado de la varianza espectral, ya con suelo de error aplicado si correspondió.</p>
+
+  <h3>Cómo lo usa ModEM en la inversión</h3>
+
+  <p>En la función objetivo $\Phi_d$ que ModEM minimiza, cada datum entra ponderado por $1/\sigma^2$:</p>
+
+  <div class="math-display">
+    $$\Phi_d = \sum_i \left| \frac{Z_i^{obs} - Z_i^{pred}}{\sigma_i} \right|^2$$
+  </div>
+
+  <p>Esto significa que <strong>los puntos con $\sigma$ pequeño (alta confianza) pesan mucho</strong> en el ajuste, y los puntos con $\sigma$ grande pesan poco. Es la implementación estadística natural: pones más confianza en lo que mediste con menos ruido.</p>
+
+  <div class="callout key">
+    <span class="label">El círculo se cierra</span>
+    El error que aparece en tu <code>.dat</code> no es decorativo: es la <em>regla de oro</em> que decide cuánto importa cada punto en la inversión. Empieza con la dispersión estadística entre ventanas FFT durante el procesado MT, viaja por el <code>.edi</code>, se transfiere al <code>.dat</code>, y termina actuando como peso $1/\sigma^2$ en cada iteración de NLCG. Por eso filtrar por error relativo es una decisión metodológica con consecuencias directas en el resultado: cambias <em>qué</em> datos importan y <em>cuánto</em>.
+  </div>
+
+  <hr class="dingbat">
+
+  <p style="text-align:center; font-style:italic; color:var(--ink-soft); font-size:15px;">
+  Cualquier duda sobre el procesado o sobre cómo interpretar los errores específicos de tus estaciones, pregunta y profundizamos.
+  </p>
+</section>
+
+<div class="footer">
+Notas técnicas · TFG · Inversión 3D MT Mallorca · Volumen III
+</div>
+
+</div>
+</body>
+</html>

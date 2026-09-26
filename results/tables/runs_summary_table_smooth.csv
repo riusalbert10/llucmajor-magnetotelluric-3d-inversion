@@ -1,0 +1,4 @@
+Label,Total_Iterations,Initial_RMS,Final_RMS,Final_Lambda,Final_Model_Norm
+"Suavitzat LOWESS 1",115,47.7766,13.5136,1.00e-08,0.6313
+"Suavitzat LOWESS 2",123,48.2712,13.3286,1.00e-08,0.7457
+"Suavitzat Hampel",129,47.5838,12.6945,1.00e-08,0.6607

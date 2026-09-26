@@ -1,0 +1,51 @@
+% Requereix \usepackage{booktabs}, \usepackage{multirow}, \usepackage{subcaption}
+\begin{table}[htbp]
+  \centering
+  \caption{RMS normalitzat (total, antidiagonal \textit{ad} i diagonal) i error relatiu mitjà $\overline{e/|Z|}$: 3 valors més baixos i més alts. Model Depuració Manual 6.}
+  \label{tab:rms_ext}
+  \footnotesize
+  \setlength{\tabcolsep}{3.5pt}
+  \begin{subtable}[t]{0.49\textwidth}
+    \centering
+    \caption{Per estació}
+    \begin{tabular}{@{}l ccc cc@{}}
+      \toprule
+      \multirow{2}{*}{Estació} & \multicolumn{3}{c}{RMS} & \multicolumn{2}{c}{$\overline{e/|Z|}$} \\
+      \cmidrule(lr){2-4}\cmidrule(lr){5-6}
+       & total & ad & diag & ad & diag \\
+      \midrule
+      \multicolumn{6}{l}{\textit{3 més baixos}} \\
+      mall31 & 1.08 & 1.13 & 1.02 & 0.05 & 0.26 \\
+      mall65 & 1.37 & 1.61 & 1.18 & 0.05 & 0.48 \\
+      mall14 & 1.56 & 1.67 & 1.45 & 0.05 & 0.34 \\
+      \midrule
+      \multicolumn{6}{l}{\textit{3 més alts}} \\
+      mall26 & 23.02 & 4.19 & 28.71 & 0.06 & 0.35 \\
+      mall52 & 17.44 & 3.88 & 23.57 & 0.06 & 0.21 \\
+      mall53 & 11.84 & 2.22 & 15.21 & 0.06 & 0.25 \\
+      \bottomrule
+    \end{tabular}
+  \end{subtable}
+  \hfill
+  \begin{subtable}[t]{0.49\textwidth}
+    \centering
+    \caption{Per període}
+    \begin{tabular}{@{}l ccc cc@{}}
+      \toprule
+      \multirow{2}{*}{Període (s)} & \multicolumn{3}{c}{RMS} & \multicolumn{2}{c}{$\overline{e/|Z|}$} \\
+      \cmidrule(lr){2-4}\cmidrule(lr){5-6}
+       & total & ad & diag & ad & diag \\
+      \midrule
+      \multicolumn{6}{l}{\textit{3 més baixos}} \\
+      $2.56\times10^{-1}$ & 1.99 & 1.95 & 2.03 & 0.07 & 0.36 \\
+      $3.44\times10^{-1}$ & 2.10 & 1.96 & 2.21 & 0.09 & 0.40 \\
+      $7.59\times10^{-3}$ & 2.21 & 1.71 & 2.62 & 0.05 & 0.34 \\
+      \midrule
+      \multicolumn{6}{l}{\textit{3 més alts}} \\
+      $1.83\times10^{-2}$ & 23.32 & 4.19 & 28.76 & 0.05 & 0.15 \\
+      $1.31\times10^{-3}$ & 13.31 & 4.86 & 15.57 & 0.05 & 0.18 \\
+      $1.02\times10^{-2}$ & 11.37 & 3.38 & 14.56 & 0.05 & 0.26 \\
+      \bottomrule
+    \end{tabular}
+  \end{subtable}
+\end{table}

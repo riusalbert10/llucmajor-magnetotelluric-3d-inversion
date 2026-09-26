@@ -1,0 +1,45 @@
+% Requereix: \usepackage{booktabs}
+% Parametres de la malla del model inicial Model_Bat_35km_recond
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Paràmetre} & \textbf{Valor} \\
+\midrule
+Cel·les totals (X\,$\times$\,Y\,$\times$\,Z) & $68 \times 68 \times 30$ \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Període i resistivitat de fons}} \\
+Període més curt & $1{,}25\times10^{-4}$ s \\
+Període més llarg & $8{,}657$ s \\
+Resistivitat de fons & $100$ $\Omega\cdot$m \\
+Skin depth mínima (a $T$ curt) & $0{,}057$ km \\
+Skin depth màxima (a $T$ llarg) & $14{,}711$ km \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Direcció X}} \\
+Nombre de cel·les (nucli) & 50 \\
+Dimensió de cel·la & 150 m \\
+Cel·les de padding (per costat) & 9 \\
+Factor de creixement (padding) & 1,5 \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Direcció Y}} \\
+Nombre de cel·les (nucli) & 50 \\
+Dimensió de cel·la & 150 m \\
+Cel·les de padding (per costat) & 9 \\
+Factor de creixement (padding) & 1,5 \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Direcció Z}} \\
+Nombre de capes & 30 \\
+Gruix de la primera capa & 12 m \\
+Factor de creixement (zona fina) & 1,2 \\
+Factor de creixement (padding profund) & 1,55 \\
+Profunditat total del domini & $68{,}36$ km \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Origen}} \\
+Mode & Mid-X,Y (centrat) \\
+Origen de la malla $(X,\,Y,\,Z)$ & $(-17{,}503,\ -17{,}503,\ 0)$ km \\
+\bottomrule
+\end{tabular}
+\caption{Paràmetres de la malla del model inicial (Model\_Bat\_35km\_recond).}
+\label{tab:malla_params}
+\end{table}

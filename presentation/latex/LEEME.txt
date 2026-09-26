@@ -1,0 +1,32 @@
+PRESENTACIÓN DEL TFG — Albert Rius Saborit
+Tema Beamer propio "resistivitat" (inspirado en la barra de colores de resistividad del TFG)
+
+ARCHIVOS
+  presentacio.tex                 Diapositivas (en catalán, con notas del ponente en \note{...})
+  presentacio_notes.tex           Envoltorio que genera la versión con notas para pympress
+  beamerthemeresistivitat.sty     El tema (colores, portada, separadores, cajas, figuras)
+  figures/                        Figuras extraídas de la memoria del TFG
+  fonts/                          Poppins (texto) y Fira Math (ecuaciones) — licencia SIL OFL 1.1
+
+CÓMO COMPILAR
+  - Con XeLaTeX, dos pasadas:
+        xelatex presentacio.tex
+        xelatex presentacio.tex
+  - En Overleaf: sube el .zip entero y cambia Menu -> Compiler -> XeLaTeX.
+  - Las fuentes están dentro de la carpeta fonts/, no hace falta instalar nada.
+    (Con pdfLaTeX también compila, pero con las fuentes por defecto.)
+
+PRESENTAR CON NOTAS (pympress)
+  - Compila presentacio_notes.tex (o usa presentacio_notes.pdf directamente).
+  - Ábrelo con pympress: detecta que las notas están en la mitad derecha de cada página.
+  - En el proyector se ve la diapositiva y en tu pantalla, las notas y el cronómetro.
+
+EDITAR
+  - Cada diapositiva es un \begin{frame}{Título} ... \end{frame} en presentacio.tex.
+  - Las notas de cada diapositiva están en \note{...} dentro del frame.
+  - Cajas disponibles:  \begin{caixa}[color]{Título} ... \end{caixa}
+                         \begin{nota}[color] ... \end{nota}
+                         \xifra[color]{valor}{descripción}
+                         \figura[ancho]{archivo}      \peu{pie de figura}
+  - Colores útiles: accent, accent2, muted, rho2 (rojo), rho3 (naranja), rho5 (verde), rho7 (azul).
+  - Las diapositivas de reserva (annex) van después de "Moltes gràcies".

@@ -1,0 +1,3 @@
+Poppins (Indian Type Foundry) y Fira Math (Xiangdong Zeng, basada en Fira Sans de Mozilla/Carrois)
+se distribuyen bajo la SIL Open Font License, versión 1.1 (https://openfontlicense.org).
+Se incluyen aquí sin modificar para que la presentación compile en cualquier equipo.

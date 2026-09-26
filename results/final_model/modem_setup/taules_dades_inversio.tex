@@ -1,0 +1,53 @@
+% Requereix: \usepackage{booktabs}
+
+%======================= TAULA 1: DADES =======================
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Paràmetre} & \textbf{Valor} \\
+\midrule
+Tipus de dada & Tensor d'impedància complet \\
+Components & $Z_{xx},\,Z_{xy},\,Z_{yx},\,Z_{yy}$ \\
+Nombre de períodes & 39 \\
+Rang de períodes & $0{,}000125$ -- $8{,}66$ s \\
+Rang de freqüències & $8000$ -- $0{,}116$ Hz \\
+Nombre d'estacions & 40 \\
+Total de components & 3980 \\
+Petjada de les estacions & X(N) $\pm2134$ m; \; Y(E) $\pm3055$ m \\
+\bottomrule
+\end{tabular}
+\caption{Característiques del conjunt de dades magnetotel·lúriques emprat en la inversió.}
+\label{tab:dades}
+\end{table}
+
+%=================== TAULA 2: INVERSIO =========================
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Paràmetre} & \textbf{Valor} \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Error floor}} \\
+Off-diagonal ($Z_{xy},Z_{yx}$) & 5\% de $\sqrt{|Z_{xy}\,Z_{yx}|}$ (fila Y a 7\% si $T\le1$ s) \\
+Diagonals ($Z_{xx},Z_{yy}$) & depurades manualment ($T\le1$ s) \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Regularització / covariància}} \\
+Esquema & autoregressió recursiva \\
+Suavitzat X / Y / Z & $0{,}2$ / $0{,}2$ / $0{,}2$ \\
+Nombre d'aplicacions & 2 \\
+Màscara d'oceà (mar fix) & mask 9 \; ($\rho = 0{,}3$ $\Omega\cdot$m) \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Control d'inversió (NLCG)}} \\
+Algorisme & NLCG (Rodi \& Mackie, 2001) \\
+$\lambda$ inicial / reducció & 100 / dividir per 10 \\
+Pas inicial de cerca de línia & 20 \\
+Sortida si rms $<$ / si $\lambda <$ & $1{,}05$ / $10^{-8}$ \\
+Iteracions màximes & 150 \\
+\bottomrule
+\end{tabular}
+\caption{Paràmetres de ponderació de dades, regularització i control de la inversió (algorisme NLCG).}
+\label{tab:inversio}
+\end{table}

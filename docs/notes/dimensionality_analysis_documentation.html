@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnetotelluric Dimensionality Analysis: Mathematical Documentation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-bottom: 2px solid #95a5a6;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+        .section {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .equation-block {
+            background-color: #ecf0f1;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .important {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .interpretation {
+            background-color: #d4edda;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background-color: #f8d7da;
+            padding: 15px;
+            border-left: 4px solid #dc3545;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #ecf0f1;
+        }
+        .reference {
+            font-style: italic;
+            color: #7f8c8d;
+            margin: 5px 0;
+        }
+        .plot-description {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .limit-box {
+            background-color: #fff8e1;
+            padding: 10px;
+            border: 2px solid #ffa726;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        ul.checklist {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        ul.checklist li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Magnetotelluric Dimensionality Analysis</h1>
+    <p style="font-size: 1.1em; color: #555;">
+        Mathematical Documentation and Interpretation Guide
+    </p>
+
+    <div class="section">
+        <h2>1. Introduction: The Dimensionality Problem in MT</h2>
+
+        <h3>1.1 What is Dimensionality?</h3>
+        <p>
+            In magnetotellurics, <strong>dimensionality</strong> refers to the geometric complexity
+            of the subsurface electrical resistivity structure. Understanding dimensionality is crucial
+            because it determines:
+        </p>
+        <ul>
+            <li>What type of modeling approach is appropriate (1D, 2D, or 3D)</li>
+            <li>Whether data rotation is necessary</li>
+            <li>How to interpret off-diagonal vs diagonal impedance elements</li>
+            <li>The computational cost of inversion</li>
+        </ul>
+
+        <h3>1.2 Three Types of Structures</h3>
+
+        <table>
+            <tr>
+                <th>Dimensionality</th>
+                <th>Structure Description</th>
+                <th>Geological Examples</th>
+                <th>Impedance Tensor</th>
+            </tr>
+            <tr>
+                <td><strong>1D</strong></td>
+                <td>Resistivity varies only with depth. Properties are uniform horizontally.</td>
+                <td>Sedimentary basins, oceanic crust, horizontally layered stratigraphy</td>
+                <td>\(Z_{xx} = Z_{yy} = 0\)<br>\(Z_{xy} = -Z_{yx}\)</td>
+            </tr>
+            <tr>
+                <td><strong>2D</strong></td>
+                <td>Resistivity varies with depth and one horizontal direction. Elongated structures.</td>
+                <td>Mountain ranges, subduction zones, major faults, dikes</td>
+                <td>After rotation to strike:<br>\(Z_{xx} = Z_{yy} = 0\)<br>\(Z_{xy} \neq -Z_{yx}\)</td>
+            </tr>
+            <tr>
+                <td><strong>3D</strong></td>
+                <td>Resistivity varies in all three spatial directions. Complex geometry.</td>
+                <td>Salt domes, ore bodies, volcanic systems, complex fault networks</td>
+                <td>All four elements non-zero:<br>\(Z_{xx}, Z_{xy}, Z_{yx}, Z_{yy} \neq 0\)</td>
+            </tr>
+        </table>
+
+        <h3>1.3 The Impedance Tensor</h3>
+        <p>Recall that the MT impedance tensor relates electric and magnetic fields:</p>
+
+        <div class="equation-block">
+            $$\begin{bmatrix} E_x \\ E_y \end{bmatrix} = \begin{bmatrix} Z_{xx} & Z_{xy} \\ Z_{yx} & Z_{yy} \end{bmatrix} \begin{bmatrix} H_x \\ H_y \end{bmatrix}$$
+        </div>
+
+        <p>The impedance tensor components carry information about subsurface geometry:</p>
+        <ul>
+            <li><strong>Off-diagonal elements</strong> (\(Z_{xy}, Z_{yx}\)): Dominant in 1D and 2D structures</li>
+            <li><strong>Diagonal elements</strong> (\(Z_{xx}, Z_{yy}\)): Should be zero in 1D, small in 2D, significant in 3D</li>
+        </ul>
+
+        <div class="important">
+            <strong>Key Insight:</strong> Dimensionality analysis examines the relative magnitudes and
+            relationships between these impedance tensor components to classify the structure.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>2. Method 1: Swift Skew</h2>
+
+        <h3>2.1 Mathematical Definition</h3>
+        <p>The Swift skew (Swift, 1967) is defined as:</p>
+
+        <div class="equation-block">
+            $$\text{Skew} = \frac{|Z_{xx} + Z_{yy}|}{|Z_{xy} - Z_{yx}|}$$
+        </div>
+
+        <p>where \(Z_{ij}\) are the complex impedance tensor elements.</p>
+
+        <h3>2.2 Physical Interpretation</h3>
+        <p>The skew measures the <strong>asymmetry</strong> of the impedance tensor:</p>
+        <ul>
+            <li><strong>Numerator</strong> \(|Z_{xx} + Z_{yy}|\): Sum of diagonal elements (should be zero for 2D)</li>
+            <li><strong>Denominator</strong> \(|Z_{xy} - Z_{yx}|\): Difference of off-diagonal elements (non-zero for 2D)</li>
+        </ul>
+
+        <h3>2.3 Classification Thresholds</h3>
+
+        <div class="limit-box">
+            <h4>Threshold Values and Rationale</h4>
+            <table>
+                <tr>
+                    <th>Skew Range</th>
+                    <th>Interpretation</th>
+                    <th>Physical Meaning</th>
+                </tr>
+                <tr>
+                    <td><strong>Skew &lt; 0.2</strong></td>
+                    <td>1D or 2D structure</td>
+                    <td>Diagonal elements are &lt;20% of off-diagonal. Structure is simple.</td>
+                </tr>
+                <tr>
+                    <td><strong>0.2 ≤ Skew &lt; 0.4</strong></td>
+                    <td>2D with 3D effects</td>
+                    <td>Some asymmetry present. Might be 2D with lateral heterogeneities.</td>
+                </tr>
+                <tr>
+                    <td><strong>Skew ≥ 0.4</strong></td>
+                    <td>3D structure</td>
+                    <td>Significant diagonal elements. Complex 3D geometry required.</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="important">
+            <strong>Why these limits?</strong>
+            <ul>
+                <li><strong>0.2 threshold:</strong> Empirically determined from synthetic 1D/2D models.
+                Diagonal elements contribute &lt;20% suggests negligible 3D effects.</li>
+                <li><strong>0.4 threshold:</strong> When diagonal elements reach 40% of off-diagonal,
+                3D modeling becomes necessary for accurate interpretation.</li>
+            </ul>
+        </div>
+
+        <h3>2.4 Code Implementation</h3>
+        <div class="code-block">
+# Extract impedance components
+Zxx = Z.z[:, 0, 0]  # Diagonal element (x,x)
+Zxy = Z.z[:, 0, 1]  # Off-diagonal (x,y)
+Zyx = Z.z[:, 1, 0]  # Off-diagonal (y,x)
+Zyy = Z.z[:, 1, 1]  # Diagonal element (y,y)
+
+# Calculate Swift skew
+numerator = np.abs(Zxx + Zyy)
+denominator = np.abs(Zxy - Zyx)
+skew = numerator / denominator
+
+# Classification
+skew_mean = np.nanmean(skew)
+if skew_mean < 0.2:
+    dimension = "1D/2D"
+elif skew_mean < 0.4:
+    dimension = "2D with 3D effects"
+else:
+    dimension = "3D"
+        </div>
+
+        <h3>2.5 Plot 1: Skew vs Period</h3>
+
+        <div class="plot-description">
+            <h4>What the Plot Shows</h4>
+            <ul class="checklist">
+                <li>X-axis: Period (s) in logarithmic scale</li>
+                <li>Y-axis: Swift skew (dimensionless)</li>
+                <li>Data points: Connected blue circles showing skew at each period</li>
+                <li>Green dashed line at 0.2: 1D/2D boundary</li>
+                <li>Orange dashed line at 0.4: 2D/3D boundary</li>
+            </ul>
+
+            <h4>Information Extracted</h4>
+            <ul>
+                <li><strong>Overall dimensionality:</strong> Are most points below 0.2, between 0.2-0.4, or above 0.4?</li>
+                <li><strong>Frequency dependence:</strong> Does dimensionality change with depth?
+                    <ul>
+                        <li>High frequency (short period) = shallow structure</li>
+                        <li>Low frequency (long period) = deep structure</li>
+                    </ul>
+                </li>
+                <li><strong>Data quality:</strong> Scattered points suggest noise or 3D effects</li>
+            </ul>
+
+            <h4>Typical Interpretations</h4>
+            <table>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Interpretation</th>
+                </tr>
+                <tr>
+                    <td>Skew &lt; 0.2 at all periods</td>
+                    <td>Simple layered structure. 1D modeling appropriate.</td>
+                </tr>
+                <tr>
+                    <td>Skew increases with period</td>
+                    <td>Shallow 1D/2D, deep 3D. Lateral heterogeneity increases with depth.</td>
+                </tr>
+                <tr>
+                    <td>Skew decreases with period</td>
+                    <td>Shallow 3D (e.g., near-surface heterogeneity), deep 1D (uniform basement).</td>
+                </tr>
+                <tr>
+                    <td>Skew > 0.4 at all periods</td>
+                    <td>Strongly 3D at all depths. Full 3D inversion required.</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. Method 2: Diagonal vs Off-Diagonal Ratio</h2>
+
+        <h3>3.1 Mathematical Definition</h3>
+        <p>This method compares the magnitude of diagonal elements to off-diagonal elements:</p>
+
+        <div class="equation-block">
+            $$\text{Ratio} = \frac{\sqrt{|Z_{xx}|^2 + |Z_{yy}|^2}}{\sqrt{|Z_{xy}|^2 + |Z_{yx}|^2}}$$
+        </div>
+
+        <p>This is the ratio of the <strong>norm</strong> of diagonal elements to the norm of off-diagonal elements.</p>
+
+        <h3>3.2 Physical Interpretation</h3>
+        <p>In a 1D or properly-oriented 2D structure:</p>
+        <ul>
+            <li>Diagonal elements \(Z_{xx}\) and \(Z_{yy}\) should be <strong>zero</strong></li>
+            <li>Off-diagonal elements \(Z_{xy}\) and \(Z_{yx}\) contain all the signal</li>
+            <li>Therefore, the ratio should be <strong>small</strong></li>
+        </ul>
+
+        <p>A large ratio indicates:</p>
+        <ul>
+            <li>3D structure, OR</li>
+            <li>2D structure that is not aligned with the measurement coordinates (needs rotation)</li>
+        </ul>
+
+        <h3>3.3 Classification Thresholds</h3>
+
+        <div class="limit-box">
+            <h4>Threshold Values and Rationale</h4>
+            <table>
+                <tr>
+                    <th>Ratio Range</th>
+                    <th>Interpretation</th>
+                    <th>Physical Meaning</th>
+                </tr>
+                <tr>
+                    <td><strong>Ratio &lt; 0.2</strong></td>
+                    <td>1D or well-oriented 2D</td>
+                    <td>Diagonal elements are &lt;20% of off-diagonal magnitude.</td>
+                </tr>
+                <tr>
+                    <td><strong>0.2 ≤ Ratio &lt; 0.5</strong></td>
+                    <td>2D, possibly misoriented</td>
+                    <td>Diagonal elements present but moderate. May need coordinate rotation.</td>
+                </tr>
+                <tr>
+                    <td><strong>Ratio ≥ 0.5</strong></td>
+                    <td>3D or badly misoriented 2D</td>
+                    <td>Diagonal elements comparable to off-diagonal. Complex structure.</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="important">
+            <strong>Why these limits?</strong>
+            <ul>
+                <li><strong>0.2 threshold:</strong> If diagonal elements are &lt;20%, they can be
+                considered negligible compared to measurement uncertainty (~5-10%).</li>
+                <li><strong>0.5 threshold:</strong> When diagonal elements reach 50% of off-diagonal,
+                the structure is either truly 3D or severely misoriented. At this point, 2D assumption fails.</li>
+            </ul>
+        </div>
+
+        <h3>3.4 Code Implementation</h3>
+        <div class="code-block">
+# Calculate magnitudes of diagonal components
+mag_diag = np.sqrt(np.abs(Zxx)**2 + np.abs(Zyy)**2)
+
+# Calculate magnitudes of off-diagonal components
+mag_offdiag = np.sqrt(np.abs(Zxy)**2 + np.abs(Zyx)**2)
+
+# Calculate ratio
+ratio_diag = mag_diag / mag_offdiag
+
+# Classification
+ratio_mean = np.nanmean(ratio_diag)
+if ratio_mean < 0.2:
+    dimension = "1D/2D"
+elif ratio_mean < 0.5:
+    dimension = "2D"
+else:
+    dimension = "3D"
+        </div>
+
+        <h3>3.5 Plot 2: Diagonal Ratio vs Period</h3>
+
+        <div class="plot-description">
+            <h4>What the Plot Shows</h4>
+            <ul class="checklist">
+                <li>X-axis: Period (s) in logarithmic scale</li>
+                <li>Y-axis: Diagonal/Off-diagonal ratio (dimensionless)</li>
+                <li>Data points: Connected red circles</li>
+                <li>Green dashed line at 0.2: 1D/2D threshold</li>
+                <li>Orange dashed line at 0.5: 2D/3D threshold</li>
+            </ul>
+
+            <h4>Information Extracted</h4>
+            <ul>
+                <li><strong>Structure alignment:</strong> Is the structure aligned with measurement coordinates?</li>
+                <li><strong>Depth-dependent complexity:</strong> Does 3D character vary with depth?</li>
+                <li><strong>Need for rotation:</strong> High ratio with low skew suggests misorientation</li>
+            </ul>
+
+            <h4>Combined Interpretation with Skew</h4>
+            <table>
+                <tr>
+                    <th>Skew</th>
+                    <th>Ratio</th>
+                    <th>Interpretation</th>
+                </tr>
+                <tr>
+                    <td>Low (&lt;0.2)</td>
+                    <td>Low (&lt;0.2)</td>
+                    <td>✓ Perfect 1D/2D, well oriented</td>
+                </tr>
+                <tr>
+                    <td>Low (&lt;0.2)</td>
+                    <td>Moderate (0.2-0.5)</td>
+                    <td>2D structure rotated from measurement axes. Find strike direction.</td>
+                </tr>
+                <tr>
+                    <td>Low (&lt;0.2)</td>
+                    <td>High (&gt;0.5)</td>
+                    <td>Severely misoriented 2D. Rotate by ~45° to principal axes.</td>
+                </tr>
+                <tr>
+                    <td>High (&gt;0.4)</td>
+                    <td>High (&gt;0.5)</td>
+                    <td>True 3D structure. Full 3D modeling required.</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. Method 3: Phase Tensor Ellipticity</h2>
+
+        <h3>4.1 Mathematical Definition</h3>
+        <p>The phase tensor approach (Caldwell et al., 2004) separates galvanic distortion from inductive response.
+        The ellipticity parameter \(\beta\) is derived from the phase difference between modes:</p>
+
+        <div class="equation-block">
+            $$\beta = \frac{1}{2}(\phi_{xy} - \phi_{yx})$$
+        </div>
+
+        <p>where \(\phi_{xy}\) and \(\phi_{yx}\) are the phases of the off-diagonal impedance elements:</p>
+
+        <div class="equation-block">
+            $$\phi_{xy} = \arg(Z_{xy}) = \arctan\left(\frac{\text{Im}(Z_{xy})}{\text{Re}(Z_{xy})}\right)$$
+        </div>
+
+        <h3>4.2 Physical Interpretation</h3>
+        <p>The ellipticity \(\beta\) represents:</p>
+        <ul>
+            <li><strong>\(\beta = 0\):</strong> Perfect 1D structure (phases are equal)</li>
+            <li><strong>\(\beta \neq 0\):</strong> 2D or 3D structure (phase split between modes)</li>
+            <li><strong>|\(\beta\)| large:</strong> Strong dimensionality (2D/3D effects)</li>
+        </ul>
+
+        <div class="important">
+            <strong>Advantage of Phase Tensor:</strong> The phase is less affected by galvanic distortion
+            (surface conductivity anomalies) than apparent resistivity. This makes \(\beta\) a more robust
+            indicator of deeper structure geometry.
+        </div>
+
+        <h3>4.3 Classification Thresholds</h3>
+
+        <div class="limit-box">
+            <h4>Threshold Values and Rationale</h4>
+            <table>
+                <tr>
+                    <th>|\(\beta\)| Range</th>
+                    <th>Interpretation</th>
+                    <th>Physical Meaning</th>
+                </tr>
+                <tr>
+                    <td><strong>|\(\beta\)| &lt; 5°</strong></td>
+                    <td>1D structure</td>
+                    <td>Phase difference negligible. Horizontal layers dominate.</td>
+                </tr>
+                <tr>
+                    <td><strong>5° ≤ |\(\beta\)| &lt; 15°</strong></td>
+                    <td>2D structure</td>
+                    <td>Moderate phase split. Elongated geological feature present.</td>
+                </tr>
+                <tr>
+                    <td><strong>|\(\beta\)| ≥ 15°</strong></td>
+                    <td>3D structure</td>
+                    <td>Large phase asymmetry. Complex 3D geometry.</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="important">
+            <strong>Why these limits?</strong>
+            <ul>
+                <li><strong>5° threshold:</strong> Below 5°, phase difference is within typical measurement
+                uncertainty (2-3° for good data). Structure is effectively 1D.</li>
+                <li><strong>15° threshold:</strong> Above 15°, the phase tensor becomes strongly asymmetric,
+                indicating substantial lateral resistivity variations characteristic of 3D structures.</li>
+                <li><strong>Theoretical basis:</strong> For a 2D structure, \(\beta\) should be constant
+                (doesn't vary with frequency). Frequency-dependent \(\beta\) suggests 3D.</li>
+            </ul>
+        </div>
+
+        <h3>4.4 Code Implementation</h3>
+        <div class="code-block">
+# Extract phases from impedance
+phase = Z.phase  # MTpy calculates this internally
+
+phase_xy = phase[:, 0, 1]  # Phase of Z_xy
+phase_yx = phase[:, 1, 0]  # Phase of Z_yx
+
+# Calculate phase difference (handle wrapping at ±180°)
+phase_diff = phase_xy - phase_yx
+phase_diff = np.where(phase_diff > 180, phase_diff - 360, phase_diff)
+phase_diff = np.where(phase_diff < -180, phase_diff + 360, phase_diff)
+
+# Calculate ellipticity (beta)
+beta = phase_diff / 2.0
+
+# Classification
+beta_mean = np.abs(np.nanmean(beta))
+if beta_mean < 5:
+    dimension = "1D"
+elif beta_mean < 15:
+    dimension = "2D"
+else:
+    dimension = "3D"
+        </div>
+
+        <h3>4.5 Plot 3: Ellipticity vs Period</h3>
+
+        <div class="plot-description">
+            <h4>What the Plot Shows</h4>
+            <ul class="checklist">
+                <li>X-axis: Period (s) in logarithmic scale</li>
+                <li>Y-axis: Ellipticity |\(\beta\)| in degrees</li>
+                <li>Data points: Connected green circles</li>
+                <li>Green dashed line at 5°: 1D threshold</li>
+                <li>Orange dashed line at 15°: 2D threshold</li>
+            </ul>
+
+            <h4>Information Extracted</h4>
+            <ul>
+                <li><strong>Structural dimensionality:</strong> Independent of coordinate system rotation</li>
+                <li><strong>Frequency dependence:</strong> Constant \(\beta\) suggests 2D, varying \(\beta\) suggests 3D</li>
+                <li><strong>Data quality:</strong> Smooth curve indicates good data, erratic suggests noise</li>
+            </ul>
+
+            <h4>Interpretation Patterns</h4>
+            <table>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Interpretation</th>
+                </tr>
+                <tr>
+                    <td>\(\beta\) ≈ 0° at all periods</td>
+                    <td>True 1D structure. Perfect horizontal layering.</td>
+                </tr>
+                <tr>
+                    <td>\(\beta\) constant (5-15°) across periods</td>
+                    <td>2D structure with consistent strike. 2D modeling appropriate.</td>
+                </tr>
+                <tr>
+                    <td>\(\beta\) increases with period</td>
+                    <td>Shallow 1D/2D, becoming 3D at depth. Lateral variations grow deeper.</td>
+                </tr>
+                <tr>
+                    <td>\(\beta\) > 15° and variable</td>
+                    <td>3D structure. Phase tensor shows complex asymmetry.</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="warning">
+            <strong>Caution:</strong> Very high ellipticity (|\(\beta\)| > 30°) at isolated frequencies
+            may indicate data problems rather than true 3D structure. Check data quality at those periods.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>5. Method 4: Strike Angle Analysis</h2>
+
+        <h3>5.1 Mathematical Definition</h3>
+        <p>For a 2D structure, there exists a <strong>strike angle</strong> \(\theta\) that defines the
+        direction of geological elongation. The strike is calculated using Swift's method:</p>
+
+        <div class="equation-block">
+            $$\theta = \frac{1}{2} \arctan\left(\frac{2\text{Re}(Z_{xy} + Z_{yx})}{|Z_{xx}|^2 - |Z_{yy}|^2}\right)$$
+        </div>
+
+        <p>After rotation by angle \(\theta\), the impedance tensor becomes:</p>
+
+        <div class="equation-block">
+            $$\mathbf{Z}' = \mathbf{R}(-\theta) \mathbf{Z} \mathbf{R}(\theta)$$
+        </div>
+
+        <p>where \(\mathbf{R}(\theta)\) is the rotation matrix:</p>
+
+        <div class="equation-block">
+            $$\mathbf{R}(\theta) = \begin{bmatrix} \cos\theta & \sin\theta \\ -\sin\theta & \cos\theta \end{bmatrix}$$
+        </div>
+
+        <h3>5.2 Physical Interpretation</h3>
+        <p>The strike angle represents:</p>
+        <ul>
+            <li><strong>Geological strike:</strong> Direction parallel to elongated geological features</li>
+            <li><strong>Coordinate rotation:</strong> Angle to rotate measurement axes to align with structure</li>
+            <li><strong>2D consistency:</strong> Constant strike across frequencies confirms 2D structure</li>
+        </ul>
+
+        <h3>5.3 Strike Angle Conventions</h3>
+
+        <div class="important">
+            <strong>Convention:</strong> Strike angle is measured clockwise from North (geographic convention)
+            and is constrained to [0°, 90°] due to 180° ambiguity in MT data.
+        </div>
+
+        <table>
+            <tr>
+                <th>Strike Angle</th>
+                <th>Geological Orientation</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td>0°</td>
+                <td>North-South</td>
+                <td>Mid-Atlantic Ridge, Rocky Mountains (N-S trending)</td>
+            </tr>
+            <tr>
+                <td>45°</td>
+                <td>NE-SW</td>
+                <td>San Andreas Fault (NW-SE, complementary angle)</td>
+            </tr>
+            <tr>
+                <td>90°</td>
+                <td>East-West</td>
+                <td>Himalayan front (E-W trending)</td>
+            </tr>
+        </table>
+
+        <h3>5.4 Strike Variability Analysis</h3>
+
+        <div class="limit-box">
+            <h4>Standard Deviation Thresholds</h4>
+            <table>
+                <tr>
+                    <th>Strike Std Dev</th>
+                    <th>Interpretation</th>
+                    <th>Implication</th>
+                </tr>
+                <tr>
+                    <td><strong>σ &lt; 10°</strong></td>
+                    <td>Well-defined 2D structure</td>
+                    <td>Strike is consistent across all depths. Clear 2D geometry.</td>
+                </tr>
+                <tr>
+                    <td><strong>10° ≤ σ &lt; 30°</strong></td>
+                    <td>2D with complications</td>
+                    <td>Generally 2D but with depth-varying strike or local 3D effects.</td>
+                </tr>
+                <tr>
+                    <td><strong>σ ≥ 30°</strong></td>
+                    <td>3D or poorly defined 2D</td>
+                    <td>No consistent strike direction. Structure is likely 3D.</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="important">
+            <strong>Why these limits?</strong>
+            <ul>
+                <li><strong>10° threshold:</strong> Within ±10°, strike is well-constrained. This is the
+                typical uncertainty in strike determination for good 2D data.</li>
+                <li><strong>30° threshold:</strong> Variation &gt;30° means strike changes significantly
+                with frequency/depth, which violates the 2D assumption of a single strike direction.</li>
+            </ul>
+        </div>
+
+        <h3>5.5 Code Implementation</h3>
+        <div class="code-block">
+# Calculate strike angle using Swift's method
+numerator = 2 * np.real(Zxy + Zyx)
+denominator = np.abs(Zxx)**2 - np.abs(Zyy)**2
+
+# Calculate strike in radians, then convert to degrees
+pt_strike = 0.5 * np.arctan2(numerator, denominator + 1e-10) * 180 / np.pi
+
+# Normalize to [0, 90] degrees range
+pt_strike = np.where(pt_strike < 0, pt_strike + 90, pt_strike)
+pt_strike = np.where(pt_strike > 90, pt_strike - 90, pt_strike)
+
+# Analyze strike consistency
+pt_std = np.nanstd(pt_strike)
+pt_mean = np.nanmean(pt_strike)
+
+if pt_std < 10:
+    interpretation = f"Well-defined 2D strike at ~{pt_mean:.1f}°"
+elif pt_std < 30:
+    interpretation = "2D structure with variable strike"
+else:
+    interpretation = "3D structure (no consistent strike)"
+        </div>
+
+        <h3>5.6 Plot 4: Strike Angle vs Period</h3>
+
+        <div class="plot-description">
+            <h4>What the Plot Shows</h4>
+            <ul class="checklist">
+                <li>X-axis: Period (s) in logarithmic scale</li>
+                <li>Y-axis: Strike angle in degrees [0°, 90°]</li>
+                <li>Data points: Connected purple circles</li>
+                <li>Reference lines at 0° and 90° (N-S and E-W)</li>
+            </ul>
+
+            <h4>Information Extracted</h4>
+            <ul>
+                <li><strong>Strike direction:</strong> Mean strike angle indicates geological orientation</li>
+                <li><strong>Strike consistency:</strong> Flat curve = good 2D, variable curve = 3D effects</li>
+                <li><strong>Depth dependence:</strong> Strike changes with period suggest varying structure with depth</li>
+            </ul>
+
+            <h4>Interpretation Patterns</h4>
+            <table>
+                <tr>
+                    <th>Pattern</th>
+                    <th>Interpretation</th>
+                    <th>Action</th>
+                </tr>
+                <tr>
+                    <td>Constant strike (±10°) all periods</td>
+                    <td>Excellent 2D structure</td>
+                    <td>✓ Use 2D inversion with this strike angle</td>
+                </tr>
+                <tr>
+                    <td>Two distinct strike values</td>
+                    <td>Shallow and deep structures with different orientations</td>
+                    <td>Consider separate 2D inversions for depth ranges</td>
+                </tr>
+                <tr>
+                    <td>Gradual rotation with period</td>
+                    <td>Progressive change in geological strike with depth</td>
+                    <td>Use 3D inversion or rotating 2D models</td>
+                </tr>
+                <tr>
+                    <td>Random scatter across periods</td>
+                    <td>3D structure, strike is not well-defined</td>
+                    <td>3D inversion required</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="interpretation">
+            <strong>Regional Strike Comparison:</strong> Compare your calculated strike with known
+            regional geological trends (e.g., mountain ranges, major faults, coastlines). Agreement
+            supports 2D interpretation; disagreement may indicate local 3D structures.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>6. Plot 5: Apparent Resistivity Reference</h2>
+
+        <h3>6.1 Purpose of This Plot</h3>
+        <p>This plot shows the <strong>observed apparent resistivity data</strong> (TE and TM modes)
+        as a reference. It helps contextualize the dimensionality indicators by showing:</p>
+        <ul>
+            <li>Data quality and consistency</li>
+            <li>TE-TM mode splitting (indicator of 2D/3D)</li>
+            <li>Overall resistivity structure</li>
+        </ul>
+
+        <h3>6.2 TE and TM Modes</h3>
+
+        <div class="important">
+            <strong>Definition:</strong>
+            <ul>
+                <li><strong>TE mode (Transverse Electric):</strong> \(\rho_{xy}\) - Electric field perpendicular to strike</li>
+                <li><strong>TM mode (Transverse Magnetic):</strong> \(\rho_{yx}\) - Magnetic field perpendicular to strike</li>
+            </ul>
+        </div>
+
+        <p>In 2D structures, these modes respond differently:</p>
+
+        <div class="equation-block">
+            $$\rho_{xy}^{\text{TE}} = \frac{|Z_{xy}|^2}{\omega\mu_0}, \quad \rho_{yx}^{\text{TM}} = \frac{|Z_{yx}|^2}{\omega\mu_0}$$
+        </div>
+
+        <h3>6.3 Plot Description</h3>
+
+        <div class="plot-description">
+            <h4>What the Plot Shows</h4>
+            <ul class="checklist">
+                <li>X-axis: Period (s) in logarithmic scale</li>
+                <li>Y-axis: Apparent resistivity (Ω·m) in logarithmic scale</li>
+                <li>Blue curve: TE mode (\(\rho_{xy}\))</li>
+                <li>Red curve: TM mode (\(\rho_{yx}\))</li>
+            </ul>
+
+            <h4>Information Extracted</h4>
+            <ul>
+                <li><strong>Mode splitting:</strong> Separation between TE and TM curves
+                    <ul>
+                        <li>No splitting → 1D structure</li>
+                        <li>Constant splitting → 2D structure</li>
+                        <li>Variable splitting → 3D effects</li>
+                    </ul>
+                </li>
+                <li><strong>Resistivity trends:</strong>
+                    <ul>
+                        <li>Increasing with period → resistivity increases with depth</li>
+                        <li>Decreasing with period → resistivity decreases with depth</li>
+                        <li>Oscillating → layered structure with alternating resistivity</li>
+                    </ul>
+                </li>
+                <li><strong>Data quality:</strong> Smooth curves indicate good data; jumps suggest noise</li>
+            </ul>
+
+            <h4>TE-TM Splitting Patterns</h4>
+            <table>
+                <tr>
+                    <th>Splitting Pattern</th>
+                    <th>Dimensionality</th>
+                    <th>Physical Meaning</th>
+                </tr>
+                <tr>
+                    <td>TE ≈ TM (overlapping curves)</td>
+                    <td>1D</td>
+                    <td>Both modes see the same layered structure</td>
+                </tr>
+                <tr>
+                    <td>TE &gt; TM (TE curve above TM)</td>
+                    <td>2D conductive structure</td>
+                    <td>TE mode sees higher resistivity (perpendicular to conductor)</td>
+                </tr>
+                <tr>
+                    <td>TM &gt; TE (TM curve above TE)</td>
+                    <td>2D resistive structure</td>
+                    <td>TM mode sees higher resistivity (perpendicular to resistor)</td>
+                </tr>
+                <tr>
+                    <td>Curves cross multiple times</td>
+                    <td>3D or complex layering</td>
+                    <td>Mode behavior changes with depth; not simple 2D</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="interpretation">
+            <strong>Integration with Dimensionality:</strong> Use this plot together with dimensionality
+            indicators. For example:
+            <ul>
+                <li>If skew is low but TE-TM splitting is large → Structure is 2D but coordinate system needs rotation</li>
+                <li>If skew is high and curves cross → Confirms 3D structure</li>
+                <li>If all dimensionality indicators are low and TE ≈ TM → Confirms 1D interpretation</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>7. Integrated Decision Framework</h2>
+
+        <h3>7.1 Decision Tree for Dimensionality</h3>
+
+        <div class="algorithm" style="background-color: #f0f8ff; padding: 20px; border-left: 4px solid #3498db;">
+            <strong>Step-by-Step Dimensionality Determination</strong>
+            <ol>
+                <li><strong>Check Swift Skew</strong>
+                    <ul>
+                        <li>If mean skew &lt; 0.2 → Go to Step 2</li>
+                        <li>If mean skew ≥ 0.4 → <strong>Conclude: 3D structure</strong></li>
+                        <li>If 0.2 ≤ mean skew &lt; 0.4 → Go to Step 3</li>
+                    </ul>
+                </li>
+                <li><strong>Check Diagonal Ratio</strong> (if skew &lt; 0.2)
+                    <ul>
+                        <li>If ratio &lt; 0.2 → <strong>Conclude: 1D or well-oriented 2D</strong></li>
+                        <li>If 0.2 ≤ ratio &lt; 0.5 → Check strike consistency (Step 4)</li>
+                        <li>If ratio ≥ 0.5 → Go to Step 3</li>
+                    </ul>
+                </li>
+                <li><strong>Check Ellipticity</strong> (if skew or ratio are moderate)
+                    <ul>
+                        <li>If |\(\beta\)| &lt; 5° → <strong>Conclude: 1D</strong></li>
+                        <li>If 5° ≤ |\(\beta\)| &lt; 15° and constant → <strong>Conclude: 2D</strong>, proceed to Step 4</li>
+                        <li>If |\(\beta\)| ≥ 15° or highly variable → <strong>Conclude: 3D</strong></li>
+                    </ul>
+                </li>
+                <li><strong>Check Strike Angle</strong> (if 2D is indicated)
+                    <ul>
+                        <li>If strike std dev &lt; 10° → <strong>Conclude: Excellent 2D, strike = {mean}°</strong></li>
+                        <li>If 10° ≤ std dev &lt; 30° → <strong>Conclude: 2D with complexity</strong></li>
+                        <li>If std dev ≥ 30° → <strong>Re-evaluate as 3D</strong></li>
+                    </ul>
+                </li>
+                <li><strong>Check TE-TM Splitting</strong>
+                    <ul>
+                        <li>Consistent with dimensionality conclusions? → <strong>Confirm</strong></li>
+                        <li>Contradicts other indicators? → <strong>Check data quality</strong></li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <h3>7.2 Summary Classification Table</h3>
+
+        <table>
+            <tr>
+                <th>Dimensionality</th>
+                <th>Skew</th>
+                <th>Ratio</th>
+                <th>|\(\beta\)|</th>
+                <th>Strike σ</th>
+                <th>Recommended Action</th>
+            </tr>
+            <tr style="background-color: #d4edda;">
+                <td><strong>1D</strong></td>
+                <td>&lt; 0.2</td>
+                <td>&lt; 0.2</td>
+                <td>&lt; 5°</td>
+                <td>N/A</td>
+                <td>Use 1D inversion (Occam1D, Bostick)</td>
+            </tr>
+            <tr style="background-color: #d1ecf1;">
+                <td><strong>2D (excellent)</strong></td>
+                <td>&lt; 0.2</td>
+                <td>0.2-0.5</td>
+                <td>5-15°</td>
+                <td>&lt; 10°</td>
+                <td>2D inversion with rotation to strike</td>
+            </tr>
+            <tr style="background-color: #fff3cd;">
+                <td><strong>2D (moderate)</strong></td>
+                <td>0.2-0.4</td>
+                <td>0.2-0.5</td>
+                <td>5-15°</td>
+                <td>10-30°</td>
+                <td>2D inversion, careful strike analysis</td>
+            </tr>
+            <tr style="background-color: #f8d7da;">
+                <td><strong>3D</strong></td>
+                <td>&gt; 0.4</td>
+                <td>&gt; 0.5</td>
+                <td>&gt; 15°</td>
+                <td>&gt; 30°</td>
+                <td>3D inversion (ModEM, WSINV3DMT)</td>
+            </tr>
+        </table>
+
+        <h3>7.3 Frequency-Dependent Dimensionality</h3>
+
+        <div class="important">
+            <strong>Important Consideration:</strong> Dimensionality can vary with frequency (depth).
+            Common scenarios:
+            <ul>
+                <li><strong>Shallow 1D, Deep 2D:</strong> Sedimentary cover (1D) over basement fault (2D)</li>
+                <li><strong>Shallow 3D, Deep 1D:</strong> Near-surface heterogeneity over uniform basement</li>
+                <li><strong>Shallow 2D, Deep 3D:</strong> Linear mountain range over complex deep structure</li>
+            </ul>
+
+            <strong>Solution:</strong> If dimensionality changes with frequency, consider:
+            <ul>
+                <li>Separate inversions for different frequency ranges</li>
+                <li>3D inversion to capture full complexity</li>
+                <li>Hybrid approach: 1D/2D for specific depth ranges</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>8. Practical Workflow Example</h2>
+
+        <h3>8.1 Case Study: Analyzing Station mall67</h3>
+
+        <div class="plot-description">
+            <strong>Step 1: Run the Analysis</strong>
+            <div class="code-block">
+python analisis_dimensionalidad.py
+            </div>
+
+            <strong>Step 2: Examine Plot 1 (Skew)</strong>
+            <ul>
+                <li>Are most points below 0.2? → Suggests 1D/2D</li>
+                <li>Check frequency dependence: Does skew increase/decrease with period?</li>
+                <li>Note any outliers (possible data quality issues)</li>
+            </ul>
+
+            <strong>Step 3: Examine Plot 2 (Ratio)</strong>
+            <ul>
+                <li>How does ratio compare to skew?</li>
+                <li>High ratio with low skew → Misoriented 2D</li>
+                <li>Both high → True 3D</li>
+            </ul>
+
+            <strong>Step 4: Examine Plot 3 (Ellipticity)</strong>
+            <ul>
+                <li>Is \(\beta\) constant or variable with period?</li>
+                <li>Constant → 2D, Variable → 3D</li>
+            </ul>
+
+            <strong>Step 5: Examine Plot 4 (Strike)</strong>
+            <ul>
+                <li>Calculate mean and standard deviation</li>
+                <li>Compare with regional geology</li>
+                <li>Low std dev → Confirms 2D with this strike</li>
+            </ul>
+
+            <strong>Step 6: Cross-check with Plot 5 (Resistivity)</strong>
+            <ul>
+                <li>Is TE-TM splitting consistent with dimensionality?</li>
+                <li>Do curves look smooth (good quality)?</li>
+            </ul>
+
+            <strong>Step 7: Make Decision</strong>
+            <ul>
+                <li>Synthesize all indicators using decision tree</li>
+                <li>Choose modeling approach (1D/2D/3D)</li>
+                <li>If 2D, use calculated strike angle for rotation</li>
+            </ul>
+        </div>
+
+        <h3>8.2 Common Pitfalls and How to Avoid Them</h3>
+
+        <div class="warning">
+            <strong>Pitfall 1: Relying on a single indicator</strong>
+            <ul>
+                <li><strong>Problem:</strong> One indicator might be misleading due to noise or local effects</li>
+                <li><strong>Solution:</strong> Always use all four methods and look for consensus</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>Pitfall 2: Ignoring frequency dependence</strong>
+            <ul>
+                <li><strong>Problem:</strong> Average values may hide depth-varying dimensionality</li>
+                <li><strong>Solution:</strong> Examine plots carefully for trends with period</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>Pitfall 3: Forcing 2D when data shows 3D</strong>
+            <ul>
+                <li><strong>Problem:</strong> 2D inversion of 3D data produces artifacts</li>
+                <li><strong>Solution:</strong> If multiple indicators suggest 3D, accept it and use 3D modeling</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>Pitfall 4: Over-interpreting noisy data</strong>
+            <ul>
+                <li><strong>Problem:</strong> Bad data at a few frequencies can skew interpretations</li>
+                <li><strong>Solution:</strong> Apply data quality filters (as in the code) before analysis</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>9. Mathematical Summary</h2>
+
+        <h3>9.1 All Formulas at a Glance</h3>
+
+        <table style="font-size: 0.9em;">
+            <tr>
+                <th>Method</th>
+                <th>Formula</th>
+                <th>Threshold for 1D</th>
+                <th>Threshold for 3D</th>
+            </tr>
+            <tr>
+                <td>Swift Skew</td>
+                <td>\(\displaystyle \text{Skew} = \frac{|Z_{xx} + Z_{yy}|}{|Z_{xy} - Z_{yx}|}\)</td>
+                <td>&lt; 0.2</td>
+                <td>&gt; 0.4</td>
+            </tr>
+            <tr>
+                <td>Diagonal Ratio</td>
+                <td>\(\displaystyle \text{Ratio} = \frac{\sqrt{|Z_{xx}|^2 + |Z_{yy}|^2}}{\sqrt{|Z_{xy}|^2 + |Z_{yx}|^2}}\)</td>
+                <td>&lt; 0.2</td>
+                <td>&gt; 0.5</td>
+            </tr>
+            <tr>
+                <td>Ellipticity</td>
+                <td>\(\displaystyle \beta = \frac{1}{2}(\phi_{xy} - \phi_{yx})\)</td>
+                <td>&lt; 5°</td>
+                <td>&gt; 15°</td>
+            </tr>
+            <tr>
+                <td>Strike Angle</td>
+                <td>\(\displaystyle \theta = \frac{1}{2} \arctan\left(\frac{2\text{Re}(Z_{xy} + Z_{yx})}{|Z_{xx}|^2 - |Z_{yy}|^2}\right)\)</td>
+                <td>N/A</td>
+                <td>σ &gt; 30°</td>
+            </tr>
+        </table>
+
+        <h3>9.2 Symbol Definitions</h3>
+
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Description</th>
+                <th>Units</th>
+            </tr>
+            <tr>
+                <td>\(Z_{ij}\)</td>
+                <td>Complex impedance tensor element</td>
+                <td>[mV/km]/[nT]</td>
+            </tr>
+            <tr>
+                <td>\(\phi_{ij}\)</td>
+                <td>Phase of impedance element \(Z_{ij}\)</td>
+                <td>degrees</td>
+            </tr>
+            <tr>
+                <td>\(\beta\)</td>
+                <td>Phase tensor ellipticity</td>
+                <td>degrees</td>
+            </tr>
+            <tr>
+                <td>\(\theta\)</td>
+                <td>Geoelectric strike angle</td>
+                <td>degrees [0°, 90°]</td>
+            </tr>
+            <tr>
+                <td>\(\rho_{xy}, \rho_{yx}\)</td>
+                <td>TE and TM mode apparent resistivities</td>
+                <td>Ω·m</td>
+            </tr>
+            <tr>
+                <td>σ</td>
+                <td>Standard deviation of strike angle</td>
+                <td>degrees</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>10. References</h2>
+
+        <div class="reference">
+            <strong>Swift, C. M. (1967).</strong> A magnetotelluric investigation of an electrical
+            conductivity anomaly in the southwestern United States. PhD thesis, MIT.
+        </div>
+
+        <div class="reference">
+            <strong>Bahr, K. (1991).</strong> Geological noise in magnetotelluric data: a classification
+            of distortion types. Physics of the Earth and Planetary Interiors, 66(1-2), 24-38.
+        </div>
+
+        <div class="reference">
+            <strong>Caldwell, T. G., Bibby, H. M., & Brown, C. (2004).</strong> The magnetotelluric phase
+            tensor. Geophysical Journal International, 158(2), 457-469.
+        </div>
+
+        <div class="reference">
+            <strong>Weaver, J. T., Agarwal, A. K., & Lilley, F. E. M. (2000).</strong> Characterization of
+            the magnetotelluric tensor in terms of its invariants. Geophysical Journal International, 141(2), 321-336.
+        </div>
+
+        <div class="reference">
+            <strong>Martí, A., Queralt, P., & Ledo, J. (2009).</strong> WALDIM: A code for the dimensionality
+            analysis of magnetotelluric data using the rotational invariants of the magnetotelluric tensor.
+            Computers & Geosciences, 35(12), 2295-2303.
+        </div>
+
+        <div class="reference">
+            <strong>Booker, J. R. (2014).</strong> The magnetotelluric phase tensor: A critical review.
+            Surveys in Geophysics, 35(1), 7-40.
+        </div>
+    </div>
+
+    <div class="section" style="background-color: #e8f4f8; border-left: 4px solid #3498db;">
+        <h2>About This Documentation</h2>
+        <p><strong>Author:</strong> Generated for Magnetotelluric Dimensionality Analysis</p>
+        <p><strong>Date:</strong> February 2026</p>
+        <p><strong>Code:</strong> Python implementation using MTpy, NumPy, and Matplotlib</p>
+        <p><strong>Purpose:</strong> Educational documentation for TFG (Final Degree Project)</p>
+        <p><strong>Source Code:</strong> <code>analisis_dimensionalidad.py</code></p>
+
+        <h3>How to Use This Document</h3>
+        <ol>
+            <li>Read the introduction to understand dimensionality concepts</li>
+            <li>Study each method (Sections 2-5) to understand the mathematics</li>
+            <li>Learn how to interpret each plot and extract information</li>
+            <li>Use the decision framework (Section 7) to classify your data</li>
+            <li>Follow the practical workflow (Section 8) when analyzing new sites</li>
+        </ol>
+    </div>
+
+</body>
+</html>

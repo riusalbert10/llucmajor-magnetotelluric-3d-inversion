@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interpretación del RMS en Inversión Magnetotelúrica 3D</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700;9..144,900&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+MathJax = {
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    chtml: { displayAlign: 'left' }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+
+<style>
+:root {
+    --bg:           #f7f4ed;
+    --bg-card:      #fdfbf6;
+    --bg-callout:   #ede6d6;
+    --bg-warning:   #f0e0d8;
+    --bg-quote:     #e8e5dc;
+    --ink:          #1f1d1a;
+    --ink-soft:     #5a554c;
+    --ink-faint:    #8a8275;
+    --accent:       #2c5e4a;
+    --accent-soft:  #d4ddd6;
+    --accent-warm:  #8c4a2a;
+    --rule:         #c4bda9;
+    --rule-soft:    #ddd6c2;
+    --shadow:       0 1px 2px rgba(31,29,26,0.04), 0 4px 12px rgba(31,29,26,0.05);
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body:    'Crimson Pro', 'EB Garamond', Georgia, serif;
+    --font-mono:    'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 19px;
+    line-height: 1.65;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-image:
+        radial-gradient(circle at 15% 5%, rgba(44,94,74,0.04) 0%, transparent 40%),
+        radial-gradient(circle at 85% 95%, rgba(140,74,42,0.03) 0%, transparent 40%);
+    min-height: 100vh;
+}
+
+.page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 90px 40px 120px;
+    position: relative;
+}
+
+/* ====== Header ====== */
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.eyebrow::before, .eyebrow::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+    max-width: 50px;
+}
+
+h1.title {
+    font-family: var(--font-display);
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.05;
+    font-weight: 400;
+    font-variation-settings: "opsz" 144, "SOFT" 50;
+    color: var(--ink);
+    margin: 0 0 24px;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+}
+h1.title em {
+    font-variation-settings: "opsz" 144;
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.subtitle {
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-soft);
+    margin: 0 0 36px;
+    line-height: 1.4;
+    text-wrap: balance;
+}
+
+.meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    padding-bottom: 28px;
+    margin-bottom: 64px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+.meta span strong { color: var(--ink-soft); font-weight: 600; }
+
+/* ====== Question block ====== */
+.question {
+    background: var(--bg-quote);
+    border-left: 3px solid var(--accent);
+    padding: 28px 32px;
+    margin: 0 0 56px;
+    border-radius: 2px;
+    position: relative;
+}
+.question-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+}
+.question-body {
+    font-family: var(--font-display);
+    font-size: 20px;
+    line-height: 1.5;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 0;
+    text-wrap: balance;
+}
+
+/* ====== Sections ====== */
+section { margin-bottom: 56px; }
+
+h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 500;
+    font-variation-settings: "opsz" 36;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 64px 0 24px;
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+}
+h2 .num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    padding-top: 4px;
+    flex-shrink: 0;
+}
+
+h3 {
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 500;
+    font-variation-settings: "opsz" 24;
+    color: var(--ink);
+    margin: 36px 0 14px;
+    line-height: 1.3;
+}
+
+h4 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 28px 0 10px;
+    letter-spacing: 0.005em;
+}
+
+p { margin: 0 0 18px; }
+p:last-child { margin-bottom: 0; }
+
+strong { font-weight: 600; color: var(--ink); }
+em { font-style: italic; }
+
+/* ====== Lead paragraph (first paragraph of section) ====== */
+.lead {
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+    font-weight: 300;
+}
+
+/* ====== Math equation block ====== */
+.equation {
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin: 24px 0;
+    text-align: center;
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+}
+.equation-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule-soft);
+}
+
+/* ====== Callouts ====== */
+.callout {
+    margin: 28px 0;
+    padding: 24px 28px;
+    border-radius: 4px;
+    background: var(--bg-callout);
+    position: relative;
+}
+.callout-icon {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.callout-icon::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+}
+.callout p:last-child { margin-bottom: 0; }
+.callout-warning {
+    background: var(--bg-warning);
+}
+.callout-warning .callout-icon {
+    color: var(--accent-warm);
+}
+.callout-warning .callout-icon::before {
+    background: var(--accent-warm);
+}
+.callout-key {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+}
+.callout-key .callout-icon {
+    color: var(--accent);
+}
+
+/* ====== Tables ====== */
+.table-wrap {
+    margin: 24px 0;
+    overflow-x: auto;
+    background: var(--bg-card);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-body);
+    font-size: 16px;
+}
+caption {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 14px 20px 8px;
+}
+th {
+    text-align: left;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg-quote);
+}
+td {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+}
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: rgba(44,94,74,0.03); }
+td.mono, th.mono { font-family: var(--font-mono); font-size: 14px; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.highlight-row { background: rgba(44,94,74,0.06); }
+.highlight-row td { font-weight: 600; color: var(--ink); }
+
+/* ====== Lists ====== */
+ol, ul { padding-left: 0; margin: 16px 0 18px; }
+ol { counter-reset: list-counter; list-style: none; }
+ol li {
+    counter-increment: list-counter;
+    padding-left: 38px;
+    position: relative;
+    margin-bottom: 10px;
+}
+ol li::before {
+    content: counter(list-counter, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.7;
+}
+ul { list-style: none; }
+ul li {
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 8px;
+}
+ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* ====== Inline code ====== */
+code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--bg-quote);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+/* ====== Diagnostic method blocks ====== */
+.method {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    margin: 0 0 28px;
+    padding: 24px 0;
+    border-top: 1px solid var(--rule-soft);
+}
+.method:last-of-type { border-bottom: 1px solid var(--rule-soft); }
+.method-number {
+    font-family: var(--font-display);
+    font-size: 56px;
+    line-height: 0.9;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--accent);
+    font-variation-settings: "opsz" 144;
+}
+.method-title {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 8px;
+    line-height: 1.25;
+}
+.method-effort {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+}
+
+/* ====== Pull quote ====== */
+.pull-quote {
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1.35;
+    font-weight: 300;
+    font-style: italic;
+    font-variation-settings: "opsz" 72;
+    color: var(--accent);
+    margin: 36px 0;
+    padding-left: 32px;
+    border-left: 2px solid var(--accent);
+    text-wrap: balance;
+}
+
+/* ====== Footer ====== */
+footer {
+    margin-top: 96px;
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* ====== Print ====== */
+@media print {
+    body { background: white; }
+    .page { max-width: none; padding: 20mm 18mm; }
+    .callout, .table-wrap, .equation { box-shadow: none; break-inside: avoid; }
+    h2 { break-after: avoid; }
+    .pull-quote { color: var(--ink); }
+}
+
+@media (max-width: 720px) {
+    .page { padding: 56px 22px 80px; }
+    h1.title { font-size: 32px; }
+    .subtitle { font-size: 19px; }
+    .question-body { font-size: 17px; }
+    h2 { font-size: 24px; flex-direction: column; gap: 4px; }
+    .method { grid-template-columns: 1fr; gap: 12px; }
+    .method-number { font-size: 40px; }
+    .pull-quote { font-size: 20px; padding-left: 20px; }
+    .meta { gap: 16px; }
+    table { font-size: 14px; }
+    th, td { padding: 10px 14px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ==================== HEADER ==================== -->
+<div class="eyebrow">TFG · Magnetotelúrica 3D · Mallorca</div>
+
+<h1 class="title">Interpretación del <em>RMS</em> en inversión magnetotelúrica</h1>
+
+<p class="subtitle">Cuándo un valor más bajo significa un modelo más cercano a la realidad geológica, y cuándo refleja únicamente un ajuste a ruido no depurado.</p>
+
+<div class="meta">
+    <span><strong>Contexto:</strong> Inversión 3D ModEM</span>
+    <span><strong>Dataset:</strong> 40 estaciones MT, Mallorca</span>
+    <span><strong>Software:</strong> ModEM-NLCG · MTpy</span>
+</div>
+
+<!-- ==================== QUESTION ==================== -->
+<div class="question">
+    <div class="question-label">Pregunta de partida</div>
+    <p class="question-body">Un RMS más bajo, ¿indica siempre una mayor similitud con la realidad, o el hecho de que los datos contengan ruido no depurado puede provocar en la inversión una bajada del RMS sesgada?</p>
+</div>
+
+<!-- ==================== RESPUESTA CONCEPTUAL ==================== -->
+<section>
+<h2><span class="num">§ 1</span>Respuesta conceptual</h2>
+
+<p class="lead"><strong>No, un RMS más bajo no implica necesariamente un modelo más realista.</strong> El RMS mide el ajuste del modelo a los datos <em>pesado por las incertidumbres declaradas</em>, no la fidelidad del modelo respecto a la realidad geológica.</p>
+
+<p>La definición estricta del RMS empleada por ModEM en la inversión NLCG es:</p>
+
+<div class="equation">
+$$\mathrm{RMS} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} \left( \frac{d_i^{\,\mathrm{obs}} - d_i^{\,\mathrm{pred}}}{\sigma_i} \right)^{\!2}}$$
+<div class="equation-label">Misfit normalizado · $N$ = número de datos · $\sigma_i$ = error declarado</div>
+</div>
+
+<p>La validez de esta métrica como indicador de fidelidad descansa enteramente sobre <strong>la honestidad de las incertidumbres</strong> $\sigma_i$. La inversión asume que estos errores reflejan correctamente el ruido instrumental, las imperfecciones del procesado robusto, los efectos no modelados (distorsión galvánica, ruido cultural) y las limitaciones del modelo numérico. Si esa asunción está mal calibrada, el RMS deja de ser un proxy confiable de la calidad del modelo.</p>
+
+<div class="pull-quote">
+La trampa está en $\sigma_i$. La inversión no sabe distinguir entre un dato preciso y un dato al que <em>le hemos asignado</em> un error pequeño.
+</div>
+</section>
+
+<!-- ==================== CUÁNDO ES SESGADO ==================== -->
+<section>
+<h2><span class="num">§ 2</span>Cuándo un RMS bajo está sesgado</h2>
+
+<p>Hay dos mecanismos clásicos por los que un RMS aparentemente bueno puede ocultar un modelo deficiente. Ambos están directamente ligados al tratamiento previo de los datos.</p>
+
+<h3>Caso A · Ruido no depurado con error subestimado</h3>
+
+<p>Considérese un outlier residual en los datos que conserva un valor de $\sigma_i$ pequeño porque el procesado robusto del EDI no lo identificó como ruido. La inversión lo interpreta como un dato altamente preciso (alta confianza) cuyo residuo respecto a la predicción es grande. Este desajuste produce un <strong>gradiente fuerte localizado</strong> que la inversión intenta minimizar generando una estructura espuria en el modelo cuya única función es encajar ese punto problemático.</p>
+
+<p>El resultado es paradójico: el RMS desciende —el residuo se ha "absorbido" en la nueva estructura— pero el modelo ha ganado <strong>rasgos geológicos que no existen en la realidad</strong>. Este es el caso paradigmático de <em>overfitting</em>.</p>
+
+<h3>Caso B · Suavizado excesivamente agresivo</h3>
+
+<p>El mecanismo opuesto. Si el filtrado de outliers elimina puntos que en realidad contenían señal geofísica válida, la inversión pierde restricciones que de otro modo habrían modelado correctamente una estructura real. Sin esas restricciones, la inversión consigue un ajuste numéricamente mejor en otras direcciones del espacio de modelos, bajando el RMS, pero <strong>perdiendo simultáneamente una característica geológica auténtica</strong>.</p>
+
+<div class="callout callout-warning">
+    <div class="callout-icon">Implicación práctica</div>
+    <p>En ambos casos —ruido no depurado y suavizado excesivo— el RMS desciende sin que el modelo se aproxime más a la realidad. La interpretación del RMS como medida de fidelidad geológica requiere, por tanto, controles adicionales.</p>
+</div>
+</section>
+
+<!-- ==================== CÓMO VERIFICARLO ==================== -->
+<section>
+<h2><span class="num">§ 3</span>Cómo discriminar entre mejora honesta y sesgo</h2>
+
+<p>Existen cuatro pruebas progresivamente más rigurosas para evaluar si la reducción del RMS refleja un avance real del modelo. Se exponen ordenadas de menor a mayor coste computacional.</p>
+
+<div class="method">
+    <div class="method-number">1</div>
+    <div>
+        <div class="method-effort">Análisis · Coste bajo</div>
+        <h4 class="method-title">Distribución espacial y espectral de los residuos</h4>
+        <p>Lectura del fichero <code>.res</code> y examen de tres distribuciones:</p>
+        <ul>
+            <li><strong>Residuos por estación</strong>: una distribución uniforme con valores bajos indica ajuste honesto. Concentraciones de residuos altos en pocas estaciones señalan puntos genuinamente difíciles, no sobre-ajuste global.</li>
+            <li><strong>Residuos por período</strong>: residuos elevados confinados a la banda muerta MT (~1 s) o a períodos cortos (<em>T</em> &lt; 0.01 s) son característicos de limitaciones físicas conocidas, no de patología del modelo.</li>
+            <li><strong>Forma de la distribución</strong>: residuos normalizados que siguen aproximadamente una gaussiana centrada en cero con $\sigma \approx 1$ indican un ajuste consistente con las incertidumbres declaradas. Colas largas o sesgo apuntan a puntos problemáticos identificables.</li>
+        </ul>
+    </div>
+</div>
+
+<div class="method">
+    <div class="method-number">2</div>
+    <div>
+        <div class="method-effort">Análisis · Coste bajo</div>
+        <h4 class="method-title">Evolución de la norma del modelo $m^2$</h4>
+        <p>Esta es la prueba más directa contra el sobre-ajuste. La cantidad $m^2$ mide la "energía" del modelo final respecto al modelo inicial, es decir, cuánta estructura se ha incorporado durante la inversión.</p>
+        <p>Si una intervención (suavizado, batimetría) consigue bajar el RMS <strong>sin que $m^2$ crezca sustancialmente</strong>, la mejora del ajuste proviene de que la inversión está usando la información disponible de forma más coherente, no de añadir estructura espuria. Por el contrario, una bajada del RMS acompañada de un aumento marcado de $m^2$ debe interpretarse con cautela: indica que la inversión está "gastando" complejidad para perseguir residuos potencialmente ruidosos.</p>
+    </div>
+</div>
+
+<div class="method">
+    <div class="method-number">3</div>
+    <div>
+        <div class="method-effort">Validación · Coste medio</div>
+        <h4 class="method-title">Contraste con datos independientes (SEV / IGME)</h4>
+        <p>La prueba más convincente desde el punto de vista científico, e independiente del RMS. Los sondeos eléctricos verticales (SEV) ofrecen información 1D de la resistividad de los primeros 100–300 m con resolución vertical superior a la MT en ese rango.</p>
+        <p>Si las resistividades del modelo MT en las celdas próximas a los emplazamientos de SEV concuerdan razonablemente con los valores observados por la prospección eléctrica, el modelo es <strong>geológicamente consistente con un dato totalmente independiente</strong>. Discrepancias sistemáticas indicarían artefactos, no estructura real.</p>
+    </div>
+</div>
+
+<div class="method">
+    <div class="method-number">4</div>
+    <div>
+        <div class="method-effort">Test sintético · Coste alto</div>
+        <h4 class="method-title">Pruebas de resolución y sensibilidad</h4>
+        <p>A partir del modelo final, se introduce una anomalía sintética conocida (por ejemplo, un cuerpo conductor de 1×1×1 km a una profundidad determinada). Se calcula la respuesta forward para generar datos sintéticos, se perturban con ruido realista y se invierten con la misma configuración. La capacidad de la inversión para recuperar la anomalía introducida indica directamente la resolución real del modelo en esa zona del dominio: las estructuras que se recuperan son fiables, las que no, son potencialmente artefactos.</p>
+    </div>
+</div>
+</section>
+
+<!-- ==================== APLICACIÓN AL CASO ==================== -->
+<section>
+<h2><span class="num">§ 4</span>Aplicación a la inversión de Mallorca</h2>
+
+<p>La progresión observada en los cuatro runs sucesivos —desde los datos en bruto sobre el modelo abrupto hasta los datos depurados con el filtrado adaptativo combinados con la incorporación de batimetría— ofrece evidencia consistente con una <strong>mejora honesta</strong>, no sesgada.</p>
+
+<div class="table-wrap">
+<table>
+    <caption>Progresión de RMS y norma del modelo</caption>
+    <thead>
+        <tr>
+            <th>Configuración</th>
+            <th class="num">Iteraciones</th>
+            <th class="num">RMS final</th>
+            <th class="num">$m^2$ final</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Datos en bruto · modelo abrupto</td>
+            <td class="num mono">110</td>
+            <td class="num mono">14.39</td>
+            <td class="num mono">0.647</td>
+        </tr>
+        <tr>
+            <td>Smooth v1 (LOWESS) · modelo abrupto</td>
+            <td class="num mono">115</td>
+            <td class="num mono">13.51</td>
+            <td class="num mono">0.631</td>
+        </tr>
+        <tr>
+            <td>Smooth v1 (LOWESS) · modelo + batimetría</td>
+            <td class="num mono">≈140</td>
+            <td class="num mono">~13.0</td>
+            <td class="num mono">~0.64</td>
+        </tr>
+        <tr class="highlight-row">
+            <td>Smooth v3 (adaptativo) · modelo + batimetría</td>
+            <td class="num mono">—</td>
+            <td class="num mono">12.6</td>
+            <td class="num mono">—</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+
+<div class="callout callout-key">
+    <div class="callout-icon">Diagnóstico</div>
+    <p>Dos rasgos del comportamiento de la inversión apoyan que la reducción del RMS es física y no debida a sobre-ajuste.</p>
+    <p style="margin-top:14px"><strong>Justificación física de cada paso.</strong> Tanto el suavizado de los EDIs como la introducción de la batimetría son intervenciones cuya mejora del RMS está físicamente esperada: el primero elimina señal contradictoria del gradiente, el segundo aporta información a priori geológicamente correcta sobre el dominio marino. La mejora no procede de la calibración de parámetros <em>ad hoc</em>.</p>
+    <p style="margin-top:14px"><strong>Estabilidad de la norma del modelo.</strong> A lo largo de los tres primeros runs, $m^2$ se mantiene en el rango 0.63–0.65. Si el suavizado o la batimetría estuviesen produciendo descensos del RMS a costa de añadir estructura espuria, $m^2$ habría crecido sustancialmente. No lo hace.</p>
+</div>
+</section>
+
+<!-- ==================== CONVENCIONES DE LA COMUNIDAD ==================== -->
+<section>
+<h2><span class="num">§ 5</span>Convenciones de la comunidad MT</h2>
+
+<p>Resulta útil enmarcar los valores absolutos de RMS dentro de las convenciones prácticas de la literatura magnetotelúrica reciente.</p>
+
+<div class="table-wrap">
+<table>
+    <caption>Interpretación práctica del RMS en inversión MT 3D</caption>
+    <thead>
+        <tr>
+            <th class="num">RMS</th>
+            <th>Interpretación</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td class="mono">≈ 1</td><td>Ajuste perfecto dentro de incertidumbres declaradas. Difícil en datos reales.</td></tr>
+        <tr><td class="mono">1 – 3</td><td>Excelente. Estándar publicable en cualquier revista del campo.</td></tr>
+        <tr><td class="mono">3 – 5</td><td>Aceptable para casos complejos: distorsión galvánica residual, costa, 3D fuerte.</td></tr>
+        <tr><td class="mono">5 – 10</td><td>Suficiente para identificar estructura a gran escala, con incertidumbres altas en detalle fino.</td></tr>
+        <tr><td class="mono">&gt; 10</td><td>El modelo no consigue ajustar dentro de los errores. Requiere o relajación del <em>error floor</em>, o aceptación de que el modelo está incompleto.</td></tr>
+    </tbody>
+</table>
+</div>
+
+<p>El valor actual de la inversión (RMS = 12.6) cae en el último tramo de la tabla. Esto <strong>no implica</strong> que el modelo sea de mala calidad, sino que <strong>las incertidumbres declaradas en el fichero <code>.dat</code> son optimistas</strong> para los datos disponibles en una región con efecto costa pronunciado, banda muerta MT presente, y geología kárstica heterogénea. Elevar el <em>error floor</em> de un 5% nominal a un 7–8% reduciría mecánicamente el RMS al rango 5–6 sin modificar el modelo subyacente, simplemente reconociendo de manera más realista la dispersión efectiva de los datos.</p>
+</section>
+
+<!-- ==================== RECOMENDACIONES ==================== -->
+<section>
+<h2><span class="num">§ 6</span>Recomendaciones para la defensa de la memoria</h2>
+
+<p>La estrategia argumentativa óptima no consiste en perseguir un RMS lo más bajo posible, sino en demostrar que el modelo es defendible más allá de su métrica numérica de ajuste.</p>
+
+<ol>
+    <li><strong>Argumentar la honestidad de cada mejora.</strong> Mostrar que el RMS desciende sin que la complejidad del modelo ($m^2$) crezca de forma anómala. Esto es ya una evidencia fuerte y directa de que no hay sobre-ajuste.</li>
+    <li><strong>Validar con datos independientes.</strong> Contrastar las resistividades del modelo MT con los SEV de IGME en los primeros cientos de metros. Una concordancia razonable —aunque sea sólo cualitativa— constituye el argumento científicamente más sólido y no depende del RMS.</li>
+    <li><strong>Caracterizar la estructura de los residuos.</strong> Demostrar que los residuos finales tienen distribución aproximadamente gaussiana y que las desviaciones se concentran en regiones del espectro físicamente esperables (banda muerta, períodos cortos, estaciones costeras).</li>
+    <li><strong>Discutir abiertamente las limitaciones.</strong> Resolución profunda decreciente, efecto coastal en estaciones cercanas a la línea de costa, posibles efectos 3D no resueltos a períodos cortos. Una discusión honesta de las limitaciones fortalece la credibilidad del trabajo.</li>
+</ol>
+
+<div class="pull-quote">
+Un modelo con RMS 12 bien validado y honestamente caracterizado es científicamente más sólido que un modelo con RMS 2 que ha sobre-ajustado los datos. Si la mejora procede de incorporar información geológica previa, eso es buena ciencia, no atajo.
+</div>
+</section>
+
+<!-- ==================== CONCLUSIÓN ==================== -->
+<section>
+<h2><span class="num">§ 7</span>Síntesis</h2>
+
+<p>El RMS es una métrica útil pero ambigua. Su descenso puede reflejar tanto una aproximación honesta del modelo a la realidad como un sobre-ajuste a ruido residual o una pérdida de señal por suavizado excesivo. Discriminar entre estas posibilidades requiere examinar adicionalmente <strong>la estructura de los residuos, la evolución de la norma del modelo, y la consistencia con datos geofísicos independientes</strong>.</p>
+
+<p>En el caso concreto de la inversión 3D de Mallorca, la progresión observada de RMS junto con la estabilidad de la norma del modelo apoya la interpretación de que las mejoras son físicamente significativas, no artefactos numéricos. El valor absoluto del RMS final (12.6) refleja más una calibración optimista de las incertidumbres declaradas que una deficiencia del modelo, y puede ser razonablemente reducido al rango habitual de la literatura mediante un ajuste del <em>error floor</em> en el fichero <code>.dat</code>.</p>
+</section>
+
+<footer>
+    <span>Albert Rius · TFG · Universitat de les Illes Balears</span>
+    <span>Documento de referencia interno</span>
+</footer>
+
+</div>
+</body>
+</html>

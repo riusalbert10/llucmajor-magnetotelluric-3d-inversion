@@ -1,0 +1,887 @@
+% =====================================================================
+%  Defensa del TFG — Albert Rius Saborit (UIB, Grau de Física, 2025-2026)
+%  "Inversió geofísica de dades magnetotel·lúriques del reservori
+%   geotèrmic de Llucmajor"
+%
+%  Compilar amb XeLaTeX (o LuaLaTeX), dues passades:
+%     xelatex presentacio.tex ; xelatex presentacio.tex
+%  Versió amb notes per a pympress: compilar presentacio_notes.tex
+% =====================================================================
+\documentclass[10pt,aspectratio=169,t]{beamer}
+
+\ifdefined\ambnotes
+  \usepackage{pgfpages}
+  \setbeameroption{show notes on second screen=right}
+\fi
+
+\usetheme{resistivitat}
+\usepackage{appendixnumberbeamer}
+\usepackage{tabularx}
+
+\hypersetup{pdftitle={Inversió geofísica de dades magnetotel·lúriques del reservori geotèrmic de Llucmajor},
+            pdfauthor={Albert Rius Saborit}}
+
+% ---------------------------------------------------------------------
+\title[Inversió MT 3D del reservori de Llucmajor]{Inversió geofísica de dades\texorpdfstring{\\}{ }magnetotel·lúriques del reservori\texorpdfstring{\\}{ }geotèrmic de Llucmajor}
+\author[Albert Rius Saborit]{Albert Rius Saborit}
+\institute{Facultat de Ciències \,·\, Universitat de les Illes Balears}
+\tutora{Tutora: Dra. Anna Martí Castells}
+\kicker{TREBALL DE FI DE GRAU \,·\, GRAU DE FÍSICA \,·\, 2025–2026}
+\titlegraphic{\includegraphics[height=0.95cm]{figures/uib_logo.png}}
+\date{}
+\renewcommand{\rsseccions}{Introducció,Metodologia,Resultats,Conclusions}
+
+% Estil dels nodes del flux de treball
+\tikzset{
+  pas/.style={draw=hairline, fill=white, rounded corners=1.6pt, line width=0.4pt,
+              text width=#1, align=left, inner sep=3.5pt, font=\scriptsize, minimum height=1.15cm},
+  pas/.default=1.78cm,
+  fletxa/.style={-{Stealth[length=4pt,width=4pt]}, muted, line width=0.6pt}
+}
+\newcommand{\nompas}[1]{{\medium\color{ink}#1}\\[1pt]}
+
+\begin{document}
+
+% =====================================================================
+%  PORTADA
+% =====================================================================
+{\setbeamertemplate{background}{\rsportadafons}
+\begin{frame}[plain,noframenumbering]
+\note{Bon dia. Em dic Albert Rius i us presentaré el meu Treball de Fi de Grau, tutoritzat per la Dra.\ Anna Martí.
+L'objectiu ha estat obtenir un model tridimensional de la resistivitat elèctrica del subsòl de Llucmajor
+a partir de dades magnetotel·lúriques, per entendre l'origen d'una anomalia geotèrmica.
+(El dibuix de la portada és el model conceptual que veurem de seguida.)}
+\end{frame}}
+
+% =====================================================================
+%  GUIÓ
+% =====================================================================
+\begin{frame}{Guió de la presentació}
+\vspace{0.35cm}
+\centering
+\begin{tikzpicture}
+  \foreach \n/\c/\t/\d in {
+      1/rho3/Introducció/{L'anomalia geotèrmica de Llucmajor i els objectius del treball},
+      2/rho4/Metodologia/{Mètode MT, dades, model inicial i inversió 3D amb ModEM},
+      3/rho5/Resultats/{Convergència, elecció del model i interpretació geològica},
+      4/rho6/Conclusions/{Què aporta el model 3D i línies de futur}}{
+    \begin{scope}[shift={({(\n-1)*3.6},0)}]
+      \fill[white, draw=hairline, line width=0.4pt, rounded corners=1.6pt] (0,0) rectangle (3.35,3.55);
+      \fill[\c] (0,3.55) rectangle (3.35,3.49);
+      \node[anchor=north west, inner sep=0, font=\fontsize{30}{30}\selectfont\medium, text=\c!85!black] at (0.3,3.2) {0\n};
+      \node[anchor=north west, inner sep=0, font=\normalsize\medium, text=ink] at (0.3,2.0) {\t};
+      \node[anchor=north west, inner sep=0, font=\scriptsize, text=muted, text width=2.8cm, align=left] at (0.3,1.45) {\d};
+    \end{scope}
+  }
+  \shade[shading=rhobar] (0,-0.55) rectangle (14.15,-0.5);
+  \foreach \n in {1,...,4}{
+    \fill[ink] ({(\n-1)*3.6+1.675},-0.47) -- ++(-0.085,0.14) -- ++(0.17,0) -- cycle;
+  }
+\end{tikzpicture}
+\note{L'exposició té quatre parts: primer el context geològic i la pregunta que motiva el treball;
+després la metodologia, des de la física del mètode fins a la inversió a ModEM;
+a continuació els resultats i com he triat el model final; i per acabar, les conclusions.}
+\end{frame}
+
+% =====================================================================
+\section{Introducció}
+% =====================================================================
+
+\begin{frame}{Una anomalia geotèrmica sense vulcanisme}
+\begin{columns}[T,onlytextwidth]
+  \column{0.56\textwidth}
+    \figura{figures/fig01_mapa_estacions.png}
+    \peu{Zona d'estudi al sud de Llucmajor (Mallorca): estacions AMT ($\bullet$) i MT ($+$). Arango (2005).}
+  \column{0.41\textwidth}
+    \xifra[rho7]{150\,m}{Profunditat dels pous d'explotació de l'aqüífer lliure (ús agrícola)}
+    \xifra[rho2]{$\approx 50\,$°C}{Temperatura de l'aigua en pous alineats N--S i E--W (IGME, 2003)}
+    \xifra[accent]{$\geq 700\,$m}{Origen mínim de l'aigua amb un gradient de $46 \pm 8$\,mK/m}
+    {\footnotesize Mallorca no és volcànica $\Rightarrow$ l'aigua calenta ha d'\textbf{ascendir} des de nivells profunds.\par}
+\end{columns}
+\note{La zona d'estudi és l'aqüífer lliure de Llucmajor, del qual s'extreu aigua per a ús agrícola amb pous d'uns 150 metres.
+En un conjunt d'aquests pous es van mesurar temperatures de fins a uns 50 graus.
+Amb el gradient tèrmic de la zona, 46 més menys 8 milikelvin per metre, aquesta aigua hauria de venir com a mínim de 700 metres,
+molt per sota dels pous. Com que a Mallorca no hi ha vulcanisme, l'única explicació és un moviment vertical d'aigua profunda.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Hipòtesi: un aqüitard amb discontinuïtats}
+\begin{columns}[T,onlytextwidth]
+  \column{0.57\textwidth}
+    \vspace{0.1cm}
+    \begin{tikzpicture}[x=0.5cm, y=1.95cm]
+      \rstall
+      \foreach \x in {2.6,6.2}{
+        \draw[ink!70, line width=0.8pt] (\x,2.1) -- (\x,1.66);
+        \fill[ink!70] (\x-0.16,2.1) rectangle (\x+0.16,2.17);}
+      \draw[rho2, line width=0.9pt] (11.3,2.1) -- (11.3,1.66);
+      \fill[rho2] (11.14,2.1) rectangle (11.46,2.17);
+      \node[anchor=south, font=\scriptsize\medium, text=rho2!85!black, inner sep=2pt] at (11.3,2.17) {$\approx 50\,$°C};
+      \node[anchor=south, font=\scriptsize, text=muted, inner sep=2pt] at (4.4,2.17) {pous};
+      \node[anchor=west, font=\scriptsize\medium, text=rho7!70!black] at (0.15,1.82) {Aqüífer lliure};
+      \node[anchor=west, font=\scriptsize\medium, text=rho2!75!black] at (0.15,1.22) {Aqüitard (margues)};
+      \node[anchor=west, font=\scriptsize\medium, text=rho5!45!black] at (0.15,0.45) {Aqüífer confinat};
+      \node[font=\scriptsize\medium, text=rho2!85!black, fill=white, fill opacity=0.8, text opacity=1,
+            rounded corners=1pt, inner sep=1.5pt] at (12.9,0.55) {discontinuïtat?};
+      \draw[muted, line width=0.4pt] (15.2,2.1) -- (15.4,2.1) -- (15.4,1.5) -- (15.2,1.5);
+      \node[anchor=east, font=\tiny, text=muted] at (15.2,1.8) {$\sim$150\,m};
+    \end{tikzpicture}
+    \peu{Model conceptual proposat per l'IGME (2003). Esquema sense escala.}
+  \column{0.40\textwidth}
+    \begin{itemize}\footnotesize
+      \item Dos aqüífers superposats, \textbf{lliure} i \textbf{confinat}, separats per un aqüitard.
+      \item L'aigua calenta de l'aqüífer confinat pujaria per una \alert{discontinuïtat de l'aqüitard}.
+      \item Cap evidència superficial (cobertura quaternària).
+      \item SEV (IGME, 1985) i sísmica (Benedicto et al., 1993): penetració o resolució insuficients.
+    \end{itemize}
+    \vspace{0.15cm}
+    \begin{nota}[accent2]
+      \footnotesize\textbf{Magnetotel·lúrica:} sensible als contrastos de resistivitat del primer quilòmetre.
+    \end{nota}
+\end{columns}
+\note{L'IGME va proposar un model conceptual amb dos aqüífers superposats: un de lliure a la part superior i un de confinat a la inferior,
+separats per un aqüitard. Perquè l'aigua calenta arribi als pous, l'aqüitard hauria de tenir alguna discontinuïtat.
+El problema és que a superfície no se'n veu res, i els sondeigs elèctrics i la sísmica anteriors no van tenir prou penetració o resolució.
+Per això es va optar per la magnetotel·lúrica, que és sensible als contrastos de resistivitat en el rang de profunditats que ens interessa.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{D'un model 2D a una inversió 3D formal}
+\begin{columns}[T,onlytextwidth]
+  \column{0.485\textwidth}
+    \begin{caixa}[muted]{Estudi previ \,·\, Arango (2005)}
+      \begin{itemize}
+        \item Inversió \textbf{2D} (REBOCC) i model 3D per \textbf{assaig i error}.
+        \item RMS elevat: les dades mostren una forta tridimensionalitat.
+        \item Efecte de costa descartat.
+      \end{itemize}
+    \end{caixa}
+  \column{0.485\textwidth}
+    \begin{caixa}[accent]{Aquest treball}
+      \begin{itemize}
+        \item Inversió \textbf{3D} formal amb \textbf{ModEM} (gradients conjugats no lineals).
+        \item Tensor d'impedància complet: les quatre components.
+        \item Costa i batimetria incloses; càlcul al supercomputador \textbf{MAGMA}.
+      \end{itemize}
+    \end{caixa}
+\end{columns}
+\vspace{0.3cm}
+\begin{nota}[rho5]
+  \etiqueta[rho5!60!black]{Objectiu}\par\vspace{2pt}
+  {\normalsize Obtenir un model 3D de resistivitat de Llucmajor amb una metodologia \textbf{objectiva i reproduïble},
+  validar-lo amb l'estudi de referència i contrastar l'origen de l'anomalia geotèrmica.}
+\end{nota}
+\note{Aquest treball parteix de la tesi d'Arango de 2005. Allà es va fer una inversió bidimensional i un model 3D ajustat per assaig i error.
+L'RMS de l'aproximació 2D era elevat, i això s'interpreta com un indici que el subsòl és clarament tridimensional.
+La diferència principal d'aquest TFG és que resolc el problema invers en 3D de manera formal, amb ModEM,
+utilitzant les quatre components del tensor i incloent-hi la costa. L'objectiu és un model objectiu i reproduïble,
+validar-lo amb Arango i contrastar la hipòtesi de l'aqüitard.}
+\end{frame}
+
+% =====================================================================
+\section{Metodologia}
+% =====================================================================
+
+\begin{frame}{Fonaments del mètode magnetotel·lúric}
+\begin{columns}[T,onlytextwidth]
+  \column{0.47\textwidth}
+    \begin{caixa}[accent2]{Fonts naturals i règim difusiu}
+      Tempestes elèctriques ($f > 1$\,Hz) i vent solar ($f < 1$\,Hz) indueixen corrents al subsòl.
+      \[
+        \frac{\omega\varepsilon}{\sigma} \ll 1
+        \;\Longrightarrow\;
+        \nabla^{2}\symbf{E} = \mu\sigma\,\frac{\partial \symbf{E}}{\partial t}
+      \]
+      \par
+      {\scriptsize\color{muted} $\omega = 2\pi f$: freqüència angular; $\varepsilon$: permitivitat; $\sigma$: conductivitat; $\mu$: permeabilitat magnètica.}
+    \end{caixa}
+    \vspace{-0.1cm}
+    {\small Els camps no es propaguen com ones: \textbf{difonen} i decauen amb la profunditat.}
+  \column{0.50\textwidth}
+    \begin{caixa}[accent]{Tensor d'impedància}
+      \[
+        \begin{pmatrix} E_x \\ E_y \end{pmatrix}
+        =
+        \begin{pmatrix} Z_{xx} & Z_{xy} \\ Z_{yx} & Z_{yy} \end{pmatrix}
+        \begin{pmatrix} H_x \\ H_y \end{pmatrix}
+      \]
+      \par
+      \begin{center}\footnotesize
+      \begin{tabular}{@{}c@{\hspace{1.1em}}c@{\hspace{1.1em}}c@{}}
+        $\begin{pmatrix} 0 & Z \\ -Z & 0 \end{pmatrix}$ &
+        $\begin{pmatrix} 0 & Z_E \\ Z_H & 0 \end{pmatrix}$ &
+        $\begin{pmatrix} Z_{xx} & Z_{xy} \\ Z_{yx} & Z_{yy} \end{pmatrix}$ \\[3pt]
+        {\medium 1D} & {\medium 2D} & {\medium\color{accent}3D} \\
+        {\scriptsize\color{muted}estratificat} & {\scriptsize\color{muted}eixos de l'\textit{strike}} & {\scriptsize\color{accent}cas general}
+      \end{tabular}
+      \end{center}
+      \vspace{-0.15cm}
+      {\scriptsize\color{muted} $E_i$, $H_i$: components horitzontals dels camps elèctric i magnètic a la superfície.}
+    \end{caixa}
+\end{columns}
+\note{El mètode es basa en les fluctuacions naturals del camp electromagnètic: les tempestes generen senyal per sobre d'1 hertz i el vent solar per sota.
+A les freqüències d'interès els corrents de desplaçament són negligibles davant dels de conducció, i les equacions de Maxwell es redueixen
+a una equació de difusió: el camp no es propaga com una ona, sinó que decau amb la profunditat.
+A la superfície es mesura la relació entre el camp elèctric i el magnètic, que és el tensor d'impedància.
+La seva forma depèn de la dimensionalitat: en 1D la diagonal és nul·la, en 2D també si girem als eixos de l'strike,
+i en 3D les quatre components són diferents de zero, que és el cas de Llucmajor.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Resistivitat aparent, fase i profunditat de penetració}
+\begin{columns}[T,onlytextwidth]
+  \column{0.46\textwidth}
+    \begin{caixa}[accent]{Observables}
+      \vspace{-0.15cm}
+      \[
+        \rho_{ij}(f) = \frac{1}{2\pi f \mu}\,\bigl|Z_{ij}(f)\bigr|^{2},
+        \qquad
+        \phi_{ij}(f) = \arg Z_{ij}(f)
+      \]
+      \par
+      {\scriptsize\color{muted} $\rho_{ij}$: resistivitat aparent; $\phi_{ij}$: fase; $f$: freqüència.}
+    \end{caixa}
+    \vspace{-0.1cm}
+    \begin{caixa}[accent2]{Skin depth}
+      \vspace{-0.15cm}
+      \[
+        \delta = \sqrt{\frac{2}{\omega\mu_0\sigma}} \approx 503\,\sqrt{\rho\,T}\ \ \text{m}
+      \]
+      \par
+      {\scriptsize\color{muted} $\delta$: profunditat on el camp decau un factor $1/e$; $\rho = 1/\sigma$ en $\Omega{\cdot}$m; $T = 1/f$: període en s.}
+    \end{caixa}
+    \vspace{-0.1cm}
+    {\small Banda $1000$--$0{,}1$\,Hz: prou alta per resoldre l'aqüífer de Llucmajor.}
+  \column{0.51\textwidth}
+    \figura{figures/fig02_resistivitat_materials.png}
+    \peu{Resistivitat dels materials de l'escorça (adaptat de Rosell, 2013). $\rho_a$ és una resposta integrada:
+    la inversió reconstrueix la resistivitat real $\rho(x,y,z)$.}
+\end{columns}
+\note{De cada component del tensor en traiem la resistivitat aparent i la fase, que són les dades que ajustarem.
+Cal remarcar que la resistivitat aparent no és la resistivitat real: és una mitjana de tot el volum que travessa el camp.
+La profunditat de penetració, o skin depth, creix amb l'arrel del producte resistivitat per període: com més període, més profund.
+Per això fem servir freqüències altes, de mil a una dècima d'hertz, perquè ens interessen els primers centenars de metres.
+A la dreta es veu per què la resistivitat és útil: les argiles i l'aigua salina són conductores, i les calcàries seques, molt resistives.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Dades: 40 estacions AMT/MT}
+\centering
+\begin{tikzpicture}[
+    ch/.style={signal, signal to=east, signal from=west, draw=hairline, fill=white, line width=0.4pt,
+               minimum height=0.8cm, text width=2.1cm, align=center, font=\scriptsize, inner sep=2pt},
+    chA/.style={ch, fill=accent!9, draw=accent!45}]
+  \node[ch, signal from=nowhere] (a) at (0,0) {\medium Campanya 2002\\{\color{muted}sèries temporals}};
+  \node[ch, right=0.08cm of a] (b) {\medium Processat\\{\color{muted}Arango (2005)}};
+  \node[ch, right=0.08cm of b] (c) {\medium 40 fitxers EDI\\{\color{muted}$Z_{ij}(f)$, tipper, variàncies}};
+  \node[chA, right=0.08cm of c] (d) {\medium\color{accent} Depuració\\{\color{muted}aquest TFG}};
+  \node[chA, right=0.08cm of d] (e) {\medium\color{accent} Inversió 3D\\{\color{muted}ModEM + MAGMA}};
+\end{tikzpicture}
+\vspace{0.3cm}
+\begin{columns}[T,onlytextwidth]
+  \column{0.485\textwidth}
+    \begin{caixa}[muted]{Adquisició (estiu de 2002)}
+      \begin{itemize}
+        \item 42 estacions: 36 amb ADU06 (AMT) i 6 amb MMS03E (MT); 4 punts amb tots dos equips.
+        \item \textbf{40 estacions} utilitzades (s'exclouen la 42 i la 61).
+        \item Malla de $\approx 300$\,m orientada segons l'\textit{strike} (NE--SW i NW--SE).
+      \end{itemize}
+    \end{caixa}
+  \column{0.485\textwidth}
+    \begin{caixa}[muted]{Processat previ (Arango, 2005)}
+      \begin{itemize}
+        \item Finestra de Hanning i DFT amb decimació en cascada.
+        \item Transformada ondicular: millor localització temps--freqüència.
+        \item El tipper no s'ha utilitzat: la qualitat no permet resultats concloents.
+      \end{itemize}
+    \end{caixa}
+\end{columns}
+\note{Les dades provenen d'una campanya de l'estiu de 2002: 42 estacions, la majoria d'audiomagnetotel·lúrica, de les quals n'he fet servir 40.
+Estan distribuïdes en una malla d'uns 300 metres orientada segons les direccions geològiques principals.
+Tot el processat de les sèries temporals el va fer Arango; jo parteixo dels 40 fitxers EDI, que contenen el tensor d'impedàncies per freqüència,
+el tipper i les variàncies. La meva feina comença a la depuració i acaba amb la inversió 3D.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Postprocessat: depuració manual de $\rho_a$ i $\phi$}
+\begin{columns}[T,onlytextwidth]
+  \column{0.60\textwidth}
+    \begin{minipage}[t]{0.49\linewidth}
+      \centering{\scriptsize\medium\color{muted}Original}\\[1pt]
+      \figura{figures/fig03_mall26_original.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.49\linewidth}
+      \centering{\scriptsize\medium\color{accent}Depurada}\\[1pt]
+      \figura{figures/fig03_mall26_depurada.png}
+    \end{minipage}
+    \peu{Estació 26: $\log_{10}\rho_a$ i $\phi$ de les components antidiagonals en funció de $\log_{10} T$.}
+  \column{0.37\textwidth}
+    {\small\medium Criteris físics per descartar punts}
+    \vspace{0.1cm}
+    \begin{enumerate}\small
+      \item \textbf{Linealitat i causalitat:} $Z(f)$ és holomorfa $\Rightarrow$ corbes suaus i contínues.
+      \item \textbf{Kramers--Kronig:} la fase depèn del pendent de $\log\rho_a$ $\Rightarrow$ cap salt aïllat.
+      \item \textbf{Difusió:} la resposta varia de manera gradual amb el període.
+    \end{enumerate}
+    \vspace{0.1cm}
+    \begin{nota}[muted]
+      \scriptsize Filtres automàtics (Hampel, LOWESS): insuficients quan el soroll és elevat.
+    \end{nota}
+\end{columns}
+\note{Abans d'invertir cal depurar les dades, perquè l'algorisme no gasti esforç ajustant punts sense sentit físic.
+Els criteris són tres: la impedància és una funció lineal i causal, per tant suau; per Kramers-Kronig la fase està lligada al pendent de la resistivitat aparent,
+de manera que un salt en una sense l'altra no és físic; i el caràcter difusiu fa que tot variï gradualment.
+Vaig provar d'automatitzar-ho amb filtres de Hampel i LOWESS, però quan el soroll és elevat contaminen la tendència. L'exemple és l'estació 26.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Model inicial i malla de càlcul}
+\begin{columns}[T,onlytextwidth]
+  \column{0.60\textwidth}
+    \begin{minipage}[t]{0.585\linewidth}
+      \figura{figures/fig05_model_inicial_3d.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.395\linewidth}
+      \figura{figures/fig05_model_inicial_planta.png}
+    \end{minipage}
+    \peu{Model inicial en vista 3D (esquerra) i en planta amb la línia de costa i les estacions (dreta).}
+    \vspace{0.05cm}
+    \begin{itemize}\small
+      \item \textbf{Costa inclosa} explícitament (Arango la va descartar) i topografia plana.
+      \item Model de referència senzill: que siguin les dades les que construeixin l'estructura.
+    \end{itemize}
+  \column{0.37\textwidth}
+    \begin{caixa}[accent]{Malla (3D Grid)}
+      \scriptsize
+      \renewcommand{\arraystretch}{1.15}
+      \begin{tabular}{@{}l@{\hspace{0.6em}}r@{}}
+        Cel·les ($X\times Y\times Z$) & $82\times82\times27$ \\
+        Nucli ($X$, $Y$) & $62\times62$ · 115\,m \\
+        \textit{Padding} lateral & 10 cel·les · $\times 1{,}5$ \\
+        Primera capa & 10\,m \\
+        Creixement vertical & $1{,}2 \rightarrow 1{,}5$ \\
+        Profunditat total & 17,28\,km \\
+      \end{tabular}
+    \end{caixa}
+    \vspace{-0.1cm}
+    \begin{caixa}[accent2]{Resistivitats inicials}
+      \scriptsize
+      \begin{tabular}{@{}l@{\hspace{0.6em}}r@{}}
+        Mar (fixa) & $0{,}3\ohmm$ \\
+        Sediments marins & $30\ohmm$ \\
+        Terra & $100\ohmm$ \\
+      \end{tabular}\\[2pt]
+      {\color{muted}Sediments fins a 500\,m sota el fons marí; batimetria EMODnet (2024).}
+    \end{caixa}
+\end{columns}
+\note{ModEM necessita dos inputs: el fitxer de dades i el model inicial. El model inicial té tres resistivitats: el mar a 0,3 ohm·metre, que es manté fix,
+una capa de sediments marins de 30 ohm·metre fins a 500 metres sota el fons marí, amb la batimetria d'EMODnet, i la terra a 100 ohm·metre.
+A diferència del treball previ, he inclòs la costa dins el domini. La topografia es considera plana perquè les variacions són mínimes.
+La malla té un nucli de cel·les de 115 metres i un padding que creix un factor 1,5 per allunyar els contorns: en total, uns 17 quilòmetres de fondària.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Inversió amb ModEM: gradients conjugats no lineals}
+\vspace{-0.1cm}
+\begin{nota}[accent]
+  \normalsize\vspace{-0.3cm}
+  \[
+    \Phi(\symbf{m}) =
+    \underbrace{\bigl(\symbf{d}-f(\symbf{m})\bigr)^{T} C_d^{-1}\bigl(\symbf{d}-f(\symbf{m})\bigr)}_{\text{desajust de les dades}}
+    \;+\;
+    \lambda\,\underbrace{\bigl(\symbf{m}-\symbf{m}_0\bigr)^{T} C_m^{-1}\bigl(\symbf{m}-\symbf{m}_0\bigr)}_{\text{regularització}}
+  \]
+  \par
+  {\scriptsize\color{muted}
+  $\symbf{d}$: dades observades; $f(\symbf{m})$: resposta del model (problema directe); $C_d$: covariància de les dades ($\sigma_i^2$);
+  $\symbf{m}_0$: model inicial; $C_m$: covariància del model (suavitzat 0,2 en $x,y,z$, dues passades, mar fix); $\lambda$: pes de la regularització.}
+\end{nota}
+\vspace{0.1cm}
+\begin{columns}[T,onlytextwidth]
+  \column{0.315\textwidth}
+    \begin{caixa}[muted]{Problema directe}
+      Diferències finites de les equacions de Maxwell en règim quasi-estàtic.
+    \end{caixa}
+  \column{0.315\textwidth}
+    \begin{caixa}[muted]{Optimització NLCG}
+      Gradient pel mètode adjunt, sense construir la matriu jacobiana.
+    \end{caixa}
+  \column{0.33\textwidth}
+    \begin{caixa}[accent2]{Mesura de l'ajust}
+      \vspace{-0.12cm}
+      \[
+        \text{RMS} = \sqrt{\frac{1}{N}\sum_{i=1}^{N}\left(\frac{d_i^{\,\text{obs}}-d_i^{\,\text{pred}}}{\sigma_i}\right)^{2}}
+      \]
+      \par
+      {\scriptsize\color{muted}$N$: nombre de dades; $\sigma_i$: error de cada dada. \textit{Error floor}: $\sigma_i \geq \mathrm{ef}\cdot\sqrt{|Z_{xy}Z_{yx}|}$.}
+    \end{caixa}
+\end{columns}
+\note{La inversió minimitza aquesta funció de cost. El primer terme mesura el desajust entre les dades i la resposta del model, ponderat pels errors.
+El segon és la regularització: penalitza allunyar-se del model inicial de manera poc suau, i lambda controla l'equilibri entre tots dos.
+El problema directe es resol per diferències finites, i l'algorisme de gradients conjugats no lineals calcula el gradient pel mètode adjunt,
+cosa que evita construir la jacobiana sencera. L'ajust es quantifica amb l'RMS normalitzat per l'error de cada dada;
+l'error floor imposa un error mínim perquè les dades amb errors nominals molt petits no dominin la inversió.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Flux de treball: un sol canvi per execució}
+\centering
+\begin{tikzpicture}[node distance=0.32cm]
+  % fila 1: filtratge algorítmic
+  \node[anchor=west] at (0,1.05) {\etiqueta[muted]{Filtratge algorítmic}};
+  \node[pas=2.85cm, anchor=west] (r) at (0,0) {\nompas{Raw data}{\color{muted}Dades sense depurar}};
+  \node[pas=2.85cm, right=of r] (l1) {\nompas{LOWESS 1}{\color{muted}Suavitzat de les antidiagonals}};
+  \node[pas=2.85cm, right=of l1] (l2) {\nompas{LOWESS 2}{\color{muted}+ sediments de $30\ohmm$ i batimetria}};
+  \node[pas=2.85cm, right=of l2] (h) {\nompas{Hampel}{\color{muted}Filtre més agressiu}};
+  \draw[fletxa] (r) -- (l1); \draw[fletxa] (l1) -- (l2); \draw[fletxa] (l2) -- (h);
+  % fila 2: depuració manual
+  \node[anchor=west] at (0,-1.02) {\etiqueta{Depuració manual + error floor}};
+  \node[pas, anchor=west, draw=accent!40] (d0) at (0,-2.05) {\nompas{DM 0}{\color{muted}$Z_{xy}$, $Z_{yx}$ a mà}};
+  \node[pas, right=0.3cm of d0, draw=accent!40] (d0e) {\nompas{DM 0 + ef}{\color{muted}floor del 5\,\%}};
+  \node[pas, right=0.3cm of d0e, draw=accent!40] (d1) {\nompas{DM 1}{\color{muted}$T \leq 10$\,s}};
+  \node[pas, right=0.3cm of d1, draw=accent!40] (d2) {\nompas{DM 2}{\color{muted}diagonals; floor 7\,\%}};
+  \node[pas, right=0.3cm of d2, draw=accent!40] (d3) {\nompas{DM 3}{\color{muted}$T \leq 1$\,s}};
+  \node[pas, right=0.3cm of d3, draw=accent, fill=accent!8, line width=0.8pt] (d4)
+       {\nompas{\color{accent}DM 4}{\color{muted}diagonals de 26, 52 i 53}};
+  \draw[fletxa] (d0) -- (d0e); \draw[fletxa] (d0e) -- (d1); \draw[fletxa] (d1) -- (d2);
+  \draw[fletxa] (d2) -- (d3); \draw[fletxa] (d3) -- (d4);
+  \draw[fletxa, rounded corners=3pt] (h.south) -- ++(0,-0.2) -- (-0.3,-0.775) -- (-0.3,-2.05) -- (d0.west);
+  \node[anchor=north, font=\scriptsize\medium, text=accent, inner sep=2pt] at (d4.south) {$\uparrow$\,model final};
+\end{tikzpicture}
+\vspace{0.15cm}
+\begin{nota}[accent2]
+  Cada configuració que millora l'anterior passa a ser el nou punt de partida: la relació causa--efecte de cada canvi és clara i el procés és \textbf{reproduïble}.
+\end{nota}
+\note{Per poder interpretar els resultats he seguit un flux de treball on a cada execució només canvio un paràmetre.
+Primer vaig provar el filtratge algorítmic: les dades en brut, dos suavitzats LOWESS, on al segon ja hi afegeixo la capa de sediments i la batimetria, i un filtre de Hampel.
+Després vaig passar a la depuració manual: primer les antidiagonals, després hi afegeixo un error floor del 5 per cent, acoto els períodes a 10 segons,
+provo de depurar les diagonals, acoto a 1 segon i, finalment, al DM 4 depuro només les diagonals de tres estacions problemàtiques.}
+\end{frame}
+
+% =====================================================================
+\section{Resultats}
+% =====================================================================
+
+\begin{frame}{Convergència de l'RMS}
+\begin{columns}[T,onlytextwidth]
+  \column{0.64\textwidth}
+    \figura{figures/fig06_rms.png}
+    \peu{RMS en funció de les iteracions de ModEM per a cada assaig (DM: depuració manual). A la dreta, ampliacions.}
+  \column{0.33\textwidth}
+    \begin{itemize}\small
+      \item Dues \textbf{famílies} de models.
+      \item Sense error floor (\textit{raw}, DM 0, suavitzats): \\ RMS $\approx 48 \rightarrow 13$--$14$.
+      \item Amb error floor del 5--10\,\%: \\ RMS $\approx 9$--$11 \rightarrow$ \alert{\textbf{3--7}}.
+      \item DM 0 i DM 0 + ef s'aturen a la iteració 23: sense acotar períodes (malla de 87\,km) i amb menys dades.
+    \end{itemize}
+\end{columns}
+\note{Aquí hi ha l'evolució de l'RMS de totes les inversions. Es veuen clarament dues famílies.
+Les que no tenen error floor, incloses les dades en brut i els suavitzats, comencen a prop de 48 i s'estanquen entre 13 i 14.
+Les depuracions manuals amb error floor comencen molt més avall i baixen fins a valors entre 3 i 7, tal com recomana la literatura de ModEM
+per a floors entre el 5 i el 10 per cent. Els models DM 0 es van haver d'aturar a la iteració 23 perquè no avançaven:
+la malla era molt més profunda i hi havia menys informació per generar estructura.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{L'RMS no ho és tot: regularització $\lambda$ i norma $m^2$}
+\begin{columns}[T,onlytextwidth]
+  \column{0.325\textwidth}
+    \figura{figures/fig07_lambda.png}
+  \column{0.325\textwidth}
+    \figura{figures/fig07_m2.png}
+  \column{0.31\textwidth}
+    \begin{nota}[muted]
+      \scriptsize L'RMS depèn de $N$ i de $\sigma_i$: eliminar dades o inflar errors el redueix \textbf{sense millorar el model}.
+      Cal llegir-lo amb $m^2 = \lVert \symbf{m}-\symbf{m}_0 \rVert^2$ i $\lambda$.
+    \end{nota}
+    \vspace{-0.1cm}
+    \begin{nota}[rho2]
+      \scriptsize \textbf{DM 2}: RMS $= 3{,}81$, però $m^2 \approx 0{,}15$ $\Rightarrow$ model sobresuavitzat; RMS \alert{cosmètic}.
+    \end{nota}
+    \vspace{-0.1cm}
+    \begin{nota}[rho5]
+      \scriptsize \textbf{DM 3 i DM 4}: $m^2 \approx 0{,}41$--$0{,}49$ i $\lambda$ decreix de forma ordenada $\Rightarrow$ estructura 3D coherent.
+    \end{nota}
+\end{columns}
+\peu{Esquerra: decaïment de $\lambda$ fins al límit de $10^{-8}$ (sortida automàtica). Dreta: norma del model respecte de $\symbf{m}_0$.}
+\note{L'RMS sol no serveix per comparar models: si trec dades o inflo els errors, baixa per construcció sense que el model sigui millor.
+Per això l'analitzo conjuntament amb la norma del model, que mesura quanta estructura s'ha afegit respecte del model inicial, i amb el decaïment de lambda.
+El cas més clar és el DM 2: té l'RMS més baix, 3,81, però perquè he tret les diagonals, que contenen informació 3D; el model queda massa suau, amb m² de 0,15.
+En canvi, DM 3 i DM 4 fan baixar lambda de manera ordenada i conserven més estructura. A més, la depuració manual elimina el repunt de l'RMS que tenien els suavitzats.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Elecció del model final: DM 4}
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\arrayrulecolor{hairline}
+\begin{tabular}{@{}l r r r r l@{}}
+  \toprule
+  {\medium Assaig} & {\medium Iter.} & {\medium RMS ini.} & {\medium RMS fin.} & {\medium $m^2_{\text{fin}}$} & {\medium Tractament de les dades} \\
+  \midrule
+  Raw data  & 110 & 48,29 & 14,39 & 0,647 & Sense depurar; sense floor \\
+  DM 0      &  23 & 37,55 & 13,63 & 0,262 & Antidiagonals depurades a mà; sense floor \\
+  DM 0 + ef &  23 & 12,15 &  7,21 & 0,059 & + floor 5\,\% a totes les components \\
+  DM 1      &  82 & 12,65 &  6,71 & 0,232 & Floor 5\,\%; $T \leq 10$\,s \\
+  DM 2      &  92 & 11,10 &  3,81 & 0,146 & Diagonals depurades (7\,\%); $T \leq 10$\,s \\
+  DM 3      &  67 &  9,70 &  6,68 & 0,411 & Floor 5\,\%; $T \leq 1$\,s \\
+  \rowcolor{accent!9}
+  {\medium\color{accent}DM 4} & {\medium 73} & {\medium 8,38} & {\medium\color{accent}4,67} & {\medium 0,487} & {\medium Floor 5\,\%; diag.\ de 26, 52 i 53; $T \leq 1$\,s} \\
+  \bottomrule
+\end{tabular}
+\arrayrulecolor{black}
+\peu{Floor: percentatge de $\sqrt{|Z_{xy}Z_{yx}|}$, aplicat com $\sigma = \max(\sigma_{\text{natiu}}, \text{floor})$.}
+\vspace{0.2cm}
+\raggedright
+\begin{columns}[T,onlytextwidth]
+  \column{0.32\textwidth}
+    \begin{nota}[accent]\scriptsize Genera prou estructura per resoldre els trets geoelèctrics d'interès.\end{nota}
+  \column{0.32\textwidth}
+    \begin{nota}[accent]\scriptsize Resultat fortament comparable amb l'estudi de referència (Arango, 2005).\end{nota}
+  \column{0.32\textwidth}
+    \begin{nota}[accent]\scriptsize Redueix el desajust \textbf{sense eliminar} la informació 3D de les diagonals.\end{nota}
+\end{columns}
+\note{Aquesta taula resumeix totes les inversions. Em quedo amb el DM 4 per tres motius: genera prou estructura per resoldre el que ens interessa,
+el resultat és molt comparable amb el d'Arango, i redueix el desajust sense haver d'eliminar les components diagonals,
+que és on hi ha la informació tridimensional. És a dir, no és el model amb l'RMS més baix, però sí el més equilibrat.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Per què acotar els períodes a $T \leq 1$\,s?}
+\begin{columns}[T,onlytextwidth]
+  \column{0.45\textwidth}
+    \centering
+    \begin{tikzpicture}[x=1cm, y=0.93cm]
+      % franja objectiu
+      \fill[accent!12] (-0.15,-0.6) rectangle (3.8,-0.7);
+      % barres: delta (clar) i z_NB (fosc)
+      \foreach \x/\r/\d/\dl/\z/\c in {0.45/5/1.125/{1,1}/0.796/rho2, 1.4/10/1.591/{1,6}/1.125/rho3,
+                                       2.35/30/2.755/{2,8}/1.949/rho4, 3.3/100/5.030/{5,0}/3.557/rho5}{
+        \fill[\c!30] (\x-0.3,0) rectangle (\x+0.3,-\d);
+        \fill[\c!85!black] (\x-0.14,0) rectangle (\x+0.14,-\z);
+        \node[font=\tiny, text=muted, anchor=north, inner sep=1pt] at (\x,-\d) {\dl\,km};
+        \node[font=\scriptsize\medium, text=ink, anchor=south, inner sep=2pt] at (\x,0.02) {\r};
+      }
+      \draw[accent, dashed, line width=0.5pt] (-0.15,-0.7) -- (3.8,-0.7);
+      \node[anchor=west, font=\tiny\medium, text=accent, align=left, inner sep=1pt] at (3.8,-0.62) {objectiu\\600--700\,m};
+      \draw[ink!70, line width=0.6pt] (-0.15,0) -- (3.8,0);
+      \node[font=\tiny, text=muted, anchor=south, inner sep=1pt] at (1.85,0.33) {$\rho$ del recobriment ($\Omega{\cdot}$m)};
+      % eix de profunditat
+      \foreach \k in {0,1,...,5}{
+        \draw[muted, line width=0.3pt] (-0.15,-\k) -- (-0.25,-\k);
+        \node[font=\tiny, text=muted, anchor=east, inner sep=1pt] at (-0.25,-\k) {\k};
+      }
+      \node[font=\tiny, text=muted, rotate=90, anchor=south] at (-0.5,-2.5) {profunditat a $T = 1$\,s (km)};
+      % llegenda
+      \fill[rho3!30] (0.1,-4.3) rectangle (0.35,-4.15); \node[font=\tiny, anchor=west, text=muted] at (0.37,-4.22) {$\delta$ (\textit{skin depth})};
+      \fill[rho3!85!black] (0.1,-4.65) rectangle (0.35,-4.5); \node[font=\tiny, anchor=west, text=muted] at (0.37,-4.57) {$z_{NB}$ (Niblett--Bostick)};
+    \end{tikzpicture}
+  \column{0.52\textwidth}
+    \begin{caixa}[accent2]{Profunditat de sondeig}
+      \vspace{-0.2cm}
+      \[
+        \delta \approx 503\sqrt{\rho T}, \qquad z_{NB} \approx \frac{\delta}{\sqrt{2}} \approx 356\sqrt{\rho T}\ \ \text{(m)}
+      \]
+      \par
+      {\scriptsize\color{muted}$z_{NB}$: profunditat de Niblett--Bostick, una estimació més conservadora.}
+    \end{caixa}
+    \vspace{-0.05cm}
+    \begin{itemize}\small
+      \item Fins i tot amb un recobriment molt conductor (5--10\ohmm): $z_{NB}(1\,\text{s}) \approx 0{,}8$--$1{,}1$\,km $>$ 700\,m.
+      \item Per arribar a 700\,m n'hi ha prou amb $T \approx 0{,}2$\,s (10\ohmm) o $0{,}07$\,s (30\ohmm).
+      \item $\delta \propto \sqrt{T}$: de 10\,s a 1\,s, $\delta_{\max}$ es divideix per $\sqrt{10} \approx 3{,}16$ $\Rightarrow$ malla menys profunda i \textbf{inversió més barata}.
+    \end{itemize}
+\end{columns}
+\note{La decisió d'acotar els períodes a un segon es justifica amb la profunditat de penetració.
+Fins i tot en el cas més desfavorable, un recobriment molt conductor de 5 a 10 ohm·metre, a un segon el sondeig arriba a entre 0,8 i 1,1 quilòmetres,
+per sobre dels 600-700 metres que volem caracteritzar. De fet, per arribar a 700 metres n'hi hauria prou amb dècimes de segon.
+Com que la skin depth va amb l'arrel del període, passar de 10 a 1 segon redueix la profunditat màxima un factor 3,16,
+i això permet retallar la malla i abaratir molt la inversió, sense perdre resolució on ens interessa.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Estudi individual de les estacions (DM 3)}
+\begin{columns}[T,onlytextwidth]
+  \column{0.35\textwidth}
+    \figura{figures/fig08_rms_estacions.png}
+    \peu{RMS normalitzat per estació. Pitjor ajust: 26, 52 i 53 (RMS de 23,0, 17,4 i 11,8).}
+  \column{0.62\textwidth}
+    \begin{minipage}[t]{0.54\linewidth}
+      \vspace{0pt}
+      \figura{figures/fig09_rms_freq.png}
+      \peu{RMS en funció de la freqüència.}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.43\linewidth}
+      \vspace{0pt}
+      \begin{nota}[rho2]
+        \footnotesize El desajust ve gairebé tot de les \textbf{diagonals}: error relatiu 0,15--0,48, davant 0,05--0,09 a les antidiagonals.
+      \end{nota}
+    \end{minipage}
+    \vspace{0.1cm}
+    \begin{itemize}\footnotesize
+      \item Pic a \textbf{50\,Hz}: soroll cultural d'una línia elèctrica propera a l'estació 26.
+      \item Pic a alta freqüència: banda morta de l'AMT (1--5\,kHz).
+    \end{itemize}
+    \vspace{0.05cm}
+    \begin{nota}[accent]
+      \footnotesize $\Rightarrow$ \textbf{DM 4}: depurar les diagonals de 26, 52 i 53 al voltant d'aquestes freqüències.
+    \end{nota}
+\end{columns}
+\note{Abans del model final vaig mirar el DM 3 estació per estació. Les pitjors són la 26, la 52 i la 53, i gairebé tot el seu desajust ve de les diagonals,
+que no havia depurat precisament per conservar la informació 3D. Si mirem l'RMS per freqüència hi ha un pic molt clar a 50 hertz:
+és la freqüència de la xarxa elèctrica, i efectivament l'estació 26 és a prop d'una línia. L'altre pic coincideix amb la banda morta de l'AMT.
+Això em va portar al DM 4: depurar només les diagonals d'aquestes tres estacions en aquestes freqüències.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Model final DM 4: ajust de les dades}
+\begin{columns}[T,onlytextwidth]
+  \column{0.32\textwidth}
+    \xifra[accent]{4,67}{RMS final del model DM 4 (DM 3: 6,68)}
+  \column{0.32\textwidth}
+    \xifra[rho5]{$+18\,\%$}{Norma $m^2$ respecte de DM 3 (0,411 $\rightarrow$ 0,487): més estructura}
+  \column{0.32\textwidth}
+    \xifra[muted]{6,07}{RMS de l'estudi de referència (Arango, 2005)}
+\end{columns}
+\vspace{0.3cm}
+\begin{columns}[T,onlytextwidth]
+  \column{0.49\textwidth}
+    {\scriptsize\medium\color{muted}Estació 9}\\[1pt]
+    \figura{figures/fig10_ajust_mall09_dm4.png}
+  \column{0.49\textwidth}
+    {\scriptsize\medium\color{muted}Estació 23}\\[1pt]
+    \figura{figures/fig10_ajust_mall23_dm4.png}
+\end{columns}
+\peu{Punts: mesures amb barres d'error; línies: resposta del model DM 4. Components antidiagonals (esquerra de cada panell) i diagonals (dreta).}
+\note{El model final baixa l'RMS de 6,68 a 4,67, dos punts menys que el DM 3, i alhora augmenta la norma del model un 18 per cent, és a dir, té més estructura, no menys.
+També millora l'RMS de 6,07 d'Arango sense descartar informació essencial. (Si ho pregunten: la comparació és orientativa, perquè els dos RMS no tenen el mateix nombre de dades ni els mateixos errors.)
+A les gràfiques es veu l'ajust de dues estacions: les antidiagonals, que són les depurades, s'ajusten molt bé, i l'algorisme evita els punts sorollosos.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Seccions verticals: tres capes geoelèctriques}
+\begin{columns}[c,onlytextwidth]
+  \column{0.90\textwidth}
+    \figura{figures/fig11_perfil1.png}
+  \column{0.09\textwidth}
+    \rscolorbarv{2.9cm}
+\end{columns}
+\peu{Perfil 1 (4,2\,km, perpendicular a l'\textit{strike}), model DM 4. Els triangles marquen les estacions.}
+\vspace{0.15cm}
+\begin{columns}[T,onlytextwidth]
+  \column{0.32\textwidth}
+    \begin{nota}[rho7]
+      \etiquetams[rho7]{0--150\,m \,·\, $>1000\ohmm$}\par\vspace{1pt}
+      {\medium Aqüífer lliure}\\ {\scriptsize\color{muted}Gruix coherent amb els pous (IGME, 2003).}
+    \end{nota}
+  \column{0.32\textwidth}
+    \begin{nota}[rho2]
+      \etiquetams[rho2]{200--700\,m \,·\, $\sim 10\ohmm$}\par\vspace{1pt}
+      {\medium Aqüitard conductor}\\ {\scriptsize\color{muted}Capa de confinament de margues.}
+    \end{nota}
+  \column{0.32\textwidth}
+    \begin{nota}[rho5]
+      \etiquetams[rho5!70!black]{$>700$\,m \,·\, $\sim 100\ohmm$}\par\vspace{1pt}
+      {\medium Aqüífer confinat}\\ {\scriptsize\color{muted}Per sota del bloc conductor.}
+    \end{nota}
+\end{columns}
+\note{Passem a la part més il·lustrativa. Aquest és el perfil 1, perpendicular a la direcció de l'strike. S'hi distingeixen tres capes:
+una zona superficial resistiva d'uns 150 metres, que interpreto com l'aqüífer lliure i que quadra amb la profunditat dels pous;
+entre 200 i 700 metres, un bloc conductor d'uns 10 ohm·metre, que és l'aqüitard; i per sota, valors d'uns 100 ohm·metre, que corresponen a l'aqüífer confinat.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Discontinuïtats de l'aqüitard i anomalia tèrmica}
+\begin{columns}[T,onlytextwidth]
+  \column{0.57\textwidth}
+    \figura{figures/fig11_perfils2a5.png}
+    \peu{Perfils 2 a 5 del model DM 4 (mateixa escala de colors que el perfil 1).}
+  \column{0.40\textwidth}
+    \figura[0.8\linewidth]{figures/fig12_gradient_termic.png}
+    \peu{Isotermes de Llucmajor (IGME, 2003).}
+    \begin{itemize}\scriptsize
+      \setlength{\itemsep}{0.2em}
+      \item Aqüitard interromput: P1 (estacions 10--4), P2 (51--67), P4 (sota la 26); P5 molt aprimat.
+      \item L'aigua no puja en vertical: l'anomalia s'associa a les zones \textbf{blau cel} ($\sim$200\ohmm, aigua dolça).
+      \item Coincideixen amb $\approx 50\,$°C (P5, estacions 62--53) i $\approx 40\,$°C (estacions 1--51).
+    \end{itemize}
+\end{columns}
+\note{En la majoria de perfils el bloc conductor presenta discontinuïtats: al perfil 1 entre les estacions 10 i 4, al perfil 2 entre la 51 i la 67,
+al perfil 4 per sota de la 26, i al perfil 5 l'aqüitard s'aprima clarament.
+Com que l'aigua no puja en línia recta, no situo l'anomalia just damunt de la discontinuïtat, sinó on apareixen les zones blau cel d'uns 200 ohm·metre,
+que associo a aigua dolça. Aquestes zones coincideixen amb les isotermes de l'IGME: uns 50 graus al perfil 5 i uns 40 graus a la zona de les estacions 1 i 51.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Comparació amb l'estudi de referència}
+\begin{columns}[T,onlytextwidth]
+  \column{0.60\textwidth}
+    \figura{figures/fig13_comparacio_arango.png}
+    \peu{Esquerra: perfils d'Arango (2005). Dreta: perfils equivalents del model DM 4.}
+  \column{0.37\textwidth}
+    \begin{nota}[rho5]
+      \scriptsize Mateixos \textbf{rangs de resistivitat} i mateixa localització de les zones resistives i conductores, amb una \textbf{resolució espacial} més elevada.
+    \end{nota}
+    \vspace{-0.05cm}
+    \begin{itemize}\scriptsize
+      \item \textbf{Perfil 1}: aprimament de l'aqüitard sota l'estació 6 i a partir de la 4; estructures conductores coincidents (2--3, 4 i 7--8).
+      \item \textbf{Perfil 2}: màxima profunditat del confinament prop de la 51; franja resistiva superficial a la 67.
+      \item \textbf{Perfil 3}: mateix gruix mínim de l'aqüitard (estació 63) i una \alert{discontinuïtat nova} ben definida.
+    \end{itemize}
+\end{columns}
+\note{Comparant amb els perfils d'Arango, les zones resistives i conductores coincideixen en rang de resistivitat i en posició, però el model 3D té més resolució.
+Al perfil 1 reproduïm l'aprimament de l'aqüitard sota l'estació 6 i a partir de la 4. Al perfil 2, la profunditat màxima del confinament prop de la 51.
+I al perfil 3, a més del mateix gruix mínim, el nou model resol una discontinuïtat clarament definida que el model previ no mostrava.}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Talls horitzontals del model DM 4}
+\centering
+\figura[0.82\textwidth]{figures/fig14_talls_horitzontals.png}
+\vspace{0.05cm}
+\raggedright
+\begin{columns}[T,onlytextwidth]
+  \column{0.32\textwidth}
+    \begin{nota}[rho7]\scriptsize \textbf{0--100 m}: zones $>1000\ohmm$ $\Rightarrow$ roca calcària fossilitzada.\end{nota}
+  \column{0.32\textwidth}
+    \begin{nota}[rho2]\scriptsize \textbf{$\geq$ 200 m}: capa de confinament de margues (argiles i carbonat de calci).\end{nota}
+  \column{0.32\textwidth}
+    \begin{nota}[accent]\scriptsize Margues: 10--200\ohmm\ (Palacky, 1987); model: \textbf{1--50\ohmm} $\Rightarrow$ possibles filtracions.\end{nota}
+\end{columns}
+\note{En els talls horitzontals, els primers metres mostren zones molt resistives, de més de mil ohm·metre, que relaciono amb roca calcària fossilitzada.
+A partir dels 200 metres apareix la capa de confinament de margues. Les margues solen tenir entre 10 i 200 ohm·metre segons la humitat i la compactació,
+però el model en dona entre 1 i 50: aquests valors tan baixos reforcen la idea que hi ha fluids conductors filtrant-se a través de l'aqüitard.}
+\end{frame}
+
+% =====================================================================
+\section{Conclusions}
+% =====================================================================
+
+\begin{frame}{Conclusions}
+\begin{columns}[T,onlytextwidth]
+  \column{0.64\textwidth}
+    \begin{enumerate}\footnotesize
+      \setlength{\itemsep}{0.5em}
+      \item Inversió \textbf{3D formal} (ModEM-NLCG) de 40 estacions: metodologia objectiva i reproduïble, enfront de l'ajust per assaig i error.
+      \item Depuració manual, error floor del 5\,\% i $T \leq 1$\,s: RMS final de \alert{\textbf{4,67}} sense descartar la informació 3D de les diagonals.
+      \item L'RMS s'ha de llegir amb $m^2$ i $\lambda$: un RMS baix pot ser \textbf{cosmètic} (DM 2).
+      \item Tres capes: aqüífer lliure resistiu ($\sim$150\,m), aqüitard conductor ($\sim$10\ohmm, 200--700\,m) i aqüífer confinat ($\sim$100\ohmm).
+      \item \textbf{Discontinuïtats de l'aqüitard} coherents amb Arango (2005) i amb les dades tèrmiques (IGME, 2003).
+    \end{enumerate}
+  \column{0.33\textwidth}
+    \begin{caixa}[rho2]{La pregunta inicial}
+      \footnotesize El model reforça la hipòtesi que l'aigua calenta \textbf{ascendeix des de l'aqüífer confinat} a través de les discontinuïtats de l'aqüitard.
+    \end{caixa}
+    \vspace{0.1cm}
+    \begin{caixa}[accent2]{Línies futures}
+      \begin{itemize}\scriptsize
+        \item Incorporar els SEV de l'IGME al model inicial.
+        \item Incloure el tipper si la qualitat de les dades ho permet.
+      \end{itemize}
+    \end{caixa}
+\end{columns}
+\note{Per concloure: he aplicat una inversió 3D formal a les 40 estacions, amb una metodologia objectiva i reproduïble.
+La depuració manual amb error floor i l'acotació de períodes han portat l'RMS final a 4,67 sense renunciar a la informació 3D.
+He mostrat que l'RMS s'ha de llegir sempre juntament amb la norma del model i la regularització.
+El model resol tres capes i, sobretot, discontinuïtats de l'aqüitard coherents amb el treball previ i amb les dades tèrmiques,
+cosa que reforça la hipòtesi que l'aigua calenta puja des de l'aqüífer confinat. Com a línies futures, integrar els sondeigs elèctrics de l'IGME al model inicial.}
+\end{frame}
+
+% =====================================================================
+%  GRÀCIES
+% =====================================================================
+{\setbeamertemplate{background}{\rsfinalfons}
+\begin{frame}[plain,noframenumbering,t]
+  \vspace{1.35cm}
+  \hspace{0.05cm}{\fontsize{30}{34}\selectfont\medium\color{white} Moltes gràcies}\\[0.25cm]
+  \hspace{0.05cm}{\large\color{white!70!nit} per la vostra atenció}\\[0.5cm]
+  \hspace{0.05cm}\tikz\shade[shading=rhobar] (0,0) rectangle (3.5,0.06);\\[0.35cm]
+  \hspace{0.05cm}{\normalsize\medium\color{rho4} Preguntes?}
+  \note{Moltes gràcies. Quedo a la vostra disposició per a les preguntes. (Tens diapositives de reserva a l'annex: malla, suavitzats, altres estacions, talls horitzontals comparats i seccions completes.)}
+\end{frame}}
+
+% =====================================================================
+%  ANNEX (diapositives de reserva per a les preguntes)
+% =====================================================================
+\annexos
+
+\begin{frame}{Paràmetres complets de la malla}
+\centering\footnotesize
+\renewcommand{\arraystretch}{1.1}
+\arrayrulecolor{hairline}
+\begin{tabular}{@{}l r@{}}
+  \toprule
+  {\medium Paràmetre} & {\medium Valor} \\
+  \midrule
+  Cel·les totals ($X\times Y\times Z$) & $82\times82\times27$ \\
+  \midrule
+  \multicolumn{2}{@{}l}{\scriptsize\medium\color{muted}DIRECCIONS X i Y} \\
+  Nombre de cel·les (nucli) & 62 \\
+  Dimensió de cel·la & 115\,m \\
+  Cel·les de \textit{padding} (per costat) & 10 \\
+  Factor de creixement (\textit{padding}) & 1,5 \\
+  \midrule
+  \multicolumn{2}{@{}l}{\scriptsize\medium\color{muted}DIRECCIÓ Z} \\
+  Nombre de capes & 27 \\
+  Gruix de la primera capa & 10\,m \\
+  Factor de creixement (zona fina) & 1,2 \\
+  Factor de creixement (\textit{padding} profund) & 1,5 \\
+  Profunditat total del domini & 17,28\,km \\
+  \bottomrule
+\end{tabular}
+\arrayrulecolor{black}
+\peu{Condició de contorn: el camp anòmal ha de decaure ($|E(z)| = E_0\,e^{-z/\delta}$) abans d'arribar als límits del domini.}
+\end{frame}
+
+\begin{frame}{Depuració manual d'altres estacions}
+\begin{columns}[T,onlytextwidth]
+  \column{0.24\textwidth}\centering{\scriptsize\medium\color{muted}Estació 9 · original}\\[1pt]\figura{figures/fig04_mall09_original.png}
+  \column{0.24\textwidth}\centering{\scriptsize\medium\color{accent}Estació 9 · depurada}\\[1pt]\figura{figures/fig04_mall09_depurada.png}
+  \column{0.24\textwidth}\centering{\scriptsize\medium\color{muted}Estació 23 · original}\\[1pt]\figura{figures/fig04_mall23_original.png}
+  \column{0.24\textwidth}\centering{\scriptsize\medium\color{accent}Estació 23 · depurada}\\[1pt]\figura{figures/fig04_mall23_depurada.png}
+\end{columns}
+\peu{Dades processades per Arango (2005) i postprocessat manual d'aquest treball.}
+\end{frame}
+
+\begin{frame}{Suavitzats algorítmics: LOWESS i Hampel}
+\begin{columns}[T,onlytextwidth]
+  \column{0.325\textwidth}\figura{figures/figA_rms_suavitzats.png}
+  \column{0.325\textwidth}\figura{figures/figA_lambda_suavitzats.png}
+  \column{0.325\textwidth}\figura{figures/figA_m2_suavitzats.png}
+\end{columns}
+\vspace{0.2cm}
+\centering\small
+\renewcommand{\arraystretch}{1.12}
+\arrayrulecolor{hairline}
+\begin{tabular}{@{}l r r r r@{}}
+  \toprule
+  {\medium Assaig} & {\medium Iter.} & {\medium RMS ini.} & {\medium RMS fin.} & {\medium $m^2_{\text{fin}}$} \\
+  \midrule
+  Suavitzat LOWESS 1 & 115 & 47,78 & 13,51 & 0,631 \\
+  Suavitzat LOWESS 2 & 123 & 48,27 & 13,33 & 0,746 \\
+  Suavitzat Hampel   & 129 & 47,58 & 12,69 & 0,661 \\
+  \bottomrule
+\end{tabular}
+\arrayrulecolor{black}
+\peu{Els algorismes actuen només sobre les components antidiagonals; les diagonals conserven l'error natiu.}
+\end{frame}
+
+\begin{frame}{Estació 26 amb DM 3: diagonals sense depurar}
+\centering
+\figura[0.9\textwidth]{figures/fig10_ajust_mall26_dm3.png}
+\peu{Ajust de l'estació 26 amb el model DM 3. Les components diagonals (dreta), sense depurar, presenten molta dispersió: motiu de la depuració DM 4.}
+\end{frame}
+
+\begin{frame}{Talls horitzontals comparats amb Arango (2005)}
+\centering
+\figura{figures/figC1_talls_vs_arango.png}
+\peu{Esquerra: talls d'Arango (2005). Dreta: model DM 4. Fins als 200\,m, tots dos resistius (excepte la franja N-E); a sota, capa conductora concordant.}
+\end{frame}
+
+\begin{frame}{Seccions verticals completes del model DM 4}
+\centering
+\figuraalt{6.3cm}{figures/fig11_seccions_verticals.png}
+\end{frame}
+
+\end{document}

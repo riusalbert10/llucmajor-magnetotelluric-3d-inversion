@@ -1,0 +1,1 @@
+La convención de escritura del .rho por ModEM no es trivial: para cada profundidad k, el fichero recorre iy de 0 a mny-1 (normal) pero ix de mnx-1 a 0 (invertido). Si el código de lectura no aplica el [::-1] correcto, los ejes X e Y aparecen intercambiados o reflejados, lo que visualmente parece exactamente una rotación de 90°. Es purely cosmético, no afecta a la inversión.

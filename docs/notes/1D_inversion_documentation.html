@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1D Magnetotelluric Inversion: Mathematical Documentation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-bottom: 2px solid #95a5a6;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+        .section {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .equation-block {
+            background-color: #ecf0f1;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        .important {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #ecf0f1;
+        }
+        .reference {
+            font-style: italic;
+            color: #7f8c8d;
+            margin: 5px 0;
+        }
+        .algorithm {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>1D Magnetotelluric Inversion: Mathematical Documentation</h1>
+
+    <div class="section">
+        <h2>1. Introduction to Magnetotellurics (MT)</h2>
+        <p>
+            Magnetotellurics is an electromagnetic geophysical method that uses natural variations
+            in the Earth's magnetic and electric fields to determine subsurface electrical resistivity
+            structure. The method is based on the diffusion of electromagnetic waves through conductive media.
+        </p>
+
+        <h3>1.1 The Impedance Tensor</h3>
+        <p>The fundamental quantity in MT is the impedance tensor \(\mathbf{Z}\), which relates the
+        horizontal electric fields to the horizontal magnetic fields in the frequency domain:</p>
+
+        <div class="equation-block">
+            $$\begin{bmatrix} E_x \\ E_y \end{bmatrix} = \begin{bmatrix} Z_{xx} & Z_{xy} \\ Z_{yx} & Z_{yy} \end{bmatrix} \begin{bmatrix} H_x \\ H_y \end{bmatrix}$$
+        </div>
+
+        <p>For a 1D (horizontally layered) Earth structure, the diagonal elements are zero
+        (\(Z_{xx} = Z_{yy} = 0\)), and we have:</p>
+
+        <div class="equation-block">
+            $$E_x = Z_{xy} H_y \quad \text{and} \quad E_y = Z_{yx} H_x$$
+        </div>
+
+        <h3>1.2 Apparent Resistivity and Phase</h3>
+        <p>The apparent resistivity is derived from the impedance magnitude:</p>
+
+        <div class="equation-block">
+            $$\rho_a = \frac{1}{\omega \mu_0} |Z|^2 = \frac{|Z|^2}{2\pi f \mu_0}$$
+        </div>
+
+        <p>where:</p>
+        <ul>
+            <li>\(\omega = 2\pi f\) is the angular frequency (rad/s)</li>
+            <li>\(f\) is the frequency (Hz)</li>
+            <li>\(\mu_0 = 4\pi \times 10^{-7}\) H/m is the magnetic permeability of free space</li>
+            <li>\(|Z|\) is the magnitude of the impedance</li>
+        </ul>
+
+        <p>For standard EDI files with impedance in [mV/km]/[nT], the formula simplifies to:</p>
+
+        <div class="equation-block">
+            $$\rho_a = \frac{|Z|^2}{5f}$$
+        </div>
+
+        <h3>1.3 Skin Depth</h3>
+        <p>The skin depth represents the characteristic depth to which electromagnetic signals penetrate:</p>
+
+        <div class="equation-block">
+            $$\delta = \sqrt{\frac{\rho}{\pi f \mu_0}} \approx 503 \sqrt{\frac{\rho}{f}} \quad \text{(in meters)}$$
+        </div>
+
+        <p>This relationship is fundamental: <strong>lower frequencies penetrate deeper</strong>.</p>
+    </div>
+
+    <div class="section">
+        <h2>2. The Bostick Transformation</h2>
+
+        <h3>2.1 Theoretical Foundation</h3>
+        <p>The Bostick transformation (Bostick, 1977) provides a rapid approximate inversion method
+        that converts apparent resistivity curves directly into a 1D resistivity-depth model without
+        formal iterative inversion.</p>
+
+        <div class="important">
+            <strong>Key Assumption:</strong> The transformation assumes that the apparent resistivity
+            measured at a given period is primarily influenced by the resistivity at the corresponding
+            skin depth.
+        </div>
+
+        <h3>2.2 Mathematical Derivation</h3>
+        <p>The Bostick transformation relates the true resistivity \(\rho(z)\) at depth \(z\) to
+        the apparent resistivity \(\rho_a(T)\) and its derivative with respect to period \(T\):</p>
+
+        <div class="equation-block">
+            $$\rho_{\text{Bostick}}(z) = \rho_a(T) \left[ 1 + \frac{T}{2\rho_a} \frac{d\rho_a}{dT} \right]$$
+        </div>
+
+        <p>This can be rewritten in terms of logarithmic derivatives:</p>
+
+        <div class="equation-block">
+            $$\rho_{\text{Bostick}}(z) = \rho_a(T) \left[ 1 + \frac{d \ln \rho_a}{d \ln T} \right]$$
+        </div>
+
+        <p>The corresponding depth is given by:</p>
+
+        <div class="equation-block">
+            $$z_{\text{Bostick}} = \frac{\delta}{\sqrt{2}} = \frac{503}{\sqrt{2}} \sqrt{\frac{\rho_a}{f}} = 356 \sqrt{\frac{\rho_a}{f}}$$
+        </div>
+
+        <h3>2.3 Implementation Details</h3>
+
+        <div class="algorithm">
+            <strong>Algorithm: Bostick Transformation</strong>
+            <ol>
+                <li><strong>Input:</strong> Apparent resistivity \(\rho_a(f)\) vs frequency \(f\)</li>
+                <li>Convert frequency to period: \(T = 1/f\)</li>
+                <li>Calculate average apparent resistivity: \(\rho_{\text{avg}} = \sqrt{\rho_{xy} \cdot \rho_{yx}}\)</li>
+                <li>Compute logarithmic derivative:
+                    <div class="equation-block">
+                        $$\frac{d \ln \rho_a}{d \ln T} = \frac{\nabla(\ln \rho_a)}{\nabla(\ln T)}$$
+                    </div>
+                    where \(\nabla\) denotes numerical gradient
+                </li>
+                <li>Apply derivative limiting to avoid extreme values:
+                    <div class="equation-block">
+                        $$\text{deriv}_{\text{limited}} = \text{clip}\left(\frac{d \ln \rho_a}{d \ln T}, -0.8, 2.0\right)$$
+                    </div>
+                </li>
+                <li>Calculate Bostick resistivity:
+                    <div class="equation-block">
+                        $$\rho_{\text{Bostick}} = \rho_a (1 + \text{deriv}_{\text{limited}})$$
+                    </div>
+                </li>
+                <li>Calculate Bostick depth:
+                    <div class="equation-block">
+                        $$z_{\text{Bostick}} = \frac{503}{\sqrt{2}} \sqrt{\frac{\rho_a}{f}}$$
+                    </div>
+                </li>
+                <li><strong>Output:</strong> Resistivity-depth pairs \((\rho_{\text{Bostick}}, z_{\text{Bostick}})\)</li>
+            </ol>
+        </div>
+
+        <h3>2.4 Code Implementation</h3>
+        <div class="code-block">
+# Calculate average apparent resistivity (geometric mean)
+rho_avg = np.sqrt(rho_xy * rho_yx)
+
+# Calculate skin depth
+depth = 503 * np.sqrt(rho_avg / freq)
+
+# Calculate logarithmic derivative
+d_log_rho = np.gradient(np.log(rho_avg))
+d_log_T = np.gradient(np.log(periodo))
+deriv = d_log_rho / d_log_T
+
+# Apply Bostick transformation with derivative limiting
+deriv_limited = np.clip(deriv, -0.8, 2.0)
+rho_bostick = rho_avg * (1 + deriv_limited)
+
+# Ensure positive values
+rho_bostick = np.maximum(rho_bostick, 1.0)
+
+# Calculate Bostick depth
+depth_bostick = depth / np.sqrt(2)
+        </div>
+
+        <h3>2.5 Limitations of Bostick Transformation</h3>
+        <ul>
+            <li><strong>Local approximation:</strong> Assumes smooth variations in resistivity</li>
+            <li><strong>No optimization:</strong> Not a least-squares fit to the data</li>
+            <li><strong>Derivative sensitivity:</strong> Sensitive to noise in the data</li>
+            <li><strong>1D assumption:</strong> Breaks down for 2D/3D structures</li>
+            <li><strong>No uncertainty estimates:</strong> Cannot provide error bounds</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>3. 1D Forward Modeling: Wait's Recursion Algorithm</h2>
+
+        <h3>3.1 The Forward Problem</h3>
+        <p>Given a 1D layered Earth model with \(N\) layers, each characterized by resistivity \(\rho_i\)
+        and thickness \(h_i\), the forward problem is to calculate the surface impedance \(Z_0\) and
+        hence the apparent resistivity that would be observed.</p>
+
+        <h3>3.2 Maxwell's Equations in 1D</h3>
+        <p>For a horizontally layered Earth with plane wave electromagnetic fields, Maxwell's equations
+        reduce to:</p>
+
+        <div class="equation-block">
+            $$\frac{d^2 E}{dz^2} = k^2 E$$
+        </div>
+
+        <p>where the propagation constant is:</p>
+
+        <div class="equation-block">
+            $$k = \sqrt{i \omega \mu_0 / \rho} = (1+i) \sqrt{\pi f \mu_0 / \rho}$$
+        </div>
+
+        <h3>3.3 Impedance in a Single Layer</h3>
+        <p>The intrinsic impedance of layer \(j\) is:</p>
+
+        <div class="equation-block">
+            $$Z_0^{(j)} = \sqrt{i \omega \mu_0 \rho_j} = (1+i) \sqrt{\pi f \mu_0 \rho_j}$$
+        </div>
+
+        <h3>3.4 Wait's Recursion Formula</h3>
+        <p>Wait (1954, 1962) developed a recursive algorithm to compute the surface impedance by
+        starting from the bottom layer (half-space) and propagating upward through each layer.</p>
+
+        <div class="important">
+            <strong>Key Concept:</strong> The impedance at the top of layer \(j\) depends on the
+            impedance at the bottom of layer \(j\) and the layer properties.
+        </div>
+
+        <p>The recursion formula is:</p>
+
+        <div class="equation-block">
+            $$Z_j = Z_0^{(j)} \frac{1 + r_j e^{-2k_j h_j}}{1 - r_j e^{-2k_j h_j}}$$
+        </div>
+
+        <p>where the reflection coefficient at the interface is:</p>
+
+        <div class="equation-block">
+            $$r_j = \frac{Z_{j+1} - Z_0^{(j)}}{Z_{j+1} + Z_0^{(j)}}$$
+        </div>
+
+        <p>Here:</p>
+        <ul>
+            <li>\(Z_j\) is the impedance looking down from the top of layer \(j\)</li>
+            <li>\(Z_{j+1}\) is the impedance looking down from the top of layer \(j+1\) (previously calculated)</li>
+            <li>\(Z_0^{(j)}\) is the intrinsic impedance of layer \(j\)</li>
+            <li>\(k_j\) is the propagation constant in layer \(j\)</li>
+            <li>\(h_j\) is the thickness of layer \(j\)</li>
+        </ul>
+
+        <h3>3.5 Complete Algorithm</h3>
+
+        <div class="algorithm">
+            <strong>Algorithm: Wait's Recursion for 1D MT Forward Modeling</strong>
+            <ol>
+                <li><strong>Input:</strong>
+                    <ul>
+                        <li>Periods \(T_1, T_2, \ldots, T_M\)</li>
+                        <li>Layer resistivities \(\rho_1, \rho_2, \ldots, \rho_N\)</li>
+                        <li>Layer thicknesses \(h_1, h_2, \ldots, h_{N-1}\) (bottom layer is half-space)</li>
+                    </ul>
+                </li>
+                <li><strong>For each period</strong> \(T_i\):
+                    <ol type="a">
+                        <li>Calculate angular frequency: \(\omega = 2\pi / T_i\)</li>
+                        <li><strong>Initialize</strong> with half-space (bottom layer \(N\)):
+                            <div class="equation-block">
+                                $$Z_N = Z_0^{(N)} = \sqrt{i \omega \mu_0 \rho_N}$$
+                            </div>
+                        </li>
+                        <li><strong>Recursion upward</strong> from layer \(N-1\) to layer 1:
+                            <ul>
+                                <li>For layer \(j = N-1, N-2, \ldots, 1\):</li>
+                                <li>Calculate propagation constant:
+                                    <div class="equation-block">
+                                        $$k_j = \sqrt{i \omega \mu_0 / \rho_j}$$
+                                    </div>
+                                </li>
+                                <li>Calculate intrinsic impedance:
+                                    <div class="equation-block">
+                                        $$Z_0^{(j)} = \sqrt{i \omega \mu_0 \rho_j}$$
+                                    </div>
+                                </li>
+                                <li>Calculate reflection coefficient:
+                                    <div class="equation-block">
+                                        $$r_j = \frac{Z_{j+1} - Z_0^{(j)}}{Z_{j+1} + Z_0^{(j)}}$$
+                                    </div>
+                                </li>
+                                <li>Update impedance:
+                                    <div class="equation-block">
+                                        $$Z_j = Z_0^{(j)} \frac{1 + r_j e^{-2k_j h_j}}{1 - r_j e^{-2k_j h_j}}$$
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><strong>Calculate apparent resistivity</strong> at surface:
+                            <div class="equation-block">
+                                $$\rho_{a,i} = \frac{|Z_1|^2}{\omega \mu_0}$$
+                            </div>
+                        </li>
+                    </ol>
+                </li>
+                <li><strong>Output:</strong> Synthetic apparent resistivities \(\rho_{a,1}, \rho_{a,2}, \ldots, \rho_{a,M}\)</li>
+            </ol>
+        </div>
+
+        <h3>3.6 Code Implementation</h3>
+        <div class="code-block">
+def mt_1d_forward(periods, resistivities, thicknesses):
+    """
+    Calculate 1D MT forward response using Wait's recursion
+
+    Parameters:
+        periods: array of periods (s)
+        resistivities: array of layer resistivities (Ohm*m)
+        thicknesses: array of layer thicknesses (m)
+
+    Returns:
+        rho_app: apparent resistivities
+    """
+    mu = 4 * np.pi * 1e-7  # Magnetic permeability
+    rho_app = np.zeros(len(periods))
+
+    for i, T in enumerate(periods):
+        omega = 2 * np.pi / T
+
+        # Start from bottom layer (half-space)
+        n_layers = len(resistivities)
+        Z = np.sqrt(1j * omega * mu * resistivities[-1])
+
+        # Recursion from bottom to top
+        for j in range(n_layers - 2, -1, -1):
+            rho_j = resistivities[j]
+            h_j = thicknesses[j]
+
+            # Propagation constant
+            k_j = np.sqrt(1j * omega * mu / rho_j)
+
+            # Intrinsic impedance
+            Z0_j = np.sqrt(1j * omega * mu * rho_j)
+
+            # Reflection coefficient
+            r = (Z - Z0_j) / (Z + Z0_j)
+
+            # Update impedance
+            Z = Z0_j * (1 + r * np.exp(-2 * k_j * h_j)) / \
+                       (1 - r * np.exp(-2 * k_j * h_j))
+
+        # Calculate apparent resistivity
+        rho_app[i] = (1 / (omega * mu)) * np.abs(Z)**2
+
+    return rho_app
+        </div>
+
+        <h3>3.7 Numerical Considerations</h3>
+        <ul>
+            <li><strong>Complex arithmetic:</strong> All calculations use complex numbers due to \(i = \sqrt{-1}\)</li>
+            <li><strong>Exponential stability:</strong> For large \(k_j h_j\), \(e^{-2k_j h_j} \to 0\), ensuring numerical stability</li>
+            <li><strong>Layer discretization:</strong> Model is discretized into ~30 layers to balance accuracy and computation</li>
+            <li><strong>Bottom half-space:</strong> Last layer has effectively infinite thickness</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>4. Data Quality Control: Filtering Anomalous Frequencies</h2>
+
+        <h3>4.1 Why Filter?</h3>
+        <p>Raw MT data can contain outliers due to:</p>
+        <ul>
+            <li>Cultural electromagnetic noise (power lines, trains, etc.)</li>
+            <li>Near-field source effects</li>
+            <li>Processing artifacts</li>
+            <li>3D effects in nominally 1D interpretation</li>
+        </ul>
+
+        <h3>4.2 Filtering Criteria</h3>
+        <p>The code applies three filters to identify and remove anomalous data points:</p>
+
+        <div class="algorithm">
+            <strong>Filter 1: Validity Check</strong>
+            <div class="equation-block">
+                $$\text{valid} = \text{isfinite}(\rho_{xy}) \land \text{isfinite}(\rho_{yx})$$
+            </div>
+            <p>Removes NaN (Not a Number) and Inf (Infinity) values.</p>
+        </div>
+
+        <div class="algorithm">
+            <strong>Filter 2: Physical Range</strong>
+            <div class="equation-block">
+                $$0.1 \leq \rho_{\text{avg}} \leq 10000 \quad \text{(Ohm·m)}$$
+            </div>
+            <p>Removes unphysical resistivity values. Most crustal rocks have resistivities
+            between 1 and 10,000 Ohm·m.</p>
+        </div>
+
+        <div class="algorithm">
+            <strong>Filter 3: TE-TM Consistency</strong>
+            <div class="equation-block">
+                $$0.1 \leq \frac{\rho_{xy}}{\rho_{yx}} \leq 10$$
+            </div>
+            <p>In 1D, TE and TM modes should give similar resistivities. Large differences
+            indicate 2D/3D effects or bad data.</p>
+        </div>
+
+        <h3>4.3 Implementation</h3>
+        <div class="code-block">
+# Create mask for valid data
+valid_mask = np.ones(len(freq), dtype=bool)
+
+# Remove NaN or Inf
+valid_mask &= np.isfinite(rho_xy) & np.isfinite(rho_yx)
+
+# Remove extreme values
+valid_mask &= (rho_avg > 0.1) & (rho_avg < 10000)
+
+# Remove frequencies where TE and TM differ by > factor of 10
+ratio_te_tm = rho_xy / rho_yx
+valid_mask &= (ratio_te_tm > 0.1) & (ratio_te_tm < 10)
+
+# Apply filter
+freq_filtered = freq[valid_mask]
+rho_xy_filtered = rho_xy[valid_mask]
+rho_yx_filtered = rho_yx[valid_mask]
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>5. Model Assessment: RMS Misfit</h2>
+
+        <h3>5.1 Definition</h3>
+        <p>The Root Mean Square (RMS) misfit quantifies how well the synthetic response from the
+        model matches the observed data:</p>
+
+        <div class="equation-block">
+            $$\text{RMS} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} \left( \log_{10} \rho_{a,i}^{\text{obs}} - \log_{10} \rho_{a,i}^{\text{syn}} \right)^2}$$
+        </div>
+
+        <p>where:</p>
+        <ul>
+            <li>\(\rho_{a,i}^{\text{obs}}\) is the observed (measured) apparent resistivity</li>
+            <li>\(\rho_{a,i}^{\text{syn}}\) is the synthetic (calculated) apparent resistivity from the model</li>
+            <li>\(N\) is the number of data points</li>
+        </ul>
+
+        <h3>5.2 Why Logarithmic Scale?</h3>
+        <p>Resistivity varies over many orders of magnitude (10⁰ to 10⁵ Ohm·m). Using logarithms:</p>
+        <ul>
+            <li>Treats relative errors equally across all magnitudes</li>
+            <li>Standard practice in geophysics</li>
+            <li>A factor of 2 error has the same weight whether it's 10 vs 20 or 1000 vs 2000 Ohm·m</li>
+        </ul>
+
+        <h3>5.3 Interpretation Guidelines</h3>
+        <table>
+            <tr>
+                <th>RMS Misfit</th>
+                <th>Model Quality</th>
+                <th>Interpretation</th>
+            </tr>
+            <tr>
+                <td>&lt; 0.3</td>
+                <td>Excellent</td>
+                <td>Model fits data very well. Bostick approximation is highly accurate.</td>
+            </tr>
+            <tr>
+                <td>0.3 - 0.5</td>
+                <td>Good</td>
+                <td>Acceptable fit. Minor discrepancies may be due to data noise or 1D approximation.</td>
+            </tr>
+            <tr>
+                <td>0.5 - 1.0</td>
+                <td>Moderate</td>
+                <td>Model captures general trends but misses details. Consider formal inversion.</td>
+            </tr>
+            <tr>
+                <td>&gt; 1.0</td>
+                <td>Poor</td>
+                <td>Significant misfit. Structure may be 2D/3D, or data quality issues. Formal inversion recommended.</td>
+            </tr>
+        </table>
+
+        <h3>5.4 Code Implementation</h3>
+        <div class="code-block">
+# Calculate RMS misfit in logarithmic scale
+rms_misfit = np.sqrt(np.mean((
+    np.log10(rho_avg) - np.log10(rho_synthetic)
+)**2))
+
+print(f"RMS misfit (log scale): {rms_misfit:.3f}")
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>6. Complete Workflow Summary</h2>
+
+        <div class="algorithm">
+            <strong>Complete 1D MT Inversion and Forward Modeling Workflow</strong>
+            <ol>
+                <li><strong>Data Input</strong>
+                    <ul>
+                        <li>Read EDI file containing MT impedance data</li>
+                        <li>Extract frequencies and impedance tensor components</li>
+                    </ul>
+                </li>
+                <li><strong>Quality Control</strong>
+                    <ul>
+                        <li>Apply validity, physical range, and TE-TM consistency filters</li>
+                        <li>Remove \(n\) anomalous frequencies</li>
+                    </ul>
+                </li>
+                <li><strong>Calculate Apparent Resistivity</strong>
+                    <ul>
+                        <li>Compute \(\rho_{xy}\) and \(\rho_{yx}\) from impedance</li>
+                        <li>Calculate geometric mean: \(\rho_{\text{avg}} = \sqrt{\rho_{xy} \cdot \rho_{yx}}\)</li>
+                    </ul>
+                </li>
+                <li><strong>Bostick Transformation (Approximate Inversion)</strong>
+                    <ul>
+                        <li>Calculate logarithmic derivative of apparent resistivity</li>
+                        <li>Apply Bostick formula to get resistivity-depth model</li>
+                        <li>Result: \((\rho_{\text{Bostick}}(z), z_{\text{Bostick}})\) pairs</li>
+                    </ul>
+                </li>
+                <li><strong>Model Discretization</strong>
+                    <ul>
+                        <li>Convert continuous Bostick model into ~30 layers</li>
+                        <li>Define layer resistivities and thicknesses</li>
+                    </ul>
+                </li>
+                <li><strong>Forward Modeling</strong>
+                    <ul>
+                        <li>Use Wait's recursion to calculate synthetic response</li>
+                        <li>For each period, compute surface impedance and apparent resistivity</li>
+                    </ul>
+                </li>
+                <li><strong>Model Validation</strong>
+                    <ul>
+                        <li>Compare observed (\(\rho_{\text{avg}}\)) vs synthetic (\(\rho_{\text{syn}}\)) curves</li>
+                        <li>Calculate RMS misfit in logarithmic scale</li>
+                        <li>Assess model quality based on misfit value</li>
+                    </ul>
+                </li>
+                <li><strong>Visualization</strong>
+                    <ul>
+                        <li>Plot 1: Observed TE and TM apparent resistivities</li>
+                        <li>Plot 2: Observed average vs synthetic forward response</li>
+                        <li>Plot 3: 1D resistivity-depth model from Bostick transformation</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>7. Mathematical Symbols and Notation</h2>
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Description</th>
+                <th>Units</th>
+            </tr>
+            <tr>
+                <td>\(E_x, E_y\)</td>
+                <td>Horizontal electric field components</td>
+                <td>mV/km</td>
+            </tr>
+            <tr>
+                <td>\(H_x, H_y\)</td>
+                <td>Horizontal magnetic field components</td>
+                <td>nT</td>
+            </tr>
+            <tr>
+                <td>\(\mathbf{Z}\)</td>
+                <td>Impedance tensor</td>
+                <td>[mV/km]/[nT]</td>
+            </tr>
+            <tr>
+                <td>\(Z_{xy}, Z_{yx}\)</td>
+                <td>Off-diagonal impedance components</td>
+                <td>[mV/km]/[nT]</td>
+            </tr>
+            <tr>
+                <td>\(\rho_a\)</td>
+                <td>Apparent resistivity</td>
+                <td>Ω·m</td>
+            </tr>
+            <tr>
+                <td>\(\rho_j\)</td>
+                <td>True resistivity of layer \(j\)</td>
+                <td>Ω·m</td>
+            </tr>
+            <tr>
+                <td>\(f\)</td>
+                <td>Frequency</td>
+                <td>Hz</td>
+            </tr>
+            <tr>
+                <td>\(T\)</td>
+                <td>Period (\(T = 1/f\))</td>
+                <td>s</td>
+            </tr>
+            <tr>
+                <td>\(\omega\)</td>
+                <td>Angular frequency (\(\omega = 2\pi f\))</td>
+                <td>rad/s</td>
+            </tr>
+            <tr>
+                <td>\(\mu_0\)</td>
+                <td>Magnetic permeability of free space</td>
+                <td>4π × 10⁻⁷ H/m</td>
+            </tr>
+            <tr>
+                <td>\(\delta\)</td>
+                <td>Skin depth</td>
+                <td>m</td>
+            </tr>
+            <tr>
+                <td>\(z\)</td>
+                <td>Depth (positive downward)</td>
+                <td>m</td>
+            </tr>
+            <tr>
+                <td>\(h_j\)</td>
+                <td>Thickness of layer \(j\)</td>
+                <td>m</td>
+            </tr>
+            <tr>
+                <td>\(k\)</td>
+                <td>Propagation constant (complex)</td>
+                <td>m⁻¹</td>
+            </tr>
+            <tr>
+                <td>\(Z_0\)</td>
+                <td>Intrinsic impedance</td>
+                <td>Ω</td>
+            </tr>
+            <tr>
+                <td>\(r\)</td>
+                <td>Reflection coefficient (complex)</td>
+                <td>dimensionless</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>8. References and Further Reading</h2>
+
+        <div class="reference">
+            <strong>Bostick, F. X. (1977).</strong> A simple almost exact method of MT analysis.
+            In: Workshop on Electrical Methods in Geothermal Exploration, U.S. Geological Survey,
+            Contract No. 14080001-8-359.
+        </div>
+
+        <div class="reference">
+            <strong>Wait, J. R. (1954).</strong> On the relation between telluric currents and the
+            Earth's magnetic field. Geophysics, 19(2), 281-289.
+        </div>
+
+        <div class="reference">
+            <strong>Wait, J. R. (1962).</strong> Electromagnetic Waves in Stratified Media.
+            Pergamon Press, Oxford.
+        </div>
+
+        <div class="reference">
+            <strong>Cagniard, L. (1953).</strong> Basic theory of the magneto-telluric method of
+            geophysical prospecting. Geophysics, 18(3), 605-635.
+        </div>
+
+        <div class="reference">
+            <strong>Vozoff, K. (1991).</strong> The magnetotelluric method. In: Nabighian, M.N. (Ed.),
+            Electromagnetic Methods in Applied Geophysics, Vol. 2, Part B, Society of Exploration
+            Geophysicists, 641-711.
+        </div>
+
+        <div class="reference">
+            <strong>Simpson, F., & Bahr, K. (2005).</strong> Practical Magnetotellurics.
+            Cambridge University Press.
+        </div>
+
+        <div class="reference">
+            <strong>Chave, A. D., & Jones, A. G. (Eds.). (2012).</strong> The Magnetotelluric Method:
+            Theory and Practice. Cambridge University Press.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>9. Conclusions and Recommendations</h2>
+
+        <h3>9.1 When to Use Bostick Transformation</h3>
+        <ul>
+            <li><strong>Quick reconnaissance:</strong> Rapid first-look at subsurface structure</li>
+            <li><strong>1D structures:</strong> Horizontally layered environments (sedimentary basins)</li>
+            <li><strong>Good data quality:</strong> Clean data with minimal noise</li>
+            <li><strong>Initial model:</strong> Starting point for formal iterative inversion</li>
+        </ul>
+
+        <h3>9.2 When to Use Formal Inversion</h3>
+        <ul>
+            <li><strong>High RMS misfit (&gt; 0.5):</strong> Bostick approximation inadequate</li>
+            <li><strong>Complex structures:</strong> Thin layers, sharp contrasts, or 2D/3D features</li>
+            <li><strong>Quantitative interpretation:</strong> Need uncertainty estimates</li>
+            <li><strong>Publication-quality results:</strong> Requires rigorous inversion</li>
+        </ul>
+
+        <h3>9.3 Advantages of the Implemented Approach</h3>
+        <ul>
+            <li>Fast computation (no iterative optimization)</li>
+            <li>No initial model required</li>
+            <li>Automatic quality control filtering</li>
+            <li>Forward modeling validation of results</li>
+            <li>Visual comparison of observed vs synthetic responses</li>
+        </ul>
+
+        <h3>9.4 Limitations and Caveats</h3>
+        <ul>
+            <li>Assumes perfect 1D structure (breaks down for 2D/3D)</li>
+            <li>Sensitive to data noise and outliers</li>
+            <li>No uncertainty quantification</li>
+            <li>Limited resolution for thin layers</li>
+            <li>Cannot handle sharp resistivity contrasts well</li>
+        </ul>
+    </div>
+
+    <div class="section" style="background-color: #e8f4f8; border-left: 4px solid #3498db;">
+        <h2>About This Documentation</h2>
+        <p><strong>Author:</strong> Generated for 1D Magnetotelluric Inversion Analysis</p>
+        <p><strong>Date:</strong> February 2026</p>
+        <p><strong>Code:</strong> Python implementation using MTpy, NumPy, and Matplotlib</p>
+        <p><strong>Purpose:</strong> Educational and research documentation for TFG (Final Degree Project)</p>
+        <p><strong>Contact:</strong> For questions about the mathematical implementation or code,
+        refer to the source code <code>inversion_1d.py</code></p>
+    </div>
+
+</body>
+</html>

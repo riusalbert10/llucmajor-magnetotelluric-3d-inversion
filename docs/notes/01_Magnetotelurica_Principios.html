@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magnetotelúrica · Principios físicos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']], processEscapes: true },
+  svg: { fontCache: 'global', scale: 1.05 }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root {
+  --bg: #EFEBE3;
+  --bg-card: #F8F4EB;
+  --ink: #1C1B17;
+  --ink-soft: #4A463E;
+  --rule: #CFC8B8;
+  --azul: #1E3A5F;
+  --azul-soft: #E6EDF4;
+  --gris: #4A5560;
+  --gris-soft: #E9E7E2;
+  --verd: #1F4D3A;
+  --verd-soft: #E0EBE5;
+  --ambre: #8B4513;
+  --ambre-soft: #F2E2CE;
+  --terra: #6B4423;
+  --display: 'Fraunces', Georgia, serif;
+  --body: 'Newsreader', Georgia, serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.65; }
+.container { max-width: 920px; margin: 0 auto; padding: 60px 32px 120px; }
+
+header.hero { border-top: 4px solid var(--terra); border-bottom: 1px solid var(--rule); padding: 48px 0 32px; margin-bottom: 56px; position: relative; }
+.hero .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--terra); margin-bottom: 24px; }
+.hero h1 { font-family: var(--display); font-weight: 900; font-size: clamp(36px, 6.5vw, 64px); line-height: 1.02; letter-spacing: -0.02em; margin: 0 0 16px; font-variation-settings: "SOFT" 30, "WONK" 1; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--terra); }
+.hero .lede { font-size: 18px; color: var(--ink-soft); max-width: 620px; font-style: italic; margin: 8px 0 24px; }
+.hero .meta { display: flex; gap: 28px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--ink-soft); letter-spacing: 0.06em; margin-top: 24px; }
+.hero .meta span { display: inline-flex; align-items: center; gap: 8px; }
+.hero .meta span::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--terra); }
+
+section { margin-bottom: 64px; }
+h2 { font-family: var(--display); font-size: 30px; font-weight: 600; letter-spacing: -0.012em; margin: 0 0 24px; display: flex; align-items: baseline; gap: 18px; border-bottom: 1px solid var(--rule); padding-bottom: 14px; }
+h2 .num { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); letter-spacing: 0.12em; font-weight: 500; }
+h3 { font-family: var(--display); font-size: 22px; font-weight: 600; margin: 32px 0 10px; letter-spacing: -0.005em; }
+p { margin: 0 0 16px; }
+strong { font-weight: 600; color: var(--ink); }
+
+.box { border-left: 3px solid; padding: 18px 24px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+.box-law { border-color: var(--azul); background: var(--azul-soft); }
+.box-deriv { border-color: var(--gris); background: var(--gris-soft); }
+.box-result { border-color: var(--verd); background: var(--verd-soft); }
+.box-key { border-color: var(--ambre); background: var(--ambre-soft); }
+.box .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; display: block; }
+.box-law .label { color: var(--azul); }
+.box-deriv .label { color: var(--gris); }
+.box-result .label { color: var(--verd); }
+.box-key .label { color: var(--ambre); }
+.box p:last-child, .box ul:last-child { margin-bottom: 0; }
+
+.callout { background: var(--ink); color: var(--bg); padding: 36px; border-radius: 8px; margin: 32px 0; }
+.callout .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #D4B97F; margin-bottom: 12px; }
+.callout h3 { color: var(--bg); margin: 0 0 12px; font-size: 24px; }
+.callout p { color: #E0D9CC; }
+.callout strong { color: var(--bg); }
+
+.summary-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 14.5px; background: var(--bg-card); border-radius: 6px; overflow: hidden; }
+.summary-table th, .summary-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.summary-table th { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--terra); border-bottom: 2px solid var(--terra); }
+
+.flow-step { margin: 14px 0; padding: 14px 20px; background: var(--bg-card); border-left: 3px solid var(--azul); border-radius: 0 4px 4px 0; display: flex; gap: 16px; align-items: flex-start; }
+.flow-step .step-num { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--azul); background: var(--azul-soft); padding: 3px 9px; border-radius: 3px; flex-shrink: 0; margin-top: 4px; white-space: nowrap; }
+
+.eq-flow { background: var(--bg-card); border: 1px solid var(--rule); padding: 24px; border-radius: 6px; margin: 24px 0; text-align: center; font-size: 16px; overflow-x: auto; }
+.eq-flow .arrow { color: var(--terra); font-weight: 600; }
+
+footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 12px; color: var(--ink-soft); letter-spacing: 0.05em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+
+mjx-container { overflow-x: auto; overflow-y: hidden; }
+mjx-container[display="true"] { margin: 0.8em 0 !important; }
+
+@media print {
+  body { background: white; font-size: 11pt; }
+  .container { padding: 16px; max-width: 100%; }
+  section, .box { break-inside: avoid; }
+  .callout { background: var(--bg-card); color: var(--ink); border: 2px solid var(--ink); }
+  .callout .label, .callout p, .callout strong { color: var(--ink); }
+}
+@media (max-width: 600px) { .container { padding: 32px 18px 80px; } h2 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <div class="eyebrow">Documentación · Geofísica aplicada</div>
+  <h1>Magnetotelúrica<br><em>física del subsuelo</em></h1>
+  <p class="lede">Cómo se mide la resistividad de la Tierra escuchando los campos electromagnéticos naturales. La aplicación directa de las ondas EM en buenos conductores.</p>
+  <div class="meta">
+    <span>Aplicación de Electromagnetisme 2</span>
+    <span>Régimen $\sigma \gg \omega\varepsilon$</span>
+    <span>Documento I de III</span>
+  </div>
+</header>
+
+<!-- ========== SECTION 1 ========== -->
+<section>
+  <h2><span class="num">01</span> La idea central</h2>
+
+  <p>La <strong>magnetotelúrica (MT)</strong> es un método geofísico pasivo que mide la resistividad del subsuelo escuchando los campos electromagnéticos naturales que las tormentas solares y los rayos lejanos inducen en la Tierra. No requiere fuente artificial — solo dos electrodos y unas bobinas, y mucha paciencia.</p>
+
+  <p>El fundamento físico es exactamente lo que se estudia en clase: <strong>la propagación de ondas EM en un buen conductor</strong>. La Tierra, a las frecuencias de interés, se comporta como tal.</p>
+
+  <div class="box box-key">
+    <span class="label">Por qué la Tierra es un buen conductor en MT</span>
+    <p>Las rocas tienen resistividades $\rho = 1/\sigma$ típicas entre 1 y 10000 Ωm. A las frecuencias usadas en MT (entre $\sim 10^{-4}$ Hz y $\sim 10^4$ Hz):</p>
+    $$\frac{\sigma}{\omega\varepsilon_0\varepsilon_r} \sim \frac{10^{-2}}{2\pi \cdot 1 \cdot 10^{-10}} \sim 10^7 \gg 1$$
+    <p>Es decir, $\tan\delta \gg 1$. Régimen de buen conductor. Todas las fórmulas del Full 4 (Problema 6) aplican directamente.</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 2 ========== -->
+<section>
+  <h2><span class="num">02</span> La fórmula de Cagniard</h2>
+
+  <p>El paso clave que conecta tu electromagnetismo con la geofísica de campo.</p>
+
+  <div class="box box-law">
+    <span class="label">Ley · Impedancia en buen conductor</span>
+    <p>De la derivación del Full 4:</p>
+    $$|\tilde{\eta}| = \sqrt{\frac{\mu\omega}{\sigma}} = \sqrt{\mu_0\,\omega\,\rho}$$
+    <p>(con $\mu = \mu_0$ en rocas no magnéticas, lo habitual).</p>
+  </div>
+
+  <div class="box box-deriv">
+    <span class="label">Derivación · De la impedancia a la resistividad</span>
+    <p>Para una onda plana incidiendo verticalmente sobre un semiespacio uniforme, la impedancia medida en superficie es:</p>
+    $$Z(\omega) = \frac{E_x(\omega)}{H_y(\omega)} = \tilde{\eta}$$
+    <p>Tomando el módulo al cuadrado:</p>
+    $$|Z(\omega)|^2 = \mu_0\,\omega\,\rho$$
+    <p>Despejando $\rho$:</p>
+  </div>
+
+  <div class="box box-result">
+    <span class="label">Resultado · Fórmula de Cagniard (1953)</span>
+    $$\boxed{\;\rho_a(\omega) = \frac{1}{\mu_0\,\omega}\,|Z(\omega)|^2\;}$$
+    <p>Esta es la ecuación fundamental del método MT. La $\rho_a$ se llama <strong>resistividad aparente</strong> porque para una Tierra estratificada no es la resistividad real, sino una promedio efectiva sobre la profundidad sondeada.</p>
+  </div>
+
+  <p><strong>La observación crucial:</strong> $|Z|^2 \propto \omega\,\rho$. La impedancia depende tanto de la frecuencia como de la resistividad. <em>Sin barrer frecuencias no podrías separar ambas cosas</em>. De ahí que un sondeo MT necesite el espectro completo.</p>
+</section>
+
+<!-- ========== SECTION 3 ========== -->
+<section>
+  <h2><span class="num">03</span> Cada frecuencia explora una profundidad distinta</h2>
+
+  <p>Aquí entra la <strong>profundidad de penetración</strong> $\delta$ derivada en clase.</p>
+
+  <div class="box box-law">
+    <span class="label">Ley · Profundidad de Bostick</span>
+    $$\delta(\omega, \rho) = \sqrt{\frac{2\rho}{\mu_0\,\omega}} = \sqrt{\frac{\rho}{\pi\mu_0 f}} \approx 503\sqrt{\frac{\rho\,[\Omega\text{m}]}{f\,[\text{Hz}]}}\;\;\text{m}$$
+    <p>En MT esto se denomina "profundidad efectiva de exploración". El número 503 sale de evaluar las constantes universales: $\sqrt{1/(\pi\mu_0)} \approx 503$ con $\mu_0 = 4\pi \times 10^{-7}$ H/m.</p>
+  </div>
+
+  <h3>Tabla de profundidades exploradas</h3>
+
+  <table class="summary-table">
+    <thead>
+      <tr><th>Frecuencia</th><th>Resistividad típica</th><th>Profundidad sondeada</th><th>Contexto geológico</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1000 Hz</td><td>100 Ωm</td><td>~160 m</td><td>Sedimentos superficiales</td></tr>
+      <tr><td>1 Hz</td><td>100 Ωm</td><td>~5 km</td><td>Cuenca sedimentaria</td></tr>
+      <tr><td>0,01 Hz</td><td>100 Ωm</td><td>~50 km</td><td>Corteza continental</td></tr>
+      <tr><td>0,001 Hz</td><td>1000 Ωm</td><td>~500 km</td><td>Manto superior</td></tr>
+      <tr><td>0,0001 Hz</td><td>100 Ωm</td><td>~1600 km</td><td>Manto profundo</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 18px;"><strong>Por eso MT puede explorar desde decenas de metros hasta el manto profundo</strong> simplemente cambiando de frecuencia. El campo de alta frecuencia se atenúa rápido ($e^{-z/\delta}$ con $\delta$ pequeña) y solo "siente" lo superficial; el de baja frecuencia penetra muy profundo.</p>
+</section>
+
+<!-- ========== SECTION 4 ========== -->
+<section>
+  <h2><span class="num">04</span> El mecanismo intuitivo</h2>
+
+  <p>Cuando una onda de frecuencia $\omega$ entra al subsuelo:</p>
+
+  <div class="flow-step"><span class="step-num">PASO 1</span><div>Se atenúa con la profundidad como $e^{-z/\delta(\omega,\rho)}$.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 2</span><div>Cada capa atravesada modifica la onda según su $\rho$ local.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 3</span><div>La onda devuelta hacia la superficie lleva información integrada de las propiedades hasta profundidad $\sim\delta$.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 4</span><div>En la superficie, modifica la relación $E_x/H_y$ a esa frecuencia concreta.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 5</span><div>Calculas $\rho_a(\omega) = |Z(\omega)|^2/(\mu_0\omega)$ para esa frecuencia → resistividad aparente sentida a la profundidad correspondiente.</div></div>
+
+  <p style="margin-top: 18px;">La curva $\rho_a(\omega)$ — o equivalentemente $\rho_a$ vs $\delta$ — es ya prácticamente un perfil de $\rho$ contra profundidad.</p>
+</section>
+
+<!-- ========== SECTION 5 ========== -->
+<section>
+  <h2><span class="num">05</span> La fase de $Z$: información extra</h2>
+
+  <p>Recuerda que en clase derivamos $\arg(\tilde{\eta}) = +\pi/4 = 45°$ exactamente para un semiespacio uniforme. Esto da una potente herramienta de diagnóstico.</p>
+
+  <div class="callout">
+    <div class="label">Resultado clave</div>
+    <h3>El termómetro de la heterogeneidad vertical</h3>
+    <p>Para una Tierra <strong>uniforme</strong>, $\arg(Z) = 45°$ a todas las frecuencias.</p>
+    <p style="margin-top: 14px;">Cualquier desviación de los 45° significa que la Tierra <strong>no es uniforme</strong> a esa profundidad:</p>
+    <ul style="margin-top: 10px;">
+      <li><strong>$\arg(Z) > 45°$</strong> → la $\rho$ <em>disminuye</em> con la profundidad por debajo de $\delta(\omega)$ (capa más conductora abajo)</li>
+      <li><strong>$\arg(Z) < 45°$</strong> → la $\rho$ <em>aumenta</em> con la profundidad (basamento resistivo)</li>
+      <li><strong>$\arg(Z) = 45°$</strong> → localmente uniforme</li>
+    </ul>
+  </div>
+
+  <p>Por esta razón, en un sondeo MT siempre se reportan <strong>dos curvas vs frecuencia</strong>: $\rho_a(\omega)$ y $\phi(\omega) = \arg(Z(\omega))$. Las dos juntas determinan unívocamente $\rho(z)$ por inversión.</p>
+</section>
+
+<!-- ========== SECTION 6 ========== -->
+<section>
+  <h2><span class="num">06</span> El flujo completo del método MT</h2>
+
+  <div class="eq-flow">
+    $\underbrace{E_x(t),\;H_y(t)}_{\text{medidas en superficie}}$ &nbsp;<span class="arrow">→ FFT →</span>&nbsp; $\underbrace{E_x(\omega),\;H_y(\omega)}_{\text{espectros}}$
+    <br><br>
+    <span class="arrow">→ $Z = E/H$ →</span>&nbsp; $\underbrace{|Z|(\omega),\;\phi(\omega)}_{\text{impedancia}}$
+    <br><br>
+    <span class="arrow">→ Cagniard →</span>&nbsp; $\underbrace{\rho_a(\omega)}_{\text{resist. aparente}}$ &nbsp;<span class="arrow">→ $\delta = \sqrt{2\rho_a/\mu_0\omega}$ →</span>&nbsp; $\underbrace{\rho_a(z)}_{\text{transformación de Bostick}}$
+    <br><br>
+    <span class="arrow">→ inversión →</span>&nbsp; $\underbrace{\rho(z)}_{\text{perfil real del subsuelo}}$
+  </div>
+</section>
+
+<!-- ========== SECTION 7 ========== -->
+<section>
+  <h2><span class="num">07</span> Síntesis</h2>
+
+  <div class="box box-result">
+    <span class="label">Las tres claves físicas del método</span>
+    <ul>
+      <li><strong>Cagniard</strong>: $|\eta|^2 = \mu_0\omega\rho$ → cada $|Z|(\omega)$ medida da una $\rho_a(\omega)$.</li>
+      <li><strong>Skin depth</strong>: $\delta(\omega,\rho) = \sqrt{2\rho/\mu_0\omega}$ → cada frecuencia "ve" una profundidad distinta.</li>
+      <li><strong>Fase de 45°</strong>: cualquier desviación delata heterogeneidad vertical.</li>
+    </ul>
+    <p style="margin-top: 14px;">Combinando los tres ingredientes, midiendo $E$ y $H$ en un rango de frecuencias suficientemente amplio (4–5 décadas, típicamente $10^{-4}$ a $10^{4}$ Hz), reconstruyes $\rho(z)$ desde la superficie hasta cientos de kilómetros.</p>
+  </div>
+
+  <p><strong>Lo más bonito del asunto:</strong> no necesitas inyectar corrientes ni emitir señal. Las tormentas magnéticas del Sol y los rayos en la otra punta del planeta hacen el trabajo de fuente por ti — solo tienes que escuchar con suficiente paciencia (de horas a semanas de registro continuo).</p>
+
+  <div class="box box-key">
+    <span class="label">La conexión con la asignatura</span>
+    <p>Lo que en el Full 4 parece un ejercicio académico (Problema 6: ona en bon conductor, derivación de $\delta$ y del desfase de 45°) es <strong>exactamente la física que la magnetotelúrica usa cada día</strong> para mapear el interior de la Tierra. Cuando alguien dice "MT" en geofísica, está hablando del Problema 6 aplicado al planeta.</p>
+  </div>
+</section>
+
+<footer>
+  <span>Magnetotelúrica · Principios físicos</span>
+  <span>Documento I de III</span>
+  <span>21025 · UIB</span>
+</footer>
+
+</div>
+</body>
+</html>

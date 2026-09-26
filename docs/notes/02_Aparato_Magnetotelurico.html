@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aparato Magnetotelúrico · Hardware y sensores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']], processEscapes: true },
+  svg: { fontCache: 'global', scale: 1.05 }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root {
+  --bg: #ECEAE3;
+  --bg-card: #F5F2EA;
+  --ink: #16181C;
+  --ink-soft: #45484E;
+  --rule: #C8C4B8;
+  --azul: #1E3A5F;
+  --azul-soft: #E4ECF4;
+  --gris: #4A5560;
+  --gris-soft: #E5E3DE;
+  --verd: #1F4D3A;
+  --verd-soft: #DDE9E2;
+  --ambre: #8B4513;
+  --ambre-soft: #F0E0CC;
+  --acer: #34495E;
+  --display: 'Fraunces', Georgia, serif;
+  --body: 'Newsreader', Georgia, serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.65; }
+.container { max-width: 920px; margin: 0 auto; padding: 60px 32px 120px; }
+
+header.hero { border-top: 4px solid var(--acer); border-bottom: 1px solid var(--rule); padding: 48px 0 32px; margin-bottom: 56px; }
+.hero .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--acer); margin-bottom: 24px; }
+.hero h1 { font-family: var(--display); font-weight: 900; font-size: clamp(36px, 6.5vw, 64px); line-height: 1.02; letter-spacing: -0.02em; margin: 0 0 16px; font-variation-settings: "SOFT" 30, "WONK" 1; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--acer); }
+.hero .lede { font-size: 18px; color: var(--ink-soft); max-width: 620px; font-style: italic; margin: 8px 0 24px; }
+.hero .meta { display: flex; gap: 28px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--ink-soft); letter-spacing: 0.06em; margin-top: 24px; }
+.hero .meta span { display: inline-flex; align-items: center; gap: 8px; }
+.hero .meta span::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--acer); }
+
+section { margin-bottom: 64px; }
+h2 { font-family: var(--display); font-size: 30px; font-weight: 600; letter-spacing: -0.012em; margin: 0 0 24px; display: flex; align-items: baseline; gap: 18px; border-bottom: 1px solid var(--rule); padding-bottom: 14px; }
+h2 .num { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); letter-spacing: 0.12em; font-weight: 500; }
+h3 { font-family: var(--display); font-size: 22px; font-weight: 600; margin: 32px 0 10px; letter-spacing: -0.005em; }
+h4 { font-family: var(--display); font-size: 18px; font-weight: 600; margin: 22px 0 8px; color: var(--acer); }
+p { margin: 0 0 16px; }
+strong { font-weight: 600; color: var(--ink); }
+
+.box { border-left: 3px solid; padding: 18px 24px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+.box-law { border-color: var(--azul); background: var(--azul-soft); }
+.box-deriv { border-color: var(--gris); background: var(--gris-soft); }
+.box-result { border-color: var(--verd); background: var(--verd-soft); }
+.box-key { border-color: var(--ambre); background: var(--ambre-soft); }
+.box .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; display: block; }
+.box-law .label { color: var(--azul); }
+.box-deriv .label { color: var(--gris); }
+.box-result .label { color: var(--verd); }
+.box-key .label { color: var(--ambre); }
+.box p:last-child, .box ul:last-child { margin-bottom: 0; }
+
+.sensor-card { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 8px; padding: 24px 28px; margin: 18px 0; position: relative; overflow: hidden; }
+.sensor-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent, var(--acer)); }
+.sensor-card .sensor-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--accent, var(--acer)); font-weight: 600; margin-bottom: 4px; }
+.sensor-card h4 { margin: 0 0 6px; color: var(--ink); }
+.sensor-card .range { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); background: var(--bg); padding: 4px 10px; border-radius: 3px; display: inline-block; margin-bottom: 12px; }
+.sensor-spec { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; font-size: 14.5px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--rule); }
+.sensor-spec dt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-soft); padding-top: 3px; }
+.sensor-spec dd { margin: 0; }
+
+.card-coil { --accent: #1E3A5F; }
+.card-fluxgate { --accent: #6B4423; }
+.card-squid { --accent: #5C3A6B; }
+.card-electrodes { --accent: #1F4D3A; }
+
+.summary-table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; background: var(--bg-card); border-radius: 6px; overflow: hidden; }
+.summary-table th, .summary-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.summary-table th { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--acer); border-bottom: 2px solid var(--acer); }
+
+.callout { background: var(--ink); color: var(--bg); padding: 36px; border-radius: 8px; margin: 32px 0; }
+.callout .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #9FB8D4; margin-bottom: 12px; }
+.callout h3 { color: var(--bg); margin: 0 0 12px; font-size: 24px; }
+.callout p, .callout li { color: #DCE0E5; }
+.callout strong { color: var(--bg); }
+
+.station-diagram { background: var(--bg-card); border: 1px solid var(--rule); padding: 28px; border-radius: 8px; margin: 24px 0; }
+.station-diagram svg { width: 100%; height: auto; max-width: 700px; display: block; margin: 0 auto; }
+
+footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 12px; color: var(--ink-soft); letter-spacing: 0.05em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+
+mjx-container { overflow-x: auto; overflow-y: hidden; }
+mjx-container[display="true"] { margin: 0.8em 0 !important; }
+
+@media print {
+  body { background: white; font-size: 11pt; }
+  .container { padding: 16px; max-width: 100%; }
+  section, .box, .sensor-card { break-inside: avoid; }
+  .callout { background: var(--bg-card); color: var(--ink); border: 2px solid var(--ink); }
+  .callout .label, .callout p, .callout strong, .callout li { color: var(--ink); }
+}
+@media (max-width: 600px) { .container { padding: 32px 18px 80px; } h2 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <div class="eyebrow">Documentación · Instrumentación</div>
+  <h1>El aparato<br><em>magnetotelúrico</em></h1>
+  <p class="lede">Cómo se construye una estación MT real: cinco sensores, un ADC y mucho silicio. La aplicación física directa de Faraday y la magnetización en materiales.</p>
+  <div class="meta">
+    <span>Hardware y principios de medida</span>
+    <span>Sensibilidades de $10^{-10}$</span>
+    <span>Documento II de III</span>
+  </div>
+</header>
+
+<!-- ========== SECTION 1 ========== -->
+<section>
+  <h2><span class="num">01</span> Aclaración previa</h2>
+
+  <p>Una <strong>estación magnetotelúrica</strong> y un <strong>magnetómetro</strong> no son lo mismo. El magnetómetro es solo uno de los sensores de la estación, el que mide el campo magnético. La estación completa tiene cinco sensores midiendo a la vez:</p>
+
+  <div class="box box-key">
+    <span class="label">Las cinco componentes de un sondeo MT</span>
+    <ul>
+      <li><strong>Tres del campo magnético</strong>: $H_x$, $H_y$, $H_z$ (con magnetómetros)</li>
+      <li><strong>Dos del campo eléctrico</strong>: $E_x$, $E_y$ (con pares de electrodos)</li>
+    </ul>
+    <p style="margin-top: 12px;">Las componentes horizontales ($E_x$, $H_y$ y $E_y$, $H_x$) son las que entran en el <strong>tensor de impedancia</strong> $Z(\omega)$. La $H_z$ se usa para detectar estructuras 2D/3D y para el llamado <em>tipper</em>.</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 2 ========== -->
+<section>
+  <h2><span class="num">02</span> El campo magnético: tres tecnologías</h2>
+
+  <p>No hay un único sensor universal. Cada tecnología es óptima para una banda de frecuencias.</p>
+
+  <div class="sensor-card card-coil">
+    <div class="sensor-tag">SENSOR A · INDUCCIÓN</div>
+    <h4>Bobinas de inducción</h4>
+    <span class="range">Banda · 10⁻³ Hz a 10 kHz · MT clásica</span>
+    <p>Lo más usado en MT estándar. Físicamente: una bobina de <strong>muchas miles de vueltas</strong> ($N \sim 10^4$–$10^5$) sobre un núcleo cilíndrico de material ferromagnético de alta permeabilidad (mu-metal o permalloy, $\mu_r \sim 10^4$–$10^5$). De 1 a 2 m de largo.</p>
+
+    <div class="box box-law">
+      <span class="label">Principio físico · Faraday</span>
+      $$\varepsilon = -N\,\frac{d\Phi_B}{dt} = -N A\,\mu_0\mu_{\text{ef}}\,\frac{dH}{dt}$$
+      <p>La señal de salida en frecuencia:</p>
+      $$V_{\text{out}}(\omega) = -i\omega\,N A\,\mu_0\mu_{\text{ef}}\,H(\omega)$$
+    </div>
+
+    <p style="margin-top: 14px;"><strong>Tres consecuencias clave:</strong></p>
+    <ol>
+      <li><strong>La salida crece con $\omega$</strong>: a baja frecuencia el voltaje es minúsculo. Por eso las bobinas son malas por debajo de $10^{-3}$ Hz.</li>
+      <li><strong>El núcleo ferromagnético amplifica el flujo</strong> por un factor $\mu_{\text{ef}}$ — concentra las líneas de $\vec{B}$ dentro del núcleo. Sin él la sensibilidad sería ridícula.</li>
+      <li><strong>La bobina mide $dH/dt$, no $H$</strong>: hay que <em>integrar electrónicamente</em> para obtener $H(t)$.</li>
+    </ol>
+
+    <dl class="sensor-spec">
+      <dt>Sensibilidad</dt><dd>$\sim 10^{-5}$ nT/√Hz a 1 Hz</dd>
+      <dt>Comparación</dt><dd>El campo terrestre de fondo es ~50000 nT → mide fluctuaciones de $10^{-10}$ veces el campo de fondo</dd>
+      <dt>Salida</dt><dd>Voltaje analógico proporcional a $dH/dt$</dd>
+    </dl>
+  </div>
+
+  <div class="sensor-card card-fluxgate">
+    <div class="sensor-tag">SENSOR B · SATURACIÓN</div>
+    <h4>Magnetómetros fluxgate</h4>
+    <span class="range">Banda · DC a ~1 Hz · MT de período largo</span>
+    <p>Para frecuencias muy bajas, las bobinas de inducción no sirven (su salida tiende a cero con $\omega$). El fluxgate funciona por un mecanismo distinto, basado en la <strong>saturación periódica de un núcleo ferromagnético</strong>:</p>
+
+    <ol>
+      <li>Un núcleo ferromagnético se excita con corriente alterna fuerte que lo lleva a saturación periódicamente.</li>
+      <li>Una segunda bobina de detección recoge la señal magnética del núcleo.</li>
+      <li><strong>Sin campo externo</strong>: la saturación es simétrica → el segundo armónico es cero.</li>
+      <li><strong>Con campo externo $H_{\text{ext}}$</strong>: el núcleo se satura asimétricamente → aparece una componente del segundo armónico <strong>proporcional a $H_{\text{ext}}$</strong>.</li>
+    </ol>
+
+    <dl class="sensor-spec">
+      <dt>Sensibilidad</dt><dd>~0,01 nT</dd>
+      <dt>Banda</dt><dd>DC hasta unos cientos de Hz</dd>
+      <dt>Salida</dt><dd>Voltaje proporcional a $H$ (no a $dH/dt$)</dd>
+      <dt>Aplicación</dt><dd>MT de muy largo período, observatorios geomagnéticos</dd>
+    </dl>
+  </div>
+
+  <div class="sensor-card card-squid">
+    <div class="sensor-tag">SENSOR C · CUÁNTICO</div>
+    <h4>SQUID · Superconducting Quantum Interference Device</h4>
+    <span class="range">Banda · DC a kHz · gama alta</span>
+    <p>La opción de máxima sensibilidad para experimentos científicos profundos. Basado en el efecto Josephson en superconductores. Requiere helio líquido y blindaje magnético cuidadoso.</p>
+
+    <dl class="sensor-spec">
+      <dt>Sensibilidad</dt><dd>~$10^{-6}$ nT</dd>
+      <dt>Coste</dt><dd>Muy alto · uso en investigación de manto profundo</dd>
+      <dt>Limitación</dt><dd>Necesita criogenia constante</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ========== SECTION 3 ========== -->
+<section>
+  <h2><span class="num">03</span> El campo eléctrico: pares de electrodos</h2>
+
+  <p>Aquí no hay un "sensor" en sentido estricto. Se mide la <strong>diferencia de potencial</strong> entre dos electrodos enterrados, separados por una distancia $L$ típicamente entre 50 y 100 m.</p>
+
+  <div class="box box-law">
+    <span class="label">Principio · Diferencia de potencial</span>
+    $$E_x = \frac{V(\text{electrodo A}) - V(\text{electrodo B})}{L}$$
+    <p>Configuración típica: cuatro electrodos en cruz (norte-sur y este-oeste) para obtener $E_x$ y $E_y$ simultáneamente.</p>
+  </div>
+
+  <div class="sensor-card card-electrodes">
+    <div class="sensor-tag">CRÍTICO · ELECTROQUÍMICA</div>
+    <h4>Por qué no se usan electrodos metálicos cualquiera</h4>
+    <p>Si usas cobre o acero, las reacciones electroquímicas con la humedad del suelo generan potenciales de contacto <strong>mucho mayores que la señal MT</strong> (que está en microvoltios). Así arruinarías la medida.</p>
+
+    <p>Se usan <strong>electrodos no polarizables</strong>: un metal en equilibrio químico con su propia sal. Los más comunes:</p>
+    <ul>
+      <li><strong>Plomo / cloruro de plomo (Pb/PbCl₂)</strong> en gel de KCl</li>
+      <li><strong>Plata / cloruro de plata (Ag/AgCl)</strong></li>
+      <li><strong>Cobre / sulfato de cobre (Cu/CuSO₄)</strong> — los "porous pots" clásicos</li>
+    </ul>
+
+    <p style="margin-top: 14px;">Estos mantienen un potencial de contacto <strong>estable y reproducible</strong>, así que las variaciones de tensión que mides son las del campo telúrico real, no artefactos químicos.</p>
+
+    <dl class="sensor-spec">
+      <dt>Sensibilidad</dt><dd>~0,1 µV detectable</dd>
+      <dt>Con $L=100$ m</dt><dd>Detecta $\sim 10^{-9}$ V/m de campo eléctrico</dd>
+      <dt>Conexión</dt><dd>Cable apantallado al amplificador de la unidad central</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- ========== SECTION 4 ========== -->
+<section>
+  <h2><span class="num">04</span> La frecuencia no se mide, se calcula</h2>
+
+  <p>Esto sorprende: una estación MT <strong>no sintoniza</strong> una frecuencia concreta como una radio. Lo que hace es:</p>
+
+  <div class="box box-result">
+    <span class="label">Flujo de adquisición</span>
+    <ol>
+      <li>Registrar las cinco señales <strong>en el dominio del tiempo</strong> durante un periodo largo (de horas a semanas, según las frecuencias de interés).</li>
+      <li>Muestrear a frecuencia $f_s$ alta (típicamente 1 kHz a 100 kHz para MT estándar).</li>
+      <li><strong>A posteriori</strong>, convertir cada serie temporal al dominio de frecuencia con la FFT (transformada rápida de Fourier).</li>
+    </ol>
+  </div>
+
+  <p>Es decir: el aparato simplemente <em>graba todo</em>, y luego el procesado matemático extrae la información en frecuencia. Esto se explica en detalle en el documento III de la serie.</p>
+</section>
+
+<!-- ========== SECTION 5 ========== -->
+<section>
+  <h2><span class="num">05</span> La unidad central de adquisición</h2>
+
+  <p>Es la "caja negra" de la estación. Contiene la electrónica que convierte voltajes en datos digitales.</p>
+
+  <div class="box box-key">
+    <span class="label">Componentes esenciales</span>
+    <ul>
+      <li><strong>ADC de alta resolución (24 bits)</strong>: el rango dinámico es enorme — la señal puede variar 5–6 órdenes de magnitud entre frecuencias. 24 bits dan $\sim 16$ millones de niveles, suficiente.</li>
+      <li><strong>Filtros antialiasing analógicos</strong>: filtro paso-bajo antes del ADC para evitar que frecuencias por encima de $f_s/2$ se cuelen disfrazadas (aliasing).</li>
+      <li><strong>Sincronización GPS</strong>: reloj GPS para sincronizar muestras al microsegundo. Esencial para procesado con <em>referencia remota</em>.</li>
+      <li><strong>Almacenamiento masivo</strong>: registrar 5 canales a 1 kHz durante una semana son varios GB. Equipos modernos con SSD industrial.</li>
+      <li><strong>Alimentación</strong>: baterías + panel solar pequeño para operación autónoma de semanas.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ========== SECTION 6 ========== -->
+<section>
+  <h2><span class="num">06</span> Trucos imprescindibles del procesado</h2>
+
+  <p>En un mundo ideal bastaría con FFT y dividir $E/H$. La realidad tiene tres complicaciones serias que se resuelven con técnicas elegantes.</p>
+
+  <h3>Promediado espectral (stacking)</h3>
+  <p>La fuente MT (tormentas solares, rayos) es <strong>estocástica</strong>. La FFT de una sola ventana de tiempo es ruidosa. La solución: dividir el registro en muchas ventanas, calcular $Z(\omega)$ en cada una y promediar. Cuantas más ventanas, menor incertidumbre. De ahí que se registre durante días.</p>
+
+  <h3>Estimación cruzada para evitar sesgo por ruido</h3>
+  <div class="box box-law">
+    <span class="label">Espectros cruzados</span>
+    <p>Si calculas $Z = E/H$ directamente, el ruido en $H$ sesga el resultado. La solución estándar:</p>
+    $$Z(\omega) = \frac{\langle E\,H^* \rangle}{\langle H\,H^* \rangle}$$
+    <p>donde $\langle\cdot\rangle$ denota promedio sobre ventanas. Esto cancela ruidos no correlacionados.</p>
+  </div>
+
+  <h3>Referencia remota (Gamble, Goubau & Clarke, 1979)</h3>
+  <p>Si hay ruido <strong>local</strong> (líneas eléctricas, vacas pasando, viento moviendo cables), contamina tanto $E$ como $H$ en la misma estación y el truco anterior no lo elimina. Solución revolucionaria: pones una <strong>segunda estación remota</strong> a 10–100 km de distancia, donde el ruido local es independiente pero la señal MT (de origen ionosférico) es la misma.</p>
+
+  <div class="box box-result">
+    <span class="label">Fórmula con referencia remota</span>
+    $$Z(\omega) = \frac{\langle E_{\text{local}}\,H_{\text{remoto}}^* \rangle}{\langle H_{\text{local}}\,H_{\text{remoto}}^* \rangle}$$
+    <p>Como el ruido local no está correlacionado con el campo remoto, <strong>se cancela en el promedio</strong>. Esta técnica revolucionó la MT en los años 80 y hoy es estándar.</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 7 ========== -->
+<section>
+  <h2><span class="num">07</span> Las tres bandas de un sondeo profundo</h2>
+
+  <p>Como una sola tasa de muestreo no cubre las 8 décadas de frecuencia ($10^{-4}$ a $10^{4}$ Hz), los equipos modernos graban en <strong>varias bandas simultáneas</strong> con submuestreo digital.</p>
+
+  <table class="summary-table">
+    <thead>
+      <tr><th>Banda</th><th>$f_s$ típica</th><th>Frecuencias útiles</th><th>Duración registro</th><th>Profundidad</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>AMT (Audio-MT)</strong></td><td>10–100 kHz</td><td>1 Hz – 10 kHz</td><td>horas</td><td>metros a ~1 km</td></tr>
+      <tr><td><strong>MT estándar</strong></td><td>~1 kHz</td><td>0,001 – 100 Hz</td><td>1–2 días</td><td>cientos m a ~50 km</td></tr>
+      <tr><td><strong>LMT (Long-period)</strong></td><td>~1 Hz</td><td>$10^{-5}$ – 1 Hz</td><td>semanas</td><td>hasta el manto profundo</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 18px;">Por eso un sondeo profundo serio dura <strong>semanas</strong> y suele combinar dos o tres equipos distintos.</p>
+</section>
+
+<!-- ========== SECTION 8 ========== -->
+<section>
+  <h2><span class="num">08</span> Una estación MT en el campo</h2>
+
+  <div class="callout">
+    <div class="label">Síntesis visual</div>
+    <h3>Qué ves al llegar a un sondeo</h3>
+    <p>Imagínate una estación MT desplegada en un terreno:</p>
+    <ul style="margin-top: 12px;">
+      <li>Una <strong>caja central</strong> (la unidad de adquisición) con el ADC, GPS, baterías solares y almacenamiento. Tipo nevera portátil.</li>
+      <li><strong>Cinco sensores</strong> conectados con cables apantallados:
+        <ul style="margin-top: 6px;">
+          <li>3 bobinas de inducción enterradas perpendiculares entre sí (norte-sur, este-oeste, vertical)</li>
+          <li>4 electrodos no polarizables enterrados en cruz a 50–100 m del centro</li>
+        </ul>
+      </li>
+      <li><strong>Antena GPS</strong> en lo alto para sincronización y posición</li>
+      <li><strong>Panel solar</strong> pequeño para alimentación durante semanas</li>
+    </ul>
+    <p style="margin-top: 14px;">Cuando vuelves a recogerlo, en el portátil corres software de procesado (BIRRP, EMTF de Egbert, ModEM…) y obtienes las curvas $\rho_a(\omega)$ y $\phi(\omega)$ que luego inviertes para obtener un modelo de $\rho(z)$ o 2D/3D del subsuelo.</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 9 ========== -->
+<section>
+  <h2><span class="num">09</span> Cada parte del aparato es un capítulo de la asignatura</h2>
+
+  <div class="box box-result">
+    <span class="label">Conexiones con Electromagnetisme 2</span>
+    <ul>
+      <li><strong>Bobinas de inducción</strong> → ley de Faraday (Full 1: fem inducida)</li>
+      <li><strong>Núcleo ferromagnético del fluxgate</strong> → magnetización en materiales (Full 2: $\vec{B} = \mu_0(\vec{H} + \vec{M})$)</li>
+      <li><strong>Electrodos no polarizables</strong> → doble capa eléctrica (electrostática en presencia de electrolito)</li>
+      <li><strong>Impedancia en la Tierra</strong> → ondas EM en buen conductor (Full 4, Problema 6)</li>
+      <li><strong>Procesado en frecuencia</strong> → análisis espectral / transformadas integrales</li>
+    </ul>
+    <p style="margin-top: 14px;">Toda la asignatura, montada en una caja en el campo midiendo el subsuelo. Lo que parece un ejercicio académico (Problema 6 del Full 4) es exactamente la física del sensor que la magnetotelúrica usa cada día.</p>
+  </div>
+</section>
+
+<footer>
+  <span>Aparato Magnetotelúrico · Hardware</span>
+  <span>Documento II de III</span>
+  <span>21025 · UIB</span>
+</footer>
+
+</div>
+</body>
+</html>

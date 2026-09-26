@@ -1,0 +1,90 @@
+% Requereix: \usepackage{booktabs}   (i \usepackage{siunitx} opcional)
+% Taules de parametres de la inversio 3D MT - configuracio Run_635.
+
+%============================ TAULA 1 ============================
+\begin{table}[htbp]
+\centering
+\caption{Característiques de la malla, les dades i el model inicial emprats en la inversió 3D magnetotel·lúrica.}
+\label{tab:malla_dades}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Paràmetre} & \textbf{Valor} \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Malla (Model\_Bat\_35km\_recond)}}\\
+Nombre de cel·les & $68\times68\times30$ \; (138.720) \\
+Extensió horitzontal & $35\times35$ km \\
+Profunditat total del domini & 68,36 km \\
+Cel·la de nucli (horitzontal) & 150 m \; (50 cel·les/eix $\rightarrow$ 7,5 km) \\
+Primera capa (vertical) & 12 m \\
+Cel·la més profunda (padding) & $\sim$23,8 km \\
+Resolució somera & 13 capes fins a 600 m; 19 fins a 2 km \\
+Origen (cantonada) & $(-17503,\,-17503,\,0)$ m \\
+Centre del domini & $(-3,\,-3)$ m \\
+Rotació & $0^{\circ}$ \\
+Format de resistivitat & LOGE ($\ln\rho$) \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Dades (Mall\_maskD\_no\_tip\_10s\_ef5)}}\\
+Tipus de dada & tensor d'impedància complet \\
+Components & $Z_{xx},\,Z_{xy},\,Z_{yx},\,Z_{yy}$ \\
+Nombre de períodes & 39 \\
+Rang de períodes & $0{,}000125$ -- $8{,}66$ s \\
+Rang de freqüències & $8000$ -- $0{,}116$ Hz \\
+Nombre d'estacions & 40 \\
+Total de components & 3980 \\
+Petjada de les estacions & X(N) $\pm2134$ m; \; Y(E) $\pm3055$ m \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Model inicial / prior}}\\
+Model inicial $=$ prior & Model\_Bat\_35km\_recond \\
+Fons (semiespai) & $100$ $\Omega\cdot$m \\
+Unitat conductora & $30$ $\Omega\cdot$m \\
+Mar (fix) & $0{,}3$ $\Omega\cdot$m \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%============================ TAULA 2 ============================
+\begin{table}[htbp]
+\centering
+\caption{Paràmetres de ponderació de dades, regularització i control de la inversió (algorisme NLCG).}
+\label{tab:inversio}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Paràmetre} & \textbf{Valor} \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Error floor}}\\
+Off-diagonal ($Z_{xy},Z_{yx}$) & 5\% de $\sqrt{|Z_{xy}\,Z_{yx}|}$ \; (fila Y a 7\% si $T\le1$ s) \\
+Diagonals ($Z_{xx},Z_{yy}$) & depurades manualment ($T\le1$ s) \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Regularització / covariància (\dots\_cov\_seafixed)}}\\
+Esquema & autoregressió recursiva \\
+Suavitzat X / Y / Z & $0{,}2$ / $0{,}2$ / $0{,}2$ \\
+Nombre d'aplicacions & 2 \\
+Excepcions & 0 \\
+Màscara d'oceà (mar fix) & mask 9 \; (400 cel·les, $\rho=0{,}3$ $\Omega\cdot$m) \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Algorisme i control d'inversió (NLCG)}}\\
+Algorisme & NLCG (Rodi \& Mackie, 2001) \\
+$\lambda$ inicial & 100 \\
+Reducció de $\lambda$ & dividir per 10 \\
+Pas inicial de la cerca de línia & 20 \\
+Restart si $\Delta$rms $<$ & $2\times10^{-3}$ \\
+Sortida si rms $<$ & $1{,}05$ \\
+Sortida si $\lambda<$ & $10^{-8}$ \\
+Iteracions màximes & 150 \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Problema directe (diferències finites, malla de Yee)}}\\
+Solver & QMR + preacondicionador ILU \\
+Iters QMR / correcció de divergència & 100 \\
+Màx. crides de correcció de divergència & 40 \\
+Màx. iters de correcció de divergència & 1000 \\
+Tolerància (directe / adjunt) & $10^{-6}$ \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Resultat (Run\_635)}}\\
+Iteracions & 92 \\
+RMS normalitzat (inicial $\rightarrow$ final) & $11{,}41 \rightarrow 3{,}81$ \\
+Convergència & $\lambda$: $100\rightarrow10^{-8}$; sortida per mínim local \\
+\bottomrule
+\end{tabular}
+\end{table}

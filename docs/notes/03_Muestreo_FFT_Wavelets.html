@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muestreo, FFT y Wavelets · Procesado de señal MT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']], processEscapes: true },
+  svg: { fontCache: 'global', scale: 1.05 }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root {
+  --bg: #ECEDE9;
+  --bg-card: #F6F6F1;
+  --ink: #14181A;
+  --ink-soft: #44494E;
+  --rule: #C5C7BF;
+  --azul: #1E3A5F;
+  --azul-soft: #E2EBF3;
+  --gris: #4A5560;
+  --gris-soft: #E5E5E0;
+  --verd: #1F4D3A;
+  --verd-soft: #DCE8E0;
+  --ambre: #8B4513;
+  --ambre-soft: #F0DECC;
+  --indigo: #2E4374;
+  --display: 'Fraunces', Georgia, serif;
+  --body: 'Newsreader', Georgia, serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.65; }
+.container { max-width: 920px; margin: 0 auto; padding: 60px 32px 120px; }
+
+header.hero { border-top: 4px solid var(--indigo); border-bottom: 1px solid var(--rule); padding: 48px 0 32px; margin-bottom: 56px; }
+.hero .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--indigo); margin-bottom: 24px; }
+.hero h1 { font-family: var(--display); font-weight: 900; font-size: clamp(36px, 6.5vw, 64px); line-height: 1.02; letter-spacing: -0.02em; margin: 0 0 16px; font-variation-settings: "SOFT" 30, "WONK" 1; }
+.hero h1 em { font-style: italic; font-weight: 500; color: var(--indigo); }
+.hero .lede { font-size: 18px; color: var(--ink-soft); max-width: 620px; font-style: italic; margin: 8px 0 24px; }
+.hero .meta { display: flex; gap: 28px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--ink-soft); letter-spacing: 0.06em; margin-top: 24px; }
+.hero .meta span { display: inline-flex; align-items: center; gap: 8px; }
+.hero .meta span::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--indigo); }
+
+section { margin-bottom: 64px; }
+h2 { font-family: var(--display); font-size: 30px; font-weight: 600; letter-spacing: -0.012em; margin: 0 0 24px; display: flex; align-items: baseline; gap: 18px; border-bottom: 1px solid var(--rule); padding-bottom: 14px; }
+h2 .num { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); letter-spacing: 0.12em; font-weight: 500; }
+h3 { font-family: var(--display); font-size: 22px; font-weight: 600; margin: 32px 0 10px; letter-spacing: -0.005em; }
+h4 { font-family: var(--display); font-size: 18px; font-weight: 600; margin: 22px 0 8px; color: var(--indigo); }
+p { margin: 0 0 16px; }
+strong { font-weight: 600; color: var(--ink); }
+
+.box { border-left: 3px solid; padding: 18px 24px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+.box-law { border-color: var(--azul); background: var(--azul-soft); }
+.box-deriv { border-color: var(--gris); background: var(--gris-soft); }
+.box-result { border-color: var(--verd); background: var(--verd-soft); }
+.box-key { border-color: var(--ambre); background: var(--ambre-soft); }
+.box .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; margin-bottom: 6px; display: block; }
+.box-law .label { color: var(--azul); }
+.box-deriv .label { color: var(--gris); }
+.box-result .label { color: var(--verd); }
+.box-key .label { color: var(--ambre); }
+.box p:last-child, .box ul:last-child { margin-bottom: 0; }
+
+.summary-table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; background: var(--bg-card); border-radius: 6px; overflow: hidden; }
+.summary-table th, .summary-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.summary-table th { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); border-bottom: 2px solid var(--indigo); }
+
+.callout { background: var(--ink); color: var(--bg); padding: 36px; border-radius: 8px; margin: 32px 0; }
+.callout .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: #B5C8E0; margin-bottom: 12px; }
+.callout h3 { color: var(--bg); margin: 0 0 12px; font-size: 24px; }
+.callout p, .callout li { color: #DCE0E5; }
+.callout strong { color: var(--bg); }
+
+.compare-table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; background: var(--bg-card); border-radius: 6px; overflow: hidden; }
+.compare-table th, .compare-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.compare-table th { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--indigo); border-bottom: 2px solid var(--indigo); }
+.compare-table td:first-child { font-weight: 600; font-family: var(--mono); font-size: 13px; }
+
+.tile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 20px 0; }
+.tile { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; text-align: center; }
+.tile h4 { margin: 0 0 8px; font-size: 15px; color: var(--indigo); }
+.tile .pic { height: 80px; display: flex; align-items: center; justify-content: center; margin: 8px 0; }
+.tile .desc { font-size: 13px; color: var(--ink-soft); line-height: 1.4; }
+
+.flow-step { margin: 12px 0; padding: 14px 20px; background: var(--bg-card); border-left: 3px solid var(--indigo); border-radius: 0 4px 4px 0; display: flex; gap: 16px; align-items: flex-start; }
+.flow-step .step-num { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--indigo); background: #E2EBF3; padding: 3px 9px; border-radius: 3px; flex-shrink: 0; margin-top: 4px; white-space: nowrap; }
+
+.numeric-example { background: var(--bg-card); border: 1px dashed var(--indigo); padding: 18px 22px; border-radius: 6px; margin: 16px 0; }
+.numeric-example .ex-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--indigo); font-weight: 600; margin-bottom: 6px; }
+
+footer { margin-top: 80px; padding-top: 28px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 12px; color: var(--ink-soft); letter-spacing: 0.05em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+
+mjx-container { overflow-x: auto; overflow-y: hidden; }
+mjx-container[display="true"] { margin: 0.8em 0 !important; }
+
+@media print {
+  body { background: white; font-size: 11pt; }
+  .container { padding: 16px; max-width: 100%; }
+  section, .box { break-inside: avoid; }
+  .callout { background: var(--bg-card); color: var(--ink); border: 2px solid var(--ink); }
+  .callout .label, .callout p, .callout strong, .callout li { color: var(--ink); }
+}
+@media (max-width: 600px) { .container { padding: 32px 18px 80px; } h2 { font-size: 24px; } .tile-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <div class="eyebrow">Documentación · Procesado de señal</div>
+  <h1>Muestreo, FFT<br><em>y wavelets</em></h1>
+  <p class="lede">Cómo se transforman voltajes continuos en espectros de frecuencia, y por qué a veces necesitas algo más sofisticado que Fourier.</p>
+  <div class="meta">
+    <span>Análisis tiempo–frecuencia</span>
+    <span>De voltajes a $Z(\omega)$</span>
+    <span>Documento III de III</span>
+  </div>
+</header>
+
+<!-- ========== SECTION 1 ========== -->
+<section>
+  <h2><span class="num">01</span> El problema de partida</h2>
+
+  <p>Tienes una bobina midiendo $H_y(t)$ y un par de electrodos midiendo $E_x(t)$. Ambas señales son <strong>continuas en el tiempo</strong> (analógicas). Cualquier instante $t$ tiene un valor.</p>
+
+  <p>Pero un ordenador no puede guardar "todos los instantes" — son infinitos. Necesita guardar <strong>una lista finita de números</strong>. Ahí entra el muestreo.</p>
+</section>
+
+<!-- ========== SECTION 2 ========== -->
+<section>
+  <h2><span class="num">02</span> Qué es muestrear a frecuencia $f_s$</h2>
+
+  <div class="box box-law">
+    <span class="label">Definición · Muestreo</span>
+    <p>Muestrear a frecuencia $f_s = 1000$ Hz significa: <strong>el aparato lee el voltaje del sensor 1000 veces por segundo, a intervalos regulares</strong>, y guarda cada lectura como un número.</p>
+    <p style="margin-top: 12px;">El intervalo entre muestras es $\Delta t = 1/f_s$. Para $f_s = 1000$ Hz, $\Delta t = 1$ ms.</p>
+    $$H_y(t) \;\longrightarrow\; H_y[0],\,H_y[1],\,H_y[2],\,\ldots,\,H_y[N-1]$$
+    <p>donde $H_y[n]$ es el valor medido en el instante $t = n\Delta t$.</p>
+  </div>
+
+  <div class="numeric-example">
+    <div class="ex-label">Ejemplo numérico</div>
+    <p>Registras durante <strong>1 hora a $f_s = 1000$ Hz</strong>. Tienes $N = 3600 \times 1000 = 3{,}6$ millones de números por canal. Cinco canales → 18 millones de números. Cada uno son 4 bytes (24 bits redondeados a 32) → <strong>72 MB por hora</strong>. Ahora se entiende por qué necesitas SSD.</p>
+  </div>
+
+  <h3>Quién hace el muestreo: el ADC</h3>
+  <p>El <strong>ADC (Analog-to-Digital Converter)</strong> es un circuito integrado que:</p>
+  <ol>
+    <li>Toma una "foto" del voltaje en su entrada cada $\Delta t$</li>
+    <li>La convierte en un número binario de $b$ bits (en MT, $b = 24$, así que el número va de $-2^{23}$ a $+2^{23}-1$, unos $\pm 8$ millones de niveles distintos)</li>
+    <li>Lo escribe en memoria</li>
+  </ol>
+  <p>Un ADC de 24 bits muestreando a 1 kHz es un componente de unos pocos euros hoy día. Hace 30 años solo era equipo de laboratorio caro.</p>
+</section>
+
+<!-- ========== SECTION 3 ========== -->
+<section>
+  <h2><span class="num">03</span> El criterio fundamental: Nyquist–Shannon</h2>
+
+  <div class="callout">
+    <div class="label">Teorema fundamental</div>
+    <h3>Nyquist–Shannon</h3>
+    <p>Para reconstruir sin pérdida una señal cuya frecuencia máxima es $f_{\max}$, debes muestrear a $f_s \geq 2 f_{\max}$.</p>
+    <p style="margin-top: 12px;">Equivalentemente: <strong>muestreando a $f_s$, solo puedes ver frecuencias hasta $f_{\max} = f_s/2$</strong> (la "frecuencia de Nyquist").</p>
+  </div>
+
+  <div class="box box-key">
+    <span class="label">El problema del aliasing</span>
+    <p>Si la señal tiene componentes por encima de $f_s/2$ y muestreas igualmente, esas frecuencias <strong>se cuelan disfrazadas</strong> como frecuencias bajas falsas. Es el fenómeno del <em>aliasing</em>.</p>
+    <p style="margin-top: 12px;">Por eso antes del ADC siempre hay un <strong>filtro paso-bajo analógico</strong> que corta lo que esté por encima de $f_s/2$ — el "filtro antialiasing".</p>
+  </div>
+
+  <h3>Ejemplos de elección de $f_s$ en MT</h3>
+  <table class="summary-table">
+    <thead>
+      <tr><th>Máxima frecuencia útil</th><th>$f_s$ mínimo (Nyquist)</th><th>$f_s$ típico (con margen)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>100 Hz</td><td>200 Hz</td><td>1000 Hz</td></tr>
+      <tr><td>10 kHz (audio-MT)</td><td>20 kHz</td><td>96 kHz</td></tr>
+      <tr><td>1 Hz (MT período largo)</td><td>2 Hz</td><td>1 Hz (suficiente, ahorra espacio)</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 16px;">Por eso los equipos modernos graban en <strong>varias bandas a la vez</strong>: uno o varios ADCs, cada uno con su propio $f_s$, optimizado para su rango de frecuencias.</p>
+</section>
+
+<!-- ========== SECTION 4 ========== -->
+<section>
+  <h2><span class="num">04</span> La FFT: cómo se obtienen las frecuencias</h2>
+
+  <p>Ya tienes una lista de $N$ números $H_y[0], H_y[1], \ldots, H_y[N-1]$. ¿Cómo extraes "qué frecuencias están presentes"?</p>
+
+  <h3>La idea matemática (Fourier)</h3>
+  <p>Cualquier señal periódica se puede escribir como suma de senos y cosenos de distintas frecuencias. La transformada de Fourier te dice <strong>cuánto</strong> hay de cada frecuencia en tu señal.</p>
+
+  <div class="box box-law">
+    <span class="label">Transformada continua y discreta</span>
+    <p>Para señal continua:</p>
+    $$H(\omega) = \int H(t)\,e^{-i\omega t}\,dt$$
+    <p>Para $N$ muestras (DFT, Discrete Fourier Transform):</p>
+    $$H[k] = \sum_{n=0}^{N-1} H[n]\,e^{-i 2\pi k n/N}, \qquad k = 0, 1, \ldots, N-1$$
+    <p>Cada $H[k]$ es un número complejo que indica cuánta señal hay a la frecuencia:</p>
+    $$f_k = k\,\frac{f_s}{N}$$
+  </div>
+
+  <div class="numeric-example">
+    <div class="ex-label">Ejemplo concreto</div>
+    <p>Has grabado $N = 1024$ muestras a $f_s = 1000$ Hz. La DFT te devuelve 1024 coeficientes complejos $H[0], H[1], \ldots, H[1023]$, asociados a las frecuencias:</p>
+    $$f_0 = 0\;\text{Hz},\;\; f_1 = \tfrac{1000}{1024} \approx 0{,}977\;\text{Hz},\;\; f_2 \approx 1{,}953\;\text{Hz},\;\; \ldots$$
+    <p>hasta $f_{512} = 500$ Hz (el Nyquist). Los $k > N/2$ son redundantes para señales reales.</p>
+  </div>
+
+  <h3>Tres números clave del binomio "registro + DFT"</h3>
+  <table class="summary-table">
+    <thead>
+      <tr><th>Concepto</th><th>Fórmula</th><th>Significado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Frecuencia mínima medible</td><td>$\Delta f = f_s/N = 1/T$</td><td>La frecuencia más baja, donde $T = N\Delta t$ es la duración total</td></tr>
+      <tr><td>Frecuencia máxima medible</td><td>$f_s/2$</td><td>Nyquist: límite por arriba</td></tr>
+      <tr><td>Resolución en frecuencia</td><td>$\Delta f = 1/T$</td><td>Cuánto puedes distinguir frecuencias cercanas</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box box-result">
+    <span class="label">Consecuencia profunda</span>
+    <p>Para distinguir bien <strong>frecuencias bajas, necesitas grabar mucho tiempo</strong>.</p>
+    <p style="margin-top: 12px;">Si quieres resolución de $\Delta f = 0{,}001$ Hz (medir oscilaciones de período 1000 s), necesitas $T \geq 1000$ s = 17 minutos. Para llegar a $f = 10^{-4}$ Hz, necesitas $T \geq 10000$ s ≈ <strong>3 horas mínimo</strong> para tener un solo punto de la curva. Por eso las MT de período largo registran semanas.</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 5 ========== -->
+<section>
+  <h2><span class="num">05</span> La FFT: solo es la DFT calculada de forma eficiente</h2>
+
+  <p>La DFT con la fórmula directa requiere $\sim N^2$ operaciones. Para $N = 10^6$, son $10^{12}$ operaciones — inviable.</p>
+
+  <p>La <strong>FFT (Fast Fourier Transform)</strong>, descubierta por Cooley y Tukey en 1965, es un algoritmo astuto que aprovecha redundancias en las exponenciales para hacer la DFT en $\sim N\log N$ operaciones. Para $N = 10^6$, son $2\times 10^7$ — un factor 50000 más rápido. <strong>El resultado es exactamente el mismo</strong>, solo cambia el método de cálculo.</p>
+
+  <div class="box box-key">
+    <span class="label">Aclaración terminológica</span>
+    <p>Cuando alguien dice "le hago la FFT a la señal", quiere decir "calculo su DFT con el algoritmo FFT". Son dos cosas con nombres distintos pero resultado idéntico.</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 6 ========== -->
+<section>
+  <h2><span class="num">06</span> El problema de la FFT: te promedia todo el tiempo</h2>
+
+  <p>La FFT tiene una limitación fundamental que motiva las wavelets. Mira la suma:</p>
+
+  $$H[k] = \sum_{n=0}^{N-1} H[n]\,e^{-i 2\pi k n/N}$$
+
+  <p>Cada $H[k]$ es una suma sobre <strong>todo el registro</strong>. Si la señal a frecuencia $f_k$ aparece solo durante 5 segundos en medio de una grabación de 1 hora, la FFT te dice "hay un poco de $f_k$ en toda la señal", <strong>no</strong> "hay $f_k$ entre $t=1800$ s y $t=1805$ s".</p>
+
+  <div class="box box-result">
+    <span class="label">Lo que da y lo que no da la FFT</span>
+    <ul>
+      <li>✅ <strong>Resolución en frecuencia</strong> excelente</li>
+      <li>❌ <strong>Resolución en tiempo</strong> nula (te promedia toda la duración)</li>
+    </ul>
+    <p style="margin-top: 12px;">Esto es OK si la señal es <strong>estacionaria</strong> (sus propiedades no cambian con el tiempo). En MT clásica se asume estacionariedad y se trabaja con FFT por ventanas (siguiente sección).</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 7 ========== -->
+<section>
+  <h2><span class="num">07</span> El parche intermedio: STFT</h2>
+
+  <p>Si la señal cambia con el tiempo, divides el registro en <strong>ventanas cortas</strong> (por ejemplo, 1024 muestras cada una con solapamiento), aplicas FFT a cada ventana y obtienes un <em>espectrograma</em>: una imagen 2D con tiempo en el eje X, frecuencia en Y, y amplitud en color.</p>
+
+  <div class="box box-law">
+    <span class="label">Short-Time Fourier Transform (STFT)</span>
+    $$\text{STFT}(t, \omega) = \int H(\tau)\,w(\tau - t)\,e^{-i\omega\tau}\,d\tau$$
+    <p>donde $w(\tau-t)$ es una ventana centrada en $t$ (típicamente gaussiana, Hamming o Hann).</p>
+  </div>
+
+  <h3>La limitación crítica: ventana de tamaño fijo</h3>
+
+  <div class="callout">
+    <div class="label">Principio de incertidumbre tiempo–frecuencia</div>
+    <h3>No puedes tener buena resolución en ambos a la vez</h3>
+    <ul style="margin-top: 12px;">
+      <li><strong>Ventana corta</strong> → buena resolución temporal, mala en frecuencia (especialmente baja frecuencia)</li>
+      <li><strong>Ventana larga</strong> → buena resolución en frecuencia, mala en tiempo</li>
+    </ul>
+    <p style="margin-top: 14px;">Si eliges ventana de 1 s, no puedes resolver frecuencias por debajo de 1 Hz. Si la haces de 1000 s, puedes resolver $10^{-3}$ Hz pero pierdes localización temporal.</p>
+  </div>
+
+  <p><strong>Pero las señales reales no funcionan uniformemente:</strong> una señal de alta frecuencia oscila rápido, así que un evento de 0,01 s a 1000 Hz tiene 10 ciclos en él (suficiente para caracterizarlo). En cambio, un evento a 0,01 Hz necesita ventanas de cientos de segundos para verse al menos un ciclo.</p>
+
+  <p><strong>Idealmente quieres ventanas que se adapten a la frecuencia:</strong> cortas para alta frecuencia, largas para baja frecuencia. Eso es exactamente lo que hace la wavelet.</p>
+</section>
+
+<!-- ========== SECTION 8 ========== -->
+<section>
+  <h2><span class="num">08</span> La transformada wavelet: adaptación automática</h2>
+
+  <div class="box box-key">
+    <span class="label">Idea clave</span>
+    <p>En lugar de un único patrón sinusoidal infinito (Fourier), usa un <em>paquete de onda localizado</em> — una "wavelet madre" — que se <strong>estira o comprime</strong> según la frecuencia que estés analizando.</p>
+  </div>
+
+  <div class="box box-law">
+    <span class="label">Definición · Continuous Wavelet Transform (CWT)</span>
+    $$W(s, t) = \frac{1}{\sqrt{s}}\int H(\tau)\,\psi^*\!\left(\frac{\tau - t}{s}\right) d\tau$$
+    <p>donde:</p>
+    <ul>
+      <li>$\psi(\tau)$ es la <strong>wavelet madre</strong> (paquete de onda localizado)</li>
+      <li>$s$ es la <strong>escala</strong> (inversamente proporcional a la frecuencia)</li>
+      <li>$t$ es la <strong>posición temporal</strong></li>
+    </ul>
+    <p style="margin-top: 12px;">Wavelets madres típicas: <strong>Morlet</strong> (gaussiana modulada por seno, la más usada en geofísica), Mexican hat, Daubechies, Meyer.</p>
+  </div>
+
+  <h3>El truco de la escala adaptativa</h3>
+
+  <p>Cuando analizas <strong>frecuencia alta</strong> (escala $s$ pequeña), la wavelet se comprime y dura poco tiempo → buena resolución temporal.</p>
+
+  <p>Cuando analizas <strong>frecuencia baja</strong> (escala $s$ grande), la wavelet se estira y dura mucho tiempo → buena resolución en frecuencia, peor temporal.</p>
+
+  <p>Es decir: la wavelet <strong>respeta automáticamente</strong> la equivalencia "un período en cada frecuencia". Cubre el plano tiempo-frecuencia con cajitas de proporciones óptimas para cada banda.</p>
+</section>
+
+<!-- ========== SECTION 9 ========== -->
+<section>
+  <h2><span class="num">09</span> Comparación visual de las tres técnicas</h2>
+
+  <div class="tile-grid">
+    <div class="tile">
+      <h4>FFT</h4>
+      <div class="pic">
+        <svg viewBox="0 0 100 70" width="100" height="70">
+          <line x1="20" y1="5" x2="20" y2="65" stroke="#1E3A5F" stroke-width="2"/>
+          <line x1="50" y1="5" x2="50" y2="65" stroke="#1E3A5F" stroke-width="2"/>
+          <line x1="80" y1="5" x2="80" y2="65" stroke="#1E3A5F" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="desc">Una franja vertical infinitamente fina en cada $f$, infinitamente extensa en $t$</div>
+    </div>
+    <div class="tile">
+      <h4>STFT</h4>
+      <div class="pic">
+        <svg viewBox="0 0 100 70" width="100" height="70">
+          <rect x="10" y="10" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="10" y="28" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="10" y="46" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="35" y="10" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="35" y="28" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="35" y="46" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="60" y="10" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="60" y="28" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+          <rect x="60" y="46" width="22" height="14" fill="none" stroke="#6B4423" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="desc">Cajitas rectangulares <em>del mismo tamaño</em> en todo el plano</div>
+    </div>
+    <div class="tile">
+      <h4>Wavelet</h4>
+      <div class="pic">
+        <svg viewBox="0 0 100 70" width="100" height="70">
+          <rect x="10" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="18" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="26" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="34" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="42" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="50" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="58" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="66" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="74" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="82" y="6" width="6" height="6" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="10" y="18" width="14" height="12" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="26" y="18" width="14" height="12" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="42" y="18" width="14" height="12" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="58" y="18" width="14" height="12" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="74" y="18" width="14" height="12" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="10" y="34" width="38" height="24" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+          <rect x="50" y="34" width="38" height="24" fill="none" stroke="#1F4D3A" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="desc">Cajitas <em>anchas y bajas</em> a baja frecuencia, <em>estrechas y altas</em> a alta frecuencia</div>
+    </div>
+  </div>
+
+  <table class="compare-table">
+    <thead>
+      <tr><th>Técnica</th><th>Resolución $t$</th><th>Resolución $f$</th><th>Forma cajita</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FFT</td><td>nula</td><td>excelente</td><td>línea vertical</td></tr>
+      <tr><td>STFT</td><td>fija (tamaño ventana)</td><td>fija (1/ventana)</td><td>rectángulo uniforme</td></tr>
+      <tr><td>Wavelet</td><td>adaptativa: alta a $f$ alta</td><td>adaptativa: alta a $f$ baja</td><td>rectángulo proporcional</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ========== SECTION 10 ========== -->
+<section>
+  <h2><span class="num">10</span> Por qué se usa wavelet en MT</h2>
+
+  <h3>Ventaja para señales transitorias</h3>
+  <p>Las fuentes MT no son estacionarias: las tormentas magnéticas duran horas, los rayos cercanos son impulsos de milisegundos. Si haces FFT de una hora con un rayo lejano en medio, el rayo "ensucia" todas las frecuencias. Con wavelet, <strong>localizas el rayo en tiempo</strong> y lo puedes excluir del análisis para ese instante concreto.</p>
+
+  <h3>Detección y limpieza de ruido transitorio</h3>
+  <p>Los artefactos eléctricos (un coche pasando, un motor arrancando) generan picos cortos y de banda ancha. La wavelet los detecta como puntos brillantes en el espectrograma wavelet y permite ponerlos a cero antes de calcular impedancias. Hay literatura específica sobre esto: <em>wavelet-based noise removal in MT</em>.</p>
+
+  <h3>Análisis multiescala</h3>
+  <p>La Tierra tiene estructuras a todas las escalas (de centímetros a cientos de km). La wavelet, al separar naturalmente la señal por bandas con resolución temporal asociada, encaja conceptualmente bien con la geofísica multiescala.</p>
+
+  <h3>Cuándo NO se usa wavelet</h3>
+  <div class="box box-key">
+    <span class="label">El reparto de papeles en la práctica</span>
+    <p>Para el cálculo final de la impedancia $Z(\omega)$, sigue siendo más estándar la FFT con ventanas y promediado, porque:</p>
+    <ol>
+      <li>La teoría MT está formulada en frecuencia, no en escala</li>
+      <li>Los errores estadísticos están bien caracterizados con técnicas espectrales clásicas</li>
+      <li>Las herramientas establecidas (BIRRP, EMTF) están construidas sobre FFT</li>
+    </ol>
+    <p style="margin-top: 12px;">La wavelet se usa más en MT como <strong>paso de pre-procesado</strong>: detección y limpieza de ruido, identificación de eventos energéticos, análisis de estacionariedad. La parte final que produce $\rho_a(\omega)$ y $\phi(\omega)$ sigue siendo FFT.</p>
+  </div>
+</section>
+
+<!-- ========== SECTION 11 ========== -->
+<section>
+  <h2><span class="num">11</span> El flujo real de un sondeo MT</h2>
+
+  <p>Para que se vea el cuadro completo, así funciona desde lo continuo hasta los datos finales:</p>
+
+  <div class="flow-step"><span class="step-num">PASO 1</span><div>Bobina y electrodos generan <strong>voltajes analógicos</strong> continuos en el tiempo.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 2</span><div>Filtros antialiasing analógicos cortan por encima de $f_s/2$.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 3</span><div>ADC de 24 bits <strong>muestrea</strong> a $f_s$ y guarda lista de números.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 4</span><div>(Opcional) Se aplica <strong>wavelet</strong> para detectar y limpiar ruido transitorio.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 5</span><div>Se divide el registro en <strong>ventanas</strong> (típicamente 1024 o 4096 muestras).</div></div>
+  <div class="flow-step"><span class="step-num">PASO 6</span><div><strong>FFT</strong> a cada ventana → coeficientes complejos a frecuencias $f_k = k f_s/N$.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 7</span><div>Se calculan <strong>espectros cruzados</strong> $\langle E\,H^*\rangle$ promediando muchas ventanas.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 8</span><div>Se obtiene $Z(\omega) = \langle EH^*\rangle/\langle HH^*\rangle$ para cada frecuencia.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 9</span><div>Cagniard: $\rho_a(\omega) = |Z(\omega)|^2/(\mu_0\omega)$.</div></div>
+  <div class="flow-step"><span class="step-num">PASO 10</span><div>Inversión → modelo $\rho(z)$ del subsuelo.</div></div>
+</section>
+
+<!-- ========== SECTION 12 ========== -->
+<section>
+  <h2><span class="num">12</span> La intuición final que ata los cabos</h2>
+
+  <div class="box box-result">
+    <span class="label">Lo que une el procesado con la física</span>
+    <p>Cada frecuencia corresponde a una profundidad vía $\delta = \sqrt{2\rho/(\mu_0\omega)}$. Cuando muestreas a $f_s$ alta y registras durante tiempo $T$, estás cubriendo:</p>
+    <ul style="margin-top: 12px;">
+      <li>Por arriba, hasta $f_s/2$ → <strong>profundidad mínima</strong> que puedes ver</li>
+      <li>Por abajo, hasta $1/T$ → <strong>profundidad máxima</strong> que puedes ver</li>
+    </ul>
+    <p style="margin-top: 12px;">Por eso el binomio "$f_s$ alto + $T$ largo" determina <strong>el rango de profundidades del sondeo</strong>. Toda la decisión de diseño experimental (qué ADC, cuánto tiempo registrar) se reduce a "qué profundidades quiero explorar".</p>
+  </div>
+
+  <p>El procesado de señal y la física del subsuelo no son dos mundos separados — son <strong>la misma cosa vista desde dos lados</strong>. Y eso es lo que hace de la magnetotelúrica un método tan elegante.</p>
+</section>
+
+<footer>
+  <span>Muestreo, FFT y Wavelets</span>
+  <span>Documento III de III</span>
+  <span>21025 · UIB</span>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Aspectos sutiles del filtrado de datos y comparación de runs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+<style>
+  :root {
+    --paper:    #f7f1e6;
+    --paper-d:  #ede4d2;
+    --ink:      #251f17;
+    --ink-soft: #4a3f30;
+    --rust:     #b54a2c;
+    --rust-d:   #8a3416;
+    --olive:    #5d6b30;
+    --olive-d:  #3d4a1c;
+    --gold:     #b4842b;
+    --rule:     #d8cdb6;
+    --kbd-bg:   #2a2218;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif Pro', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 12% 4%, rgba(93,107,48,0.05) 0%, transparent 30%),
+      radial-gradient(circle at 88% 96%, rgba(180,132,43,0.04) 0%, transparent 35%);
+    background-attachment: fixed;
+  }
+  .frame { max-width: 880px; margin: 0 auto; padding: 80px 48px 120px; }
+
+  .cover { margin-bottom: 80px; padding-bottom: 50px; border-bottom: 1px solid var(--rule); position: relative; }
+  .cover .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--olive); margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400; font-size: 58px; line-height: 1.05;
+    margin: 0; letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+  .cover h1 em { font-style: italic; font-weight: 300; color: var(--olive-d); }
+  .cover .lede {
+    font-size: 21px; line-height: 1.5; color: var(--ink-soft);
+    max-width: 640px; margin-top: 22px; font-style: italic;
+  }
+  .cover .meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--ink-soft); margin-top: 32px;
+    display: flex; gap: 32px; flex-wrap: wrap;
+  }
+  .cover .meta span strong { color: var(--ink); margin-right: 6px; }
+  .cover::before {
+    content: ''; position: absolute; top: -12px; right: -16px;
+    width: 100px; height: 100px;
+    border: 1px solid var(--olive); opacity: 0.3;
+    transform: rotate(-12deg); pointer-events: none;
+  }
+
+  .toc {
+    background: var(--paper-d); padding: 28px 36px;
+    margin: 0 0 70px; border-left: 3px solid var(--olive);
+  }
+  .toc h2 {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin: 0 0 18px; color: var(--ink); font-weight: 700;
+  }
+  .toc ol { list-style: none; counter-reset: t; padding: 0; margin: 0; }
+  .toc li { counter-increment: t; padding: 6px 0; }
+  .toc li::before {
+    content: counter(t, decimal-leading-zero);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--olive); margin-right: 14px;
+  }
+  .toc a { color: var(--ink); text-decoration: none; font-size: 16px; }
+  .toc a:hover { color: var(--olive); }
+
+  section { margin: 0 0 80px; }
+  section > .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.15em; color: var(--olive);
+    margin-bottom: 8px; display: block;
+  }
+  section h2 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 500;
+    font-size: 34px; line-height: 1.15; margin: 0 0 12px;
+    letter-spacing: -0.015em;
+  }
+  section .subtitle {
+    font-style: italic; color: var(--ink-soft);
+    font-size: 17px; margin: 0 0 28px;
+  }
+  section h3 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 500;
+    font-size: 21px; line-height: 1.3; margin: 32px 0 12px;
+  }
+
+  p { margin: 0 0 16px; }
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--rust-d); }
+  a:hover { color: var(--rust); }
+
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
+    background: var(--paper-d); padding: 2px 6px; border-radius: 3px;
+    color: var(--rust-d);
+  }
+  pre {
+    background: var(--kbd-bg); color: #e8dfc9;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.55;
+    padding: 22px 26px; border-radius: 4px; overflow-x: auto;
+    margin: 20px 0;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  pre .c { color: #8a8270; font-style: italic; }
+  pre .k { color: #d99550; }
+
+  ul, ol { padding-left: 24px; margin: 16px 0; }
+  li { margin-bottom: 6px; }
+  li::marker { color: var(--olive); }
+
+  .callout {
+    background: var(--paper-d); padding: 18px 22px; margin: 24px 0;
+    font-size: 15.5px; line-height: 1.65;
+    border-left: 3px solid var(--gold);
+  }
+  .callout.key { border-left-color: var(--rust); }
+  .callout.note { border-left-color: var(--olive); }
+  .callout .label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    display: block; margin-bottom: 8px; font-weight: 700;
+    color: var(--gold);
+  }
+  .callout.key .label { color: var(--rust); }
+  .callout.note .label { color: var(--olive); }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px;
+  }
+  th, td {
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--olive); border-bottom: 2px solid var(--rule); font-weight: 700;
+  }
+  td code { font-size: 12px; }
+
+  .figure { margin: 30px 0; text-align: center; }
+  .figure svg { max-width: 100%; height: auto; }
+  .figure .caption {
+    font-size: 13px; color: var(--ink-soft);
+    margin-top: 12px; font-style: italic; line-height: 1.5;
+    max-width: 700px; margin-left: auto; margin-right: auto;
+  }
+
+  .math-display { margin: 22px 0; text-align: center; font-size: 1.05em; }
+
+  .citation {
+    font-size: 14px; color: var(--ink-soft);
+    background: var(--paper-d); padding: 14px 18px;
+    border-left: 2px solid var(--olive); margin: 18px 0;
+  }
+  .citation .src {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--olive); display: block; margin-bottom: 4px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  hr.sep { border: 0; height: 1px; background: var(--rule); margin: 60px 0; }
+  hr.dingbat { border: 0; text-align: center; margin: 50px 0; }
+  hr.dingbat::after {
+    content: '◇ ◇ ◇'; font-size: 12px; letter-spacing: 1em; color: var(--gold);
+  }
+
+  .footer {
+    margin-top: 90px; padding-top: 28px; border-top: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-soft); letter-spacing: 0.05em;
+  }
+
+  .references {
+    background: var(--paper-d); padding: 22px 28px;
+    border-left: 3px solid var(--olive); margin-top: 40px;
+    font-size: 14px;
+  }
+  .references h3 {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 11px !important; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--olive);
+    margin: 0 0 14px !important; font-weight: 700;
+  }
+  .references ol { padding-left: 22px; margin: 0; }
+  .references li { margin-bottom: 10px; line-height: 1.5; }
+
+  @media print {
+    body { background: white; }
+    .frame { padding: 0; }
+    pre { font-size: 11px; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="eyebrow">Notas técnicas · TFG · Mallorca MT · Vol. IV</div>
+  <h1>Aspectos sutiles<br><em>del filtrado y la comparación</em></h1>
+  <p class="lede">Tres trampas conceptuales que conviene tener documentadas: por qué el RMS no se compara directamente, por qué filtramos por error relativo y qué se nos escapa al hacerlo.</p>
+  <div class="meta">
+    <span><strong>Tema</strong>Metodología de inversión MT</span>
+    <span><strong>Nivel</strong>Intermedio</span>
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<nav class="toc">
+  <h2>Las tres trampas</h2>
+  <ol>
+    <li><a href="#rms">El RMS no es comparable entre runs con distinto número de datums</a></li>
+    <li><a href="#errrel">Por qué el error relativo es la métrica estándar de filtrado</a></li>
+    <li><a href="#tendencia">La trampa del error relativo: outliers que sobreviven al filtro</a></li>
+  </ol>
+</nav>
+
+<!-- ============ §1 ============ -->
+<section id="rms">
+  <span class="num">§ 1</span>
+  <h2>El RMS no es comparable entre runs con distinto número de datums</h2>
+  <p class="subtitle">O por qué un RMS de 17.8 puede ser "mejor" que uno de 16.9.</p>
+
+  <p>Cuando comparas dos runs de inversión, la primera tentación es mirar el RMS final y decir "este es mejor que ese". Es lo natural, pero <strong>el RMS solo es directamente comparable cuando ambos runs usan exactamente el mismo conjunto de datos</strong>. En cuanto cambia el número de datums (por filtrado, exclusión de tippers, eliminación de períodos), la comparación directa deja de tener sentido.</p>
+
+  <h3>La fórmula y de dónde viene la dependencia con N</h3>
+
+  <p>El RMS que ModEM reporta en cada iteración es la raíz cuadrada del data misfit normalizado por el número total de datums:</p>
+
+  <div class="math-display">
+    $$\text{RMS} = \sqrt{\frac{\Phi_d}{N_{\text{datums}}}} = \sqrt{\frac{1}{N}\sum_{i=1}^{N} \left(\frac{d_i^{obs} - d_i^{pred}}{\sigma_i}\right)^2}$$
+  </div>
+
+  <p>Donde:</p>
+  <ul>
+    <li>$N$ es el número total de datums (cada componente real e imaginaria de Z cuenta como un datum independiente).</li>
+    <li>$d_i^{obs}$ y $d_i^{pred}$ son el valor observado y predicho del datum $i$.</li>
+    <li>$\sigma_i$ es el error estándar del datum, escrito en la columna 11 de tu <code>.dat</code>.</li>
+  </ul>
+
+  <p>El RMS es, esencialmente, el residual <em>promedio</em> en unidades de "número de sigmas". Un RMS de 1 significa que en promedio cada predicción está dentro de su barra de error. Un RMS de 15 significa que en promedio se desvía 15 veces la sigma.</p>
+
+  <h3>El efecto de los puntos con σ enorme</h3>
+
+  <p>Aquí está el detalle clave. Imagina dos puntos:</p>
+
+  <table>
+    <tr><th>Punto</th><th>$|d^{obs} - d^{pred}|$</th><th>$\sigma$</th><th>Contribución a $\Phi_d$</th></tr>
+    <tr><td>Punto bueno</td><td>50</td><td>10</td><td>$(50/10)^2 = 25$</td></tr>
+    <tr><td>Punto basura</td><td>50</td><td>500</td><td>$(50/500)^2 = 0.01$</td></tr>
+  </table>
+
+  <p>El "punto basura" tiene exactamente el mismo error absoluto que el punto bueno, pero contribuye <strong>2500 veces menos</strong> al $\Phi_d$ porque su $\sigma$ es 50 veces mayor. <em>Sin embargo, ambos puntos cuentan igualmente en el divisor $N$ del promedio</em>.</p>
+
+  <h3>Aplicado a tus dos runs</h3>
+
+  <p>En el run 466 (sin depurar) tenías $N = 6368$ datums. De ellos, 832 puntos tenían errores relativos enormes — sus contribuciones a $\Phi_d$ eran prácticamente cero. Pero los 832 sí contaban en el denominador. Resultado: el promedio quedaba "diluido".</p>
+
+  <p>En el run 467 (depurado a 50%) tienes $N = 5536$ datums. Se han retirado los 832 puntos basura. El $\Phi_d$ baja un poco (por las pequeñas contribuciones perdidas), pero el divisor baja proporcionalmente más, así que el cociente <em>aumenta</em>. Visto en cifras hipotéticas:</p>
+
+  <div class="math-display">
+    $$\text{RMS}_{466} = \sqrt{\frac{\Phi_d^{(466)}}{6368}}, \qquad \text{RMS}_{467} = \sqrt{\frac{\Phi_d^{(466)} - \epsilon}{5536}}$$
+  </div>
+
+  <p>Donde $\epsilon$ es la contribución (mínima) de los 832 puntos descartados. Como $\epsilon \ll \Phi_d^{(466)}$, el numerador apenas cambia, pero el denominador sí. <strong>El RMS depurado es numéricamente más alto, pero no es peor — es más exigente</strong>.</p>
+
+  <h3>Cómo hacer una comparación válida</h3>
+
+  <p>Hay tres formas honestas de comparar dos runs con $N$ distinto:</p>
+
+  <ol>
+    <li><strong>Comparar el ajuste sobre un subconjunto común</strong>. Reaplicar las predicciones del run 466 al subconjunto de 5536 datums depurados y recalcular el RMS solo sobre esos. Eso da un RMS<sub>466</sub> recalculado que sí es comparable con el RMS<sub>467</sub>.</li>
+    <li><strong>Comparar visualmente los datos predichos vs observados</strong>. Para cada estación, plotear $\rho_a^{obs}$ y $\rho_a^{pred}$ vs período. Si el run 467 ajusta visualmente las curvas tan bien o mejor que el 466 (sobre los datos comunes), es mejor.</li>
+    <li><strong>Comparar el modelo final</strong>. Mirar si las estructuras geológicas que aparecen son consistentes con el contexto regional y si tienen sentido geológico. El RMS es solo un proxy del ajuste; el modelo es el resultado real.</li>
+  </ol>
+
+  <div class="callout key">
+    <span class="label">Para tu TFG</span>
+    Cuando reportes los resultados, no escribas simplemente "el run depurado dio RMS=X y el sin depurar RMS=Y". Eso induce a error. Escribe algo como: "Tras filtrar los datos por error relativo &gt;50% (eliminando 832 puntos con incertidumbre estadística no informativa), el RMS final fue X, calculado sobre un conjunto de N=5536 datums con incertidumbres realistas. El RMS no es directamente comparable con el del run sin depurar (N=6368) por la dependencia inversa con el número de datums."
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ============ §2 ============ -->
+<section id="errrel">
+  <span class="num">§ 2</span>
+  <h2>Por qué el error relativo es la métrica estándar de filtrado</h2>
+  <p class="subtitle">No es arbitrario: está alineado con cómo ModEM trata los datos internamente.</p>
+
+  <p>Filtrar por error relativo $\sigma_i / |Z_i|$ no es una decisión cosmética. Hay dos razones técnicas que lo hacen la métrica natural en procesado MT.</p>
+
+  <h3>Razón 1: ModEM pesa cada datum por 1/σ²</h3>
+
+  <p>La función objetivo que ModEM minimiza durante la inversión NLCG es:</p>
+
+  <div class="math-display">
+    $$\Phi(m) = \Phi_d(m) + \lambda \, \Phi_m(m)$$
+  </div>
+
+  <p>donde el término de ajuste a los datos es:</p>
+
+  <div class="math-display">
+    $$\Phi_d = (d^{obs} - d^{pred}(m))^T \, \mathbf{C}_d^{-1} \, (d^{obs} - d^{pred}(m)) = \sum_{i=1}^{N} \frac{|d_i^{obs} - d_i^{pred}|^2}{\sigma_i^2}$$
+  </div>
+
+  <p>La matriz de covarianza de los datos $\mathbf{C}_d$ se asume diagonal (los datums se tratan como independientes), con entradas $\sigma_i^2$. Por tanto, su inversa es también diagonal con entradas $1/\sigma_i^2$, y ese factor aparece como peso de cada datum en la suma.</p>
+
+  <p class="citation">
+    <span class="src">Fuente original</span>
+    Esta formulación es la convención estándar en problemas de inversión geofísica, formalizada para el caso de inversión EM en <strong>Egbert &amp; Kelbert (2012)</strong> [1] y aplicada específicamente a ModEM en <strong>Kelbert et al. (2014)</strong> [2]. La sección 2.2 del primer paper define explícitamente la función objetivo con el peso $\mathbf{C}_d^{-1}$, y la Ec. (3) del segundo paper lo aplica a impedancia, vertical components y otros tipos de dato MT.
+  </p>
+
+  <p><strong>La consecuencia operacional</strong>: un punto con $\sigma$ pequeño (poco ruido, alta confianza) tiene mucho peso en la inversión y "tira fuerte" del modelo hacia ajustarlo. Un punto con $\sigma$ grande (mucho ruido) tiene peso despreciable y prácticamente no afecta. Filtrar por error relativo elimina puntos cuyo peso ya era cercano a cero en la práctica — están ahí pero no están "tirando" del modelo.</p>
+
+  <h3>Razón 2: el error relativo normaliza correctamente los rangos dinámicos</h3>
+
+  <p>Las componentes del tensor de impedancia tienen magnitudes muy distintas. En un sondeo típico, $|Z_{xy}|$ puede ser 50× mayor que $|Z_{xx}|$. Si filtraras por error <em>absoluto</em>, un umbral fijo (por ejemplo $\sigma &gt; 10$) eliminaría:</p>
+
+  <ul>
+    <li>Casi todos los $Z_{xx}$ (porque $|Z_{xx}|$ es pequeño y muchos $\sigma$ relativos al ruido absoluto serían grandes)</li>
+    <li>Casi ningún $Z_{xy}$ (porque $|Z_{xy}|$ es grande, sus $\sigma$ relativos son pequeños incluso siendo absolutos similares)</li>
+  </ul>
+
+  <p>Sería un filtrado tendencioso. El error relativo, al normalizar por $|Z|$, evalúa cada componente <em>en su propia escala</em>: un 50% relativo es un 50% relativo da igual la magnitud absoluta. Esto da un criterio justo entre componentes.</p>
+
+  <h3>Resumen comparativo de criterios de filtrado</h3>
+
+  <table>
+    <tr><th>Criterio</th><th>Justificación</th><th>Limitación</th></tr>
+    <tr>
+      <td>Error <em>relativo</em> $\sigma/|Z|$</td>
+      <td>Alineado con peso $1/\sigma^2$ en la inversión. Justo entre componentes.</td>
+      <td>No detecta outliers de tendencia (§3).</td>
+    </tr>
+    <tr>
+      <td>Error <em>absoluto</em> $\sigma$</td>
+      <td>Simple de aplicar.</td>
+      <td>Tendencioso: penaliza componentes pequeñas.</td>
+    </tr>
+    <tr>
+      <td>Coherencia $\gamma^2$</td>
+      <td>Mide directamente la calidad del procesado.</td>
+      <td>No siempre disponible en los <code>.edi</code>; requiere reprocesar.</td>
+    </tr>
+    <tr>
+      <td>Inspección visual</td>
+      <td>Capta patrones sutiles.</td>
+      <td>Subjetivo, no reproducible, lento.</td>
+    </tr>
+  </table>
+
+  <div class="callout note">
+    <span class="label">Verificable independientemente</span>
+    El código fuente de ModEM es de acceso abierto (Egbert &amp; Kelbert, repositorio bajo demanda). En el archivo <code>fortran/SENS/DataFunc.f90</code>, la función <code>computeMisfit</code> implementa explícitamente la suma $\sum |d^{obs} - d^{pred}|^2 / \sigma^2$, confirmando que el peso $1/\sigma^2$ es el que se usa. Cualquier persona puede inspeccionar el código y ver la fórmula real, no es una afirmación heurística.
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ============ §3 ============ -->
+<section id="tendencia">
+  <span class="num">§ 3</span>
+  <h2>La trampa del error relativo: outliers que sobreviven al filtro</h2>
+  <p class="subtitle">El error relativo y la desviación de la tendencia son cosas distintas.</p>
+
+  <p>El error relativo mide la <strong>incertidumbre estadística</strong> del propio punto: cómo de variables fueron las estimaciones espectrales entre ventanas FFT durante el procesado. Pero <strong>no</strong> mide cuán bien encaja el punto con sus vecinos en la curva del sondeo. Son cosas conceptualmente distintas.</p>
+
+  <h3>El caso patológico</h3>
+
+  <p>Imagina un sondeo MT en una estación, mirando la curva de $\rho_a$ para una componente concreta (digamos $Z_{xy}$):</p>
+
+  <div class="figure">
+    <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <style>
+          .lbl { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #4a3f30; }
+          .ttl { font-family: 'Fraunces', serif; font-size: 13px; fill: #251f17; }
+          .axis { stroke: #4a3f30; stroke-width: 1; fill: none; }
+          .grid { stroke: #d8cdb6; stroke-width: 0.5; fill: none; }
+        </style>
+      </defs>
+
+      <!-- Frame -->
+      <rect x="60" y="40" width="600" height="220" fill="#f7f1e6" stroke="#251f17" stroke-width="0.5"/>
+
+      <!-- Grid -->
+      <line x1="60" y1="100" x2="660" y2="100" class="grid"/>
+      <line x1="60" y1="160" x2="660" y2="160" class="grid"/>
+      <line x1="60" y1="220" x2="660" y2="220" class="grid"/>
+      <line x1="180" y1="40" x2="180" y2="260" class="grid"/>
+      <line x1="300" y1="40" x2="300" y2="260" class="grid"/>
+      <line x1="420" y1="40" x2="420" y2="260" class="grid"/>
+      <line x1="540" y1="40" x2="540" y2="260" class="grid"/>
+
+      <!-- Axes -->
+      <text x="60" y="98" class="lbl">100</text>
+      <text x="60" y="158" class="lbl">10</text>
+      <text x="60" y="218" class="lbl">1</text>
+      <text x="35" y="155" class="lbl" transform="rotate(-90 35 155)">ρa (Ω·m)</text>
+      <text x="170" y="280" class="lbl">10⁻³</text>
+      <text x="290" y="280" class="lbl">10⁻²</text>
+      <text x="410" y="280" class="lbl">10⁻¹</text>
+      <text x="530" y="280" class="lbl">10⁰</text>
+      <text x="650" y="280" class="lbl">10¹</text>
+      <text x="350" y="305" class="lbl" text-anchor="middle">Period (s)</text>
+
+      <!-- Smooth trend "good" points -->
+      <g fill="#27AE60">
+        <circle cx="120" cy="105" r="5"/>
+        <circle cx="180" cy="113" r="5"/>
+        <circle cx="240" cy="125" r="5"/>
+        <circle cx="300" cy="142" r="5"/>
+        <circle cx="360" cy="160" r="5"/>
+        <circle cx="420" cy="158" r="5"/>
+        <circle cx="480" cy="155" r="5"/>
+        <circle cx="540" cy="148" r="5"/>
+        <circle cx="600" cy="138" r="5"/>
+      </g>
+      <!-- Error bars on good points (small) -->
+      <g stroke="#27AE60" stroke-width="1.5">
+        <line x1="120" y1="100" x2="120" y2="110"/>
+        <line x1="180" y1="108" x2="180" y2="118"/>
+        <line x1="240" y1="120" x2="240" y2="130"/>
+        <line x1="300" y1="137" x2="300" y2="147"/>
+        <line x1="360" y1="155" x2="360" y2="165"/>
+        <line x1="420" y1="153" x2="420" y2="163"/>
+        <line x1="480" y1="150" x2="480" y2="160"/>
+        <line x1="540" y1="143" x2="540" y2="153"/>
+        <line x1="600" y1="133" x2="600" y2="143"/>
+      </g>
+
+      <!-- The bad outlier with small error bar -->
+      <circle cx="390" cy="220" r="6" fill="#C0392B"/>
+      <line x1="390" y1="216" x2="390" y2="224" stroke="#C0392B" stroke-width="1.5"/>
+      <text x="390" y="245" class="lbl" fill="#C0392B" text-anchor="middle">¡outlier con</text>
+      <text x="390" y="258" class="lbl" fill="#C0392B" text-anchor="middle">σ pequeño!</text>
+
+      <!-- Labels -->
+      <text x="120" y="92" class="ttl" fill="#27AE60">Tendencia continua →</text>
+
+      <!-- Legend -->
+      <rect x="500" y="48" width="150" height="40" fill="white" stroke="#d8cdb6"/>
+      <circle cx="515" cy="60" r="4" fill="#27AE60"/>
+      <text x="525" y="64" class="lbl">tendencia coherente</text>
+      <circle cx="515" cy="78" r="4" fill="#C0392B"/>
+      <text x="525" y="82" class="lbl">outlier visual</text>
+    </svg>
+    <div class="caption">Sondeo hipotético. Los puntos verdes siguen una tendencia continua (típica de MT). El punto rojo está claramente desviado, pero su barra de error es pequeña — el procesado le dio confianza estadística. <strong>Un filtro por error relativo NO lo detectaría</strong>.</div>
+  </div>
+
+  <p>Imagina un caso concreto: en una estación, los puntos a $T = 0.05$ s y $T = 0.2$ s tienen $\rho_a \approx 50$ Ω·m, pero el punto intermedio a $T = 0.1$ s tiene $\rho_a = 5$ Ω·m. Ese punto del medio es físicamente sospechoso: las curvas MT son monótonas o suavemente variables (la inducción electromagnética suaviza), y un salto de un orden de magnitud entre dos vecinos no tiene sentido geológico.</p>
+
+  <p>Pero ese punto puede tener un error relativo perfectamente normal — quizás 5%. ¿Por qué? Porque su procesado fue estadísticamente consistente (las ventanas FFT dieron resultados parecidos entre sí), aunque su valor sea físicamente erróneo. Causas posibles: una banda de frecuencia con interferencia coherente (un tren cercano a horario regular), una resonancia local de los electrodos, un error de calibración a una frecuencia concreta.</p>
+
+  <h3>El método: filtro de mediana móvil con MAD</h3>
+
+  <p>Para detectar este tipo de outlier hay que usar un criterio basado en la <strong>tendencia local</strong> en lugar de en la incertidumbre estadística. La técnica estándar se llama <strong>filtro de Hampel</strong> [3], que combina dos ideas:</p>
+
+  <ol>
+    <li>Para cada punto, definir una <em>ventana móvil</em> con sus $k$ vecinos más cercanos en período (típicamente $k = 5$, es decir, $\pm 2$ vecinos).</li>
+    <li>Calcular dos estadísticos robustos sobre esa ventana:
+      <ul>
+        <li>La <strong>mediana</strong> $\tilde{\rho}_a$.</li>
+        <li>La <strong>desviación absoluta mediana</strong> (MAD): $\text{MAD} = \text{med}(|\rho_a^{(j)} - \tilde{\rho}_a|)$.</li>
+      </ul>
+    </li>
+    <li>Marcar el punto como outlier si $|\rho_a^{(i)} - \tilde{\rho}_a| > k_\sigma \cdot \text{MAD} \cdot 1.4826$.</li>
+  </ol>
+
+  <p>El factor 1.4826 convierte la MAD en un equivalente a la desviación estándar para distribuciones gaussianas. El valor $k_\sigma = 3$ es típico (descarta puntos a más de "3 sigmas robustos" de la mediana local).</p>
+
+  <h3>Por qué se usa la mediana y no la media</h3>
+
+  <p>La mediana es robusta frente a outliers: si en una ventana de 5 puntos uno es disparatado, la mediana sigue dando el valor central correcto. La media, en cambio, se "contamina" con el outlier y el filtro fallaría: el outlier tiraría de la media hacia él, su residuo respecto a la media bajaría, y no se detectaría.</p>
+
+  <p>Igualmente, la MAD es más robusta que la varianza muestral. Es por eso que el filtro de Hampel está construido entero con estadísticos basados en mediana.</p>
+
+  <h3>Aplicación al caso MT</h3>
+
+  <p>Sobre cada sondeo (estación, componente) por separado:</p>
+  <ol>
+    <li>Ordenar los puntos por período.</li>
+    <li>Trabajar en escala logarítmica de $\rho_a$ (las curvas MT son típicamente monótonas en log-log).</li>
+    <li>Aplicar el filtro de Hampel con ventana de 5 vecinos y $k_\sigma = 3$.</li>
+    <li>Marcar como outliers los puntos detectados.</li>
+  </ol>
+
+  <p>El parámetro libre es $k_\sigma$. Valores típicos:</p>
+
+  <table>
+    <tr><th>$k_\sigma$</th><th>Estricto/laxo</th><th>Lo que descarta</th></tr>
+    <tr><td>2</td><td>Muy estricto</td><td>Casi cualquier punto que se desvíe del suave. Riesgo de eliminar señal real.</td></tr>
+    <tr><td>3</td><td>Estándar</td><td>Outliers claros (>3σ de la tendencia local). Recomendado.</td></tr>
+    <tr><td>4-5</td><td>Conservador</td><td>Solo outliers extremos. Menos riesgo de eliminar señal pero deja pasar más basura.</td></tr>
+  </table>
+
+  <h3>Filtrado combinado: la versión rigurosa</h3>
+
+  <p>El procedimiento completo, recomendado para un trabajo metodológico cuidadoso, sería aplicar los dos filtros en cascada:</p>
+
+  <ol>
+    <li><strong>Primer filtro</strong> (estadístico): error relativo &lt; umbral (50% o 30%). Elimina puntos con incertidumbre estadística no informativa.</li>
+    <li><strong>Segundo filtro</strong> (geométrico): Hampel con $k_\sigma = 3$ aplicado por sondeo. Elimina outliers de tendencia que sobrevivieron al primer filtro.</li>
+  </ol>
+
+  <p>El resultado es un dataset donde cada punto cumple dos condiciones: <em>fue procesado con confianza estadística razonable</em> y <em>encaja con el comportamiento esperado de su sondeo</em>.</p>
+
+  <div class="callout key">
+    <span class="label">Honestidad metodológica</span>
+    El segundo filtro introduce un parámetro subjetivo ($k_\sigma$) y un supuesto físico (las curvas MT son suaves). Estos pueden ser razonables, pero deben documentarse. En tu TFG, si haces este filtrado adicional, conviene escribir: "Se aplicó adicionalmente un filtro de Hampel con $k_\sigma = 3$ por sondeo, basado en el supuesto de que las curvas $\rho_a(T)$ tienen continuidad debido a la naturaleza inductiva del fenómeno MT. La elección de $k_\sigma$ se contrastó visualmente con los resultados del filtrado estadístico."
+  </div>
+
+  <hr class="dingbat">
+
+  <!-- ============ References ============ -->
+  <div class="references">
+    <h3>Referencias</h3>
+    <ol>
+      <li>Egbert, G. D. &amp; Kelbert, A. (2012). <em>Computational recipes for electromagnetic inverse problems</em>. Geophysical Journal International, 189(1), 251–267. doi:10.1111/j.1365-246X.2011.05347.x</li>
+      <li>Kelbert, A., Meqbel, N., Egbert, G. D. &amp; Tandon, K. (2014). <em>ModEM: A modular system for inversion of electromagnetic geophysical data</em>. Computers &amp; Geosciences, 66, 40–53. doi:10.1016/j.cageo.2014.01.010</li>
+      <li>Hampel, F. R. (1974). <em>The influence curve and its role in robust estimation</em>. Journal of the American Statistical Association, 69(346), 383–393. doi:10.1080/01621459.1974.10482962</li>
+      <li>Egbert, G. D. (1997). <em>Robust multiple-station magnetotelluric data processing</em>. Geophysical Journal International, 130(2), 475–496. (Para el procesado MT robusto que da los <code>.edi</code> y sus errores.)</li>
+    </ol>
+  </div>
+</section>
+
+<div class="footer">
+Notas técnicas · TFG · Inversión 3D MT Mallorca · Volumen IV
+</div>
+
+</div>
+</body>
+</html>

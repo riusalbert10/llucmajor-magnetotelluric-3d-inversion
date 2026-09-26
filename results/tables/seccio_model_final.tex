@@ -1,0 +1,89 @@
+% ---------------------------------------------------------------------------
+% Apartat: elecció del model final, tall de períodes i reducció del model inicial
+% Paquets necessaris al preàmbul:
+%   \usepackage{amsmath}
+%   \usepackage{booktabs}
+% ---------------------------------------------------------------------------
+
+\subsection{Elecció del model final i estratègia de períodes}
+
+Un cop avaluat el conjunt d'inversions, s'ha adoptat com a model final la
+\emph{Depuració Manual~2}, en la qual no s'ha modificat cap de les components
+antidiagonals del tensor d'impedància. El criteri d'aquesta elecció no ha estat la
+mera minimització de l'RMS, sinó l'equilibri global descrit anteriorment: aquest
+model aconsegueix generar prou estructura per resoldre els trets geoelèctrics
+d'interès i, alhora, reprodueix un resultat fortament comparable amb l'estudi de
+referència, sense recórrer a l'eliminació ni a la devaluació de la informació
+tridimensional continguda a les components diagonals. En altres paraules, s'ha
+prioritzat un model honest i geològicament plausible per damunt d'un desajust
+numèric artificialment baix.
+
+Sobre aquesta base, s'ha decidit acotar el rang de períodes fins a $T = 1$~s. La
+justificació és directa a partir de la profunditat pel·licular (\emph{skin depth}),
+que en el mètode magnetotel·lúric determina la profunditat de penetració del camp
+electromagnètic difós i, per tant, la profunditat màxima de sondeig efectiu:
+%
+\begin{equation}
+    \delta \approx 503\,\sqrt{\rho\,T}\ \ [\text{m}],
+    \qquad \rho\ \text{en}\ \Omega\!\cdot\!\text{m},\ T\ \text{en s},
+    \label{eq:skindepth}
+\end{equation}
+%
+on una estimació més conservadora del sondeig efectiu ve donada per la profunditat de
+Niblett--Bostick, $z_{NB} \approx \delta/\sqrt{2} \approx 356\,\sqrt{\rho\,T}$. La
+taula~\ref{tab:skindepth} recull tots dos valors a $T = 1$~s per a un ventall de
+resistivitats representatiu del recobriment de la zona d'estudi.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Profunditat pel·licular $\delta$ i profunditat de sondeig de
+    Niblett--Bostick $z_{NB}$ a $T = 1$~s, segons l'equació~\eqref{eq:skindepth},
+    per a diferents resistivitats del recobriment.}
+    \label{tab:skindepth}
+    \begin{tabular}{l r r}
+        \toprule
+        $\rho$ ($\Omega\!\cdot\!$m) & $\delta$ a 1\,s (m) & $z_{NB}$ a 1\,s (m) \\
+        \midrule
+        5 \ (intrusió salina / conductor) & 1\,125 & 796 \\
+        10                                & 1\,591 & 1\,125 \\
+        30 \ (mescla sediment/calcària)   & 2\,755 & 1\,949 \\
+        100 \ (calcària resistiva)        & 5\,030 & 3\,557 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Com es desprèn de la taula~\ref{tab:skindepth}, fins i tot en el cas més desfavorable
+per a la penetració —un recobriment fortament conductor de
+$\rho \approx 5\text{–}10\ \Omega\!\cdot\!$m— a $T = 1$~s el \emph{skin depth} és de
+$1{,}1\text{–}1{,}6$~km i el sondeig efectiu de Niblett--Bostick de
+$\sim 0{,}8\text{–}1{,}1$~km, tots dos clarament per sota de l'objectiu de
+caracterització situat a $600\text{–}700$~m, amb un factor de marge de
+$\sim 1{,}6\text{–}2{,}3$. Invertint l'equació~\eqref{eq:skindepth}, per assolir
+$700$~m només calen períodes de l'ordre de
+$T = \rho^{-1}\,(z/503)^{2} \approx 0{,}2$~s ($\rho = 10$) o $0{,}07$~s
+($\rho = 30$), de manera que l'estructura objectiu queda ben dins de la banda
+mostrejada i no al límit de penetració, on quedaria mal restringida. Estendre el
+rang fins a $1$~s proporciona, doncs, el coixí necessari sense excés: períodes més
+llargs només afegirien sensibilitat a estructures de diversos quilòmetres,
+irrellevants per a un objectiu de profunditat $\leq 700$~m.
+
+Aquesta acotació té, a més, una conseqüència directa sobre el disseny del model. La
+condició de contorn inferior del domini tridimensional, tal com estableixen
+Chave i Jones, exigeix que la malla s'estengui fins a profunditats on els camps
+electromagnètics siguin negligibles i s'assoleixi el règim asimptòtic, cosa que
+equival a diverses profunditats pel·liculars del període més llarg al substrat
+resistiu. Atès que $\delta \propto \sqrt{T}$, reduir el període màxim d'unes desenes
+de segons fins a $1$~s disminueix el \emph{skin depth} màxim en el factor
+corresponent (per exemple, $\sqrt{10} \approx 3{,}16$ en passar de $10$~s a $1$~s) i,
+per tant, la fondària mínima que ha de tenir el model per satisfer la condició de
+contorn es redueix en la mateixa proporció. Això permet aprimar el model inicial
+—fent-lo compatible amb les condicions de contorn especificades per Chave i Jones—
+i, alhora, reduir de manera notable el cost computacional de la inversió, sense
+comprometre en cap moment la resolució de l'objectiu situat a $600\text{–}700$~m.
+
+Convé matisar, finalment, que la profunditat pel·licular és una aproximació
+unidimensional; en un medi tridimensional la sensibilitat real depèn també de la
+cobertura de períodes i de la qualitat de les dades. Tanmateix, com a justificació de
+primer ordre —la d'ús habitual en el disseny d'experiments magnetotel·lúrics— el
+criteri és plenament vàlid i robust, atès que el marge de penetració respecte a
+l'objectiu és ampli fins i tot en el cas més conductor.

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metodología de Cálculo - Resistividad Aparente Magnetotelúrica</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+        .formula {
+            background-color: #ecf0f1;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .equation {
+            text-align: center;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        .note {
+            background-color: #fff9e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #f39c12;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        .data-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        code {
+            background-color: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 5px;
+        }
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .greek {
+            font-style: italic;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Metodología de Cálculo de Resistividad Aparente Magnetotelúrica</h1>
+
+        <p><strong>Archivo de datos:</strong> <code>mall67.edi</code></p>
+        <p><strong>Ubicación:</strong> Llucmajor, Mallorca, España</p>
+        <p><strong>Coordenadas:</strong> 39°28'06"N, 2°52'51"E</p>
+        <p><strong>Procesamiento:</strong> Datos procesados con transformada wavelet</p>
+
+        <h2>1. Fundamentos Teóricos</h2>
+
+        <p>El método magnetotelúrico (MT) se basa en la relación entre las componentes del campo electromagnético natural de la Tierra. La impedancia magnetotelúrica relaciona los campos eléctrico y magnético horizontales mediante el tensor de impedancia <span class="greek">Z</span>.</p>
+
+        <h3>1.1 Tensor de Impedancia</h3>
+
+        <div class="formula">
+            <div class="equation">
+                <strong>E<sub>x</sub></strong> = Z<sub>xx</sub>H<sub>x</sub> + Z<sub>xy</sub>H<sub>y</sub>
+            </div>
+            <div class="equation">
+                <strong>E<sub>y</sub></strong> = Z<sub>yx</sub>H<sub>x</sub> + Z<sub>yy</sub>H<sub>y</sub>
+            </div>
+        </div>
+
+        <p>Donde:</p>
+        <ul>
+            <li><strong>E<sub>x</sub>, E<sub>y</sub></strong>: Componentes del campo eléctrico (mV/km)</li>
+            <li><strong>H<sub>x</sub>, H<sub>y</sub></strong>: Componentes del campo magnético (nT)</li>
+            <li><strong>Z<sub>ij</sub></strong>: Elementos del tensor de impedancia (mV/km·nT)</li>
+        </ul>
+
+        <h2>2. Extracción de Datos del Archivo EDI</h2>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Lectura de Frecuencias:</strong> Extracción de 46 frecuencias desde la sección <code>&gt;FREQ</code>
+        </div>
+
+        <div class="formula">
+            <p>Rango de frecuencias: <strong>0.014824 Hz ≤ f ≤ 8000 Hz</strong></p>
+            <p>Rango de períodos: <strong>T = 1/f</strong> → 0.000125 s ≤ T ≤ 67.46 s</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Extracción de Componentes de Impedancia:</strong> Lectura de partes real e imaginaria
+        </div>
+
+        <table class="data-table">
+            <tr>
+                <th>Componente</th>
+                <th>Parte Real</th>
+                <th>Parte Imaginaria</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td>Z<sub>xx</sub></td>
+                <td>ZXXR</td>
+                <td>ZXXI</td>
+                <td>Componente diagonal (usualmente pequeña en 1D)</td>
+            </tr>
+            <tr>
+                <td>Z<sub>xy</sub></td>
+                <td>ZXYR</td>
+                <td>ZXYI</td>
+                <td>Modo TE (Transversal Eléctrico)</td>
+            </tr>
+            <tr>
+                <td>Z<sub>yx</sub></td>
+                <td>ZYXR</td>
+                <td>ZYXI</td>
+                <td>Modo TM (Transversal Magnético)</td>
+            </tr>
+            <tr>
+                <td>Z<sub>yy</sub></td>
+                <td>ZYYR</td>
+                <td>ZYYI</td>
+                <td>Componente diagonal (usualmente pequeña en 1D)</td>
+            </tr>
+        </table>
+
+        <h2>3. Cálculo de Resistividad Aparente</h2>
+
+        <h3>3.1 Impedancia Compleja</h3>
+
+        <div class="formula">
+            <div class="equation">
+                <strong>Z<sub>ij</sub> = Z<sub>ij</sub><sup>R</sup> + i·Z<sub>ij</sub><sup>I</sup></strong>
+            </div>
+        </div>
+
+        <p>Donde:</p>
+        <ul>
+            <li><strong>Z<sub>ij</sub><sup>R</sup></strong>: Parte real de la impedancia</li>
+            <li><strong>Z<sub>ij</sub><sup>I</sup></strong>: Parte imaginaria de la impedancia</li>
+            <li><strong>i</strong>: Unidad imaginaria (i² = -1)</li>
+        </ul>
+
+        <h3>3.2 Magnitud de la Impedancia</h3>
+
+        <div class="formula">
+            <div class="equation">
+                <strong>|Z<sub>ij</sub>| = √((Z<sub>ij</sub><sup>R</sup>)² + (Z<sub>ij</sub><sup>I</sup>)²)</strong>
+            </div>
+        </div>
+
+        <div class="note">
+            <strong>Nota:</strong> Este cálculo se realiza para cada componente del tensor de impedancia (xy y yx) por separado.
+        </div>
+
+        <h3>3.3 Fórmula de Cagniard para Resistividad Aparente</h3>
+
+        <div class="note">
+            <strong>¡IMPORTANTE - Unidades de la Impedancia!</strong><br>
+            El formato EDI estándar usa impedancias en unidades <strong>[mV/km]/[nT]</strong>, no en unidades SI puras.
+            Esto requiere usar una fórmula práctica específica.
+        </div>
+
+        <h4>Fórmula para archivos EDI con Z en [mV/km]/[nT]:</h4>
+
+        <div class="formula">
+            <div class="equation">
+                <strong>ρ<sub>a</sub> = 0.2 × T × |Z<sub>ij</sub>|²</strong>
+            </div>
+            <p style="text-align: center;">o equivalentemente:</p>
+            <div class="equation">
+                <strong>ρ<sub>a</sub> = |Z<sub>ij</sub>|² / (5f)</strong>
+            </div>
+        </div>
+
+        <p>Donde:</p>
+        <ul>
+            <li><strong>ρ<sub>a</sub></strong>: Resistividad aparente (Ω·m)</li>
+            <li><strong>|Z<sub>ij</sub>|</strong>: Magnitud de la impedancia [mV/km]/[nT]</li>
+            <li><strong>T = 1/f</strong>: Período (s)</li>
+            <li><strong>f</strong>: Frecuencia (Hz)</li>
+            <li><strong>0.2</strong>: Factor de conversión de unidades EDI a Ω·m</li>
+        </ul>
+
+        <h4>Fórmula teórica (para Z en unidades SI):</h4>
+
+        <div class="formula">
+            <div class="equation">
+                <strong>ρ<sub>a</sub> = |Z<sub>ij</sub>|² / (ω·μ₀)</strong>
+            </div>
+        </div>
+
+        <p>Donde:</p>
+        <ul>
+            <li><strong>ω = 2πf</strong>: Frecuencia angular (rad/s)</li>
+            <li><strong>μ₀ = 4π × 10<sup>-7</sup></strong>: Permeabilidad magnética del vacío (H/m)</li>
+        </ul>
+
+        <div class="note">
+            <strong>¿Por qué la diferencia?</strong><br>
+            La conversión de [mV/km]/[nT] a unidades SI implica factores de 10³, 10⁻⁶, 10⁻⁹, etc.
+            que se combinan matemáticamente para producir el factor "5" o "0.2" en las fórmulas prácticas.
+            Por eso ω·μ₀ ≈ 7.89×10⁻⁶·f (teórico) ≠ 5f (práctico para EDI).
+        </div>
+
+        <h3>3.4 Implementación en Python</h3>
+
+        <div class="formula">
+<pre>
+def calculate_apparent_resistivity(zr, zi, freq):
+    """
+    Calcula resistividad aparente para archivos EDI
+
+    Para archivos EDI estándar con impedancia en [mV/km]/[nT]:
+    ρₐ = 0.2 × T × |Z|² = |Z|² / (5f)
+
+    Parámetros:
+        zr: Parte real de la impedancia [mV/km]/[nT]
+        zi: Parte imaginaria de la impedancia [mV/km]/[nT]
+        freq: Frecuencia (Hz)
+
+    Retorna:
+        rho_a: Resistividad aparente (Ω·m)
+    """
+    # Magnitud de la impedancia
+    z_magnitude = np.sqrt(zr**2 + zi**2)
+
+    # Fórmula correcta para unidades EDI estándar [mV/km]/[nT]
+    rho_a = (z_magnitude**2) / (5.0 * freq)
+
+    return rho_a
+</pre>
+        </div>
+
+        <h2>4. Cálculo de Fase</h2>
+
+        <p>La fase de la impedancia proporciona información sobre la geometría y conductividad del subsuelo.</p>
+
+        <div class="formula">
+            <div class="equation">
+                <strong>φ = arctan(Z<sub>ij</sub><sup>I</sup> / Z<sub>ij</sub><sup>R</sup>) × (180/π)</strong>
+            </div>
+        </div>
+
+        <p>Donde:</p>
+        <ul>
+            <li><strong>φ</strong>: Fase de la impedancia (grados)</li>
+            <li><strong>arctan</strong>: Función arcotangente (arctangente de dos argumentos)</li>
+        </ul>
+
+        <div class="note">
+            <strong>Interpretación física:</strong>
+            <ul>
+                <li>φ = 45°: Tierra homogénea (modelo 1D)</li>
+                <li>φ &gt; 45°: Aumento de resistividad con profundidad</li>
+                <li>φ &lt; 45°: Disminución de resistividad con profundidad</li>
+            </ul>
+        </div>
+
+        <h3>4.1 Implementación en Python</h3>
+
+        <div class="formula">
+<pre>
+def calculate_phase(zr, zi):
+    """
+    Calcula fase de la impedancia
+
+    Parámetros:
+        zr: Parte real de la impedancia
+        zi: Parte imaginaria de la impedancia
+
+    Retorna:
+        phase: Fase en grados
+    """
+    phase = np.arctan2(zi, zr) * 180 / np.pi
+    return phase
+</pre>
+        </div>
+
+        <h2>5. Profundidad de Penetración (Skin Depth)</h2>
+
+        <p>La profundidad de penetración indica hasta qué profundidad las ondas electromagnéticas pueden penetrar en el subsuelo.</p>
+
+        <div class="formula">
+            <div class="equation">
+                <strong>δ = 503 × √(ρ<sub>a</sub> / f)</strong>
+            </div>
+        </div>
+
+        <p>Donde:</p>
+        <ul>
+            <li><strong>δ</strong>: Profundidad de penetración (m)</li>
+            <li><strong>ρ<sub>a</sub></strong>: Resistividad aparente (Ω·m)</li>
+            <li><strong>f</strong>: Frecuencia (Hz)</li>
+            <li><strong>503</strong>: Constante derivada de √(1/(πfμ₀σ)) con unidades apropiadas</li>
+        </ul>
+
+        <div class="note">
+            <strong>Derivación de la constante 503:</strong><br>
+            δ = √(2/(ωμ₀σ)) = √(ρ/(πfμ₀))<br>
+            Sustituyendo μ₀ = 4π × 10<sup>-7</sup> H/m:<br>
+            δ ≈ 503.3 × √(ρ/f)
+        </div>
+
+        <h3>5.1 Implementación en Python</h3>
+
+        <div class="formula">
+<pre>
+def calculate_skin_depth(rho, freq):
+    """
+    Calcula profundidad de penetración
+
+    Parámetros:
+        rho: Resistividad aparente (Ω·m)
+        freq: Frecuencia (Hz)
+
+    Retorna:
+        depth: Profundidad de penetración (m)
+    """
+    depth = 503 * np.sqrt(rho / freq)
+    return depth
+</pre>
+        </div>
+
+        <h2>6. Resultados Obtenidos de mall67.edi</h2>
+
+        <h3>6.1 Modo TE (ρ<sub>xy</sub>)</h3>
+
+        <table class="data-table">
+            <tr>
+                <th>Parámetro</th>
+                <th>Valor Mínimo</th>
+                <th>Valor Máximo</th>
+                <th>Valor Medio</th>
+            </tr>
+            <tr>
+                <td>Resistividad (Ω·m)</td>
+                <td>4.12</td>
+                <td>263</td>
+                <td>37.7</td>
+            </tr>
+            <tr>
+                <td>Fase (°)</td>
+                <td>18.65</td>
+                <td>104.41</td>
+                <td>52.10</td>
+            </tr>
+        </table>
+
+        <h3>6.2 Modo TM (ρ<sub>yx</sub>)</h3>
+
+        <table class="data-table">
+            <tr>
+                <th>Parámetro</th>
+                <th>Valor Mínimo</th>
+                <th>Valor Máximo</th>
+                <th>Valor Medio</th>
+            </tr>
+            <tr>
+                <td>Resistividad (Ω·m)</td>
+                <td>7.83</td>
+                <td>622</td>
+                <td>87.4</td>
+            </tr>
+            <tr>
+                <td>Fase (°)</td>
+                <td>-177.78</td>
+                <td>-15.64</td>
+                <td>-131.53</td>
+            </tr>
+        </table>
+
+        <h3>6.3 Profundidad de Penetración</h3>
+
+        <table class="data-table">
+            <tr>
+                <th>Parámetro</th>
+                <th>Valor</th>
+            </tr>
+            <tr>
+                <td>Profundidad Mínima</td>
+                <td>78 m (0.078 km)</td>
+            </tr>
+            <tr>
+                <td>Profundidad Máxima</td>
+                <td>17.9 km</td>
+            </tr>
+            <tr>
+                <td>Profundidad Media</td>
+                <td>3.0 km</td>
+            </tr>
+        </table>
+
+        <h2>7. Interpretación Geológica</h2>
+
+        <div class="note">
+            <strong>Observaciones:</strong>
+            <ul>
+                <li>Las <strong>resistividades moderadas</strong> (4-622 Ω·m) son típicas de rocas sedimentarias, calizas con algo de porosidad, y rocas con contenido moderado de agua o minerales conductivos.</li>
+                <li>El <strong>modo TE</strong> (4-263 Ω·m) muestra resistividades generalmente más bajas que el <strong>modo TM</strong> (8-622 Ω·m), indicando anisotropía eléctrica o estructuras 2D/3D en el subsuelo.</li>
+                <li>Las <strong>fases negativas en el modo TM</strong> (-178° a -16°) indican un comportamiento inductivo característico de estructuras conductivas en profundidad.</li>
+                <li>Las <strong>profundidades de penetración</strong> (78 m a 17.9 km) permiten investigar desde sedimentos superficiales hasta la corteza media, rango ideal para estudios de acuíferos, estructuras geológicas y exploración de recursos.</li>
+                <li>Los valores son consistentes con la geología de Mallorca: formaciones carbonatadas mesozoicas, margas, y basamento cristalino.</li>
+            </ul>
+        </div>
+
+        <h2>8. Nota sobre la Permeabilidad Magnética</h2>
+
+        <h3>8.1 ¿Se debe usar μ₀ o considerar la permeabilidad de las rocas?</h3>
+
+        <p>En magnetotelúrica, casi siempre se usa <strong>μ₀ = 4π × 10<sup>-7</sup> H/m</strong> (permeabilidad del vacío) porque:</p>
+
+        <table class="data-table">
+            <tr>
+                <th>Material</th>
+                <th>Permeabilidad Relativa (μᵣ)</th>
+                <th>Impacto</th>
+            </tr>
+            <tr>
+                <td>Rocas sedimentarias</td>
+                <td>1.0 - 1.002</td>
+                <td>Despreciable (&lt;0.2%)</td>
+            </tr>
+            <tr>
+                <td>Rocas ígneas</td>
+                <td>1.0 - 1.01</td>
+                <td>Insignificante (&lt;1%)</td>
+            </tr>
+            <tr>
+                <td>Rocas con magnetita (baja concentración)</td>
+                <td>1.01 - 1.1</td>
+                <td>Pequeño (&lt;10%)</td>
+            </tr>
+            <tr>
+                <td>Rocas muy magnéticas (alta magnetita)</td>
+                <td>1.1 - 5.0</td>
+                <td>Moderado (hasta 5×)</td>
+            </tr>
+        </table>
+
+        <div class="note">
+            <strong>Conclusión:</strong>
+            <ul>
+                <li>La permeabilidad magnética de las rocas es <strong>casi idéntica al vacío</strong> (μᵣ ≈ 1.0) en la mayoría de los casos.</li>
+                <li>Incluso en rocas muy magnéticas, el efecto es máximo un factor de 5, <strong>NO varios órdenes de magnitud</strong>.</li>
+                <li>El factor de 10⁶ que observaste entre nuestros cálculos iniciales y los correctos se debe 100% a las <strong>unidades de la impedancia</strong>, no a la permeabilidad.</li>
+                <li>En la práctica estándar de MT, siempre se usa μ₀ porque el error introducido es negligible comparado con otras fuentes de incertidumbre.</li>
+            </ul>
+        </div>
+
+        <h3>8.2 Verificación del Factor de Conversión</h3>
+
+        <p>Comparando ambas fórmulas:</p>
+
+        <div class="formula">
+            <p><strong>Teórica (SI):</strong> ωμ₀ = 2πf × 4π × 10<sup>-7</sup> ≈ 7.89 × 10<sup>-6</sup> × f</p>
+            <p><strong>Práctica (EDI):</strong> 5f</p>
+            <p><strong>Ratio:</strong> (7.89 × 10<sup>-6</sup> × f) / (5f) ≈ 1.58 × 10<sup>-6</sup></p>
+        </div>
+
+        <p>Esta diferencia de ~6 órdenes de magnitud (10<sup>-6</sup>) proviene de la conversión de unidades [mV/km]/[nT] a SI, NO de la permeabilidad magnética.</p>
+
+        <h2>9. Referencias</h2>
+
+        <ul>
+            <li>Cagniard, L. (1953). Basic theory of the magneto-telluric method of geophysical prospecting. <em>Geophysics</em>, 18(3), 605-635.</li>
+            <li>Simpson, F., & Bahr, K. (2005). <em>Practical Magnetotellurics</em>. Cambridge University Press.</li>
+            <li>Chave, A. D., & Jones, A. G. (2012). <em>The Magnetotelluric Method: Theory and Practice</em>. Cambridge University Press.</li>
+            <li>Vozoff, K. (1991). The magnetotelluric method. In M. N. Nabighian (Ed.), <em>Electromagnetic Methods in Applied Geophysics</em> (Vol. 2, pp. 641-711). Society of Exploration Geophysicists.</li>
+        </ul>
+
+        <hr style="margin-top: 40px;">
+
+        <p style="text-align: center; color: #7f8c8d; font-size: 0.9em;">
+            <strong>Documento generado automáticamente</strong><br>
+            Análisis Magnetotelúrico - Estación mall67, Llucmajor, Mallorca<br>
+            Fecha: Diciembre 2025
+        </p>
+    </div>
+</body>
+</html>

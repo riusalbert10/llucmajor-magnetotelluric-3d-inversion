@@ -1,0 +1,10 @@
+Label,Total_Iterations,Initial_RMS,Final_RMS,Final_Lambda,Final_Model_Norm
+"Raw data",110,48.2853,14.3916,1.00e-08,0.6475
+"Suavitzat LOWESS 1",115,47.7766,13.5136,1.00e-08,0.6313
+"Suavitzat LOWESS 2",123,48.2712,13.3286,1.00e-08,0.7457
+"Suavitzat Hampel",129,47.5838,12.6945,1.00e-08,0.6607
+"Depuració Manual 1",134,44.6866,11.8960,1.00e-08,0.7207
+"Depuració Manual 2",82,12.6490,6.7124,1.00e-08,0.2317
+"Depuració Manual 3",92,11.0962,3.8057,1.00e-08,0.1465
+"Depuració Manual 4",86,10.7960,3.2521,1.00e-08,0.1881
+"Depuració Manual 5",67,9.7049,6.6761,1.00e-08,0.4113

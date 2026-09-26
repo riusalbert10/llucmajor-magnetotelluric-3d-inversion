@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*_env*/
+
+# Field data (not redistributable)
+data/*
+!data/README.md
+*.edi
+
+# LaTeX build files
+*.aux
+*.log
+!results/final_model/*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.xdv
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

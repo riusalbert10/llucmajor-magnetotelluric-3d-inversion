@@ -1,0 +1,90 @@
+========================================================================
+ TAULA DE PARAMETRES DE LA INVERSIO 3D MT  (reproductibilitat)
+ Configuracio: Model_recond_diag_dep_10s_ef5_ef7 / Run_635
+========================================================================
+
+------------------------------------------------------------------------
+ 1. MALLA  (Model_Bat_35km_recond)
+------------------------------------------------------------------------
+ Nombre de cel.les .............. 68 x 68 x 30   (138.720)
+ Extensio horitzontal ........... 35 x 35 km
+ Profunditat total del domini ... 68,36 km
+ Cel.la de nucli (horitzontal) .. 150 m  (50 cel.les/eix -> nucli 7,5 km)
+ Primera capa (vertical) ........ 12 m
+ Cel.la mes profunda (padding) .. ~23,8 km
+ Resolucio somera ............... 13 capes fins a 600 m ; 19 fins a 2 km
+ Origen (cantonada) ............. (-17503, -17503, 0) m
+ Centre del domini .............. (-3, -3) m
+ Rotacio ........................ 0 graus
+ Format resistivitat ............ LOGE (ln rho)
+
+------------------------------------------------------------------------
+ 2. DADES  (Mall_maskD_no_tip_10s_ef5)
+------------------------------------------------------------------------
+ Tipus de dada .................. tensor d'impedancia complet (Full_Impedance)
+ Components ..................... Zxx, Zxy, Zyx, Zyy
+ Nombre de periodes ............. 39
+ Rang de periodes ............... 0,000125 s  ->  8,66 s
+ Rang de frequencies ............ 8000 Hz  ->  0,116 Hz
+ Nombre d'estacions ............. 40
+ Nombre total de components ..... 3980 (Zxx 1034, Zxy 982, Zyx 1005, Zyy 959)
+ Petjada de les estacions ....... X(N) +/-2134 m (span 4,27 km)
+                                  Y(E) +/-3055 m (span 6,11 km)
+
+------------------------------------------------------------------------
+ 3. ERROR FLOOR
+------------------------------------------------------------------------
+ Off-diagonal (Zxy, Zyx) ........ 5% de sqrt(|Zxy*Zyx|)   (T <= 1 s: fila Y a 7%)
+ Diagonals (Zxx, Zyy) ........... depurades manualment (T <= 1 s) i ponderades
+ Nota ........................... esquema del Run_635; per a variants uniformes
+                                  vegeu els fitxers _u5 (5%) o _u7 (7%)
+
+------------------------------------------------------------------------
+ 4. REGULARITZACIO / COVARIANCIA  (Model_Bat_35km_recond_cov_seafixed)
+------------------------------------------------------------------------
+ Esquema ........................ autoregressio recursiva (suavitzat)
+ Suavitzat X / Y / Z ............ 0,2 / 0,2 / 0,2
+ Nombre d'aplicacions ........... 2
+ Excepcions ..................... 0
+ Mascara d'ocea (mar fix) ....... mask 9 (400 cel.les de mar, rho = 0,3 ohm-m,
+                                  fixades; suavitzat costa-terra desactivat)
+
+------------------------------------------------------------------------
+ 5. ALGORITME I CONTROL D'INVERSIO  (NLCG)
+------------------------------------------------------------------------
+ Algoritme ...................... NLCG (gradient conjugat no lineal;
+                                  Rodi & Mackie, 2001, dins ModEM)
+ Lambda inicial ................. 100
+ Reduccio de lambda ............. dividir per 10 (en estancament)
+ Pas inicial de line search ..... 20 (unitats de model)
+ Restart si diff. rms < ......... 2e-3
+ Sortida si rms < ............... 1,05
+ Sortida si lambda < ............ 1e-8
+ Iteracions maximes ............. 150
+
+------------------------------------------------------------------------
+ 6. CONTROL DEL PROBLEMA DIRECTE  (FD, malla Yee)
+------------------------------------------------------------------------
+ Solver ......................... QMR + preacondicionador ILU
+ Iters QMR / correccio divergencia  100
+ Max. crides correccio divergencia  40
+ Max. iters correccio divergencia   1000
+ Toleran. solver directe/adjunt ... 1e-6
+
+------------------------------------------------------------------------
+ 7. MODEL INICIAL / PRIOR
+------------------------------------------------------------------------
+ Model inicial = prior .......... Model_Bat_35km_recond
+ Fons (halfspace) ............... 100 ohm-m
+ Unitat conductora .............. 30 ohm-m
+ Mar (fix) ...................... 0,3 ohm-m
+
+------------------------------------------------------------------------
+ 8. RESULTAT  (Run_635)
+------------------------------------------------------------------------
+ Iteracions ..................... 92
+ RMS normalitzat inicial ........ 11,41
+ RMS normalitzat final .......... 3,81
+ Convergencia ................... lambda refredada 100 -> 1e-8; sortida per
+                                  minim local
+========================================================================

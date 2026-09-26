@@ -1,0 +1,116 @@
+<svg viewBox="0 0 1180 1320" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+    <marker id="arrowT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2E9C8E"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1180" height="1320" fill="white"/>
+
+  <!-- Title -->
+  <text x="590" y="40" text-anchor="middle" font-size="25" font-weight="700" fill="#1c2b3a">Flux de treball intern de ModEM</text>
+  <text x="590" y="66" text-anchor="middle" font-size="14.5" fill="#5b6a78">Inversió magnetotel·lúrica 3D (NLCG): el problema directe s'executa dins del bucle iteratiu</text>
+
+  <!-- ===================== INPUTS ===================== -->
+  <g>
+    <rect x="70"  y="92" width="300" height="92" rx="9" fill="#f2f3f5" stroke="#9aa4ad" stroke-width="1.4"/>
+    <text x="220" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#3a4650">Dades observades</text>
+    <text x="220" y="144" text-anchor="middle" font-size="12.5" fill="#4b5763">Z (i tipper) a cada estació</text>
+    <text x="220" y="163" text-anchor="middle" font-size="12.5" fill="#4b5763">i periode + errors (error floor)</text>
+
+    <rect x="440" y="92" width="300" height="92" rx="9" fill="#f2f3f5" stroke="#9aa4ad" stroke-width="1.4"/>
+    <text x="590" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#3a4650">Model inicial / de referencia</text>
+    <text x="590" y="144" text-anchor="middle" font-size="12.5" fill="#4b5763">distribucio de resistivitats m₀</text>
+    <text x="590" y="163" text-anchor="middle" font-size="12.5" fill="#4b5763">(sovint tambe m_ref)</text>
+
+    <rect x="810" y="92" width="300" height="92" rx="9" fill="#f2f3f5" stroke="#9aa4ad" stroke-width="1.4"/>
+    <text x="960" y="118" text-anchor="middle" font-size="14" font-weight="700" fill="#3a4650">Malla i configuracio</text>
+    <text x="960" y="140" text-anchor="middle" font-size="12.5" fill="#4b5763">condicions de contorn (1D/2D),</text>
+    <text x="960" y="159" text-anchor="middle" font-size="12.5" fill="#4b5763">regularitzacio: suavitzat C_m, λ</text>
+  </g>
+
+  <!-- funnel arrows into forward -->
+  <path d="M220,184 C 300,225 400,235 448,262" fill="none" stroke="#555" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <path d="M590,184 L 460,262" fill="none" stroke="#555" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <path d="M960,184 C 880,225 560,238 500,262" fill="none" stroke="#555" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- ===================== LOOP CONTAINER ===================== -->
+  <rect x="55" y="240" width="790" height="1040" rx="16" fill="#fbfbfc" stroke="#b6bcc2" stroke-width="1.6" stroke-dasharray="7 5"/>
+  <text x="78" y="268" font-size="14.5" font-weight="700" fill="#8a929a">Bucle iteratiu (NLCG)</text>
+
+  <!-- 1. FORWARD -->
+  <rect x="210" y="286" width="480" height="120" rx="10" fill="#e8f0fe" stroke="#2c6bb3" stroke-width="1.8"/>
+  <text x="450" y="313" text-anchor="middle" font-size="15.5" font-weight="700" fill="#1b4d80">① Problema directe (forward)</text>
+  <text x="450" y="337" text-anchor="middle" font-size="12.8" fill="#254b6b">Equacions de Maxwell (aproximacio difusiva/quasiestatica)</text>
+  <text x="450" y="356" text-anchor="middle" font-size="12.8" fill="#254b6b">resoltes per diferencies finites amb la resistivitat actual mₖ</text>
+  <text x="450" y="375" text-anchor="middle" font-size="12.8" fill="#254b6b">→ camps E i H → impedancia predita F(mₖ)</text>
+  <text x="450" y="396" text-anchor="middle" font-size="11.3" font-style="italic" fill="#6a7a8a">(es repeteix per cada periode i les 2 polaritzacions)</text>
+
+  <path d="M450,406 L450,438" fill="none" stroke="#555" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- 2. OBJECTIVE -->
+  <rect x="210" y="440" width="480" height="118" rx="10" fill="#fdf3e0" stroke="#c88a2e" stroke-width="1.8"/>
+  <text x="450" y="467" text-anchor="middle" font-size="15.5" font-weight="700" fill="#8a5a12">② Funcio objectiu i desajust</text>
+  <text x="450" y="493" text-anchor="middle" font-size="13.2" fill="#6d4a12">Φ(m) = ‖d − F(m)‖²(C_d) + λ‖m − m_ref‖²(C_m)</text>
+  <text x="450" y="514" text-anchor="middle" font-size="12.6" fill="#6d4a12">desajust de dades  +  regularitzacio (suavitzat)</text>
+  <text x="450" y="536" text-anchor="middle" font-size="12.6" font-weight="600" fill="#6d4a12">→ RMS del desajust</text>
+
+  <path d="M450,558 L450,588" fill="none" stroke="#555" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- 3. DECISION diamond -->
+  <polygon points="450,590 590,662 450,734 310,662" fill="#e2f4f1" stroke="#2e9c8e" stroke-width="1.9"/>
+  <text x="450" y="655" text-anchor="middle" font-size="14" font-weight="700" fill="#1d6a60">③ RMS ≤ objectiu</text>
+  <text x="450" y="676" text-anchor="middle" font-size="13" fill="#1d6a60">o Φ estancada?</text>
+
+  <!-- No path down -->
+  <path d="M450,734 L450,772" fill="none" stroke="#555" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <text x="468" y="758" font-size="13" font-weight="700" fill="#b23b3b">No</text>
+
+  <!-- Si path right to final -->
+  <path d="M590,662 L884,662" fill="none" stroke="#2E9C8E" stroke-width="2" marker-end="url(#arrowT)"/>
+  <text x="720" y="649" text-anchor="middle" font-size="13" font-weight="700" fill="#2E9C8E">Si</text>
+
+  <!-- 4. GRADIENT -->
+  <rect x="210" y="774" width="480" height="72" rx="10" fill="#f0ebf9" stroke="#7a5ab0" stroke-width="1.8"/>
+  <text x="450" y="805" text-anchor="middle" font-size="15" font-weight="700" fill="#573f86">④ Gradient de Φ</text>
+  <text x="450" y="827" text-anchor="middle" font-size="12.8" fill="#573f86">calculat pel metode adjunt (una resolucio adjunta)</text>
+
+  <path d="M450,846 L450,872" fill="none" stroke="#555" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- 5. NLCG -->
+  <rect x="210" y="874" width="480" height="72" rx="10" fill="#eef1f4" stroke="#5b6a78" stroke-width="1.8"/>
+  <text x="450" y="905" text-anchor="middle" font-size="15" font-weight="700" fill="#39434d">⑤ NLCG</text>
+  <text x="450" y="927" text-anchor="middle" font-size="12.8" fill="#39434d">direccio de cerca conjugada + line search</text>
+
+  <path d="M450,946 L450,972" fill="none" stroke="#555" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- 6. UPDATE -->
+  <rect x="210" y="974" width="480" height="72" rx="10" fill="#e7f5ea" stroke="#3b9b54" stroke-width="1.8"/>
+  <text x="450" y="1005" text-anchor="middle" font-size="15" font-weight="700" fill="#256b39">⑥ Actualitza el model → mₖ₊₁</text>
+  <text x="450" y="1027" text-anchor="middle" font-size="12.8" fill="#256b39">nova distribucio de resistivitats</text>
+
+  <!-- loop back arrow -->
+  <path d="M210,1010 L120,1010 L120,346 L210,346" fill="none" stroke="#555" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <text x="112" y="690" text-anchor="middle" font-size="12.5" font-weight="600" fill="#555" transform="rotate(-90 112 690)">itera amb mₖ₊₁</text>
+
+  <!-- ===================== FINAL MODEL ===================== -->
+  <rect x="885" y="602" width="255" height="120" rx="11" fill="#2e9c8e" stroke="#1d6a60" stroke-width="1.8"/>
+  <text x="1012" y="645" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">Model final</text>
+  <text x="1012" y="669" text-anchor="middle" font-size="13" fill="#eafaf7">de resistivitats</text>
+  <text x="1012" y="694" text-anchor="middle" font-size="12" fill="#d6f2ec">distribucio 3D interpretable</text>
+
+  <!-- lambda cooling note -->
+  <rect x="885" y="770" width="255" height="150" rx="11" fill="#fff9ec" stroke="#c88a2e" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="1012" y="798" text-anchor="middle" font-size="14" font-weight="700" fill="#8a5a12">Cooling de λ</text>
+  <text x="1012" y="822" text-anchor="middle" font-size="12.2" fill="#6d4a12">Cada cert nombre d'iteracions</text>
+  <text x="1012" y="841" text-anchor="middle" font-size="12.2" fill="#6d4a12">es redueix λ: es passa d'un</text>
+  <text x="1012" y="860" text-anchor="middle" font-size="12.2" fill="#6d4a12">model suau a un amb mes</text>
+  <text x="1012" y="879" text-anchor="middle" font-size="12.2" fill="#6d4a12">estructura, mantenint l'ajust</text>
+  <text x="1012" y="903" text-anchor="middle" font-size="12.2" fill="#6d4a12">de les dades.</text>
+
+  <!-- footnote -->
+  <text x="60" y="1305" font-size="11.5" font-style="italic" fill="#8a929a">La inversio ajusta el MODEL (resistivitats), no les dades: els datos observats son fixos i es modifica m fins que F(m) els reprodueix dins l'error.</text>
+</svg>

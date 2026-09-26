@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Derivación Física: ¿Por qué 5 en lugar de 2πμ₀?</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 35px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 35px;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+            background-color: #ecf0f1;
+            padding: 10px 15px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 25px;
+        }
+        .derivation {
+            background-color: #e3f2fd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 5px solid #2196f3;
+        }
+        .step {
+            background-color: #f5f5f5;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #ff9800;
+        }
+        .equation {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            font-family: 'Times New Roman', serif;
+        }
+        .highlight-box {
+            background-color: #fff9c4;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border: 2px solid #fbc02d;
+        }
+        .key-point {
+            background-color: #c8e6c9;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 5px solid #4caf50;
+        }
+        .warning {
+            background-color: #ffebee;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 5px solid #f44336;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .fraction > span {
+            display: block;
+        }
+        .fraction .top {
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+        }
+        .fraction .bottom {
+            padding-top: 2px;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .sub {
+            font-size: 0.8em;
+            vertical-align: sub;
+        }
+        .sup {
+            font-size: 0.8em;
+            vertical-align: super;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Derivación Física Completa: ¿De Dónde Viene el Factor "5"?</h1>
+
+        <div class="highlight-box">
+            <h3>Pregunta Clave:</h3>
+            <p style="font-size: 1.1em;"><strong>¿Qué sentido físico tiene sustituir 2πfμ₀ por 5f?</strong></p>
+            <p><strong>Respuesta corta:</strong> NO se "sustituye" arbitrariamente. El factor 5 es el resultado matemático de aplicar TODA la física (incluyendo 2πμ₀) CON las conversiones de unidades prácticas de magnetotelúrica.</p>
+        </div>
+
+        <h2>1. Punto de Partida: Fórmula Teórica en Unidades SI Puras</h2>
+
+        <div class="derivation">
+            <p>En unidades del Sistema Internacional (SI), la resistividad aparente se calcula como:</p>
+
+            <div class="equation">
+                <strong>ρ<sub>a</sub> = |Z<sub>SI</sub>|² / (ωμ₀)</strong>
+            </div>
+
+            <p><strong>Donde:</strong></p>
+            <ul>
+                <li><strong>Z<sub>SI</sub></strong>: Impedancia en unidades SI → [V/m] / [A/m] = Ω (ohms)</li>
+                <li><strong>ω = 2πf</strong>: Frecuencia angular (rad/s)</li>
+                <li><strong>μ₀ = 4π × 10<sup>-7</sup></strong>: Permeabilidad magnética del vacío (H/m)</li>
+            </ul>
+
+            <p>Sustituyendo ω:</p>
+
+            <div class="equation">
+                <strong>ρ<sub>a</sub> = |Z<sub>SI</sub>|² / (2πf × 4π × 10<sup>-7</sup>)</strong>
+            </div>
+
+            <div class="equation">
+                <strong>ρ<sub>a</sub> = |Z<sub>SI</sub>|² / (8π² × 10<sup>-7</sup> × f)</strong>
+            </div>
+
+            <div class="equation">
+                <strong>ρ<sub>a</sub> ≈ |Z<sub>SI</sub>|² / (7.89 × 10<sup>-6</sup> × f)</strong>
+            </div>
+
+            <p style="color: #d32f2f; font-weight: bold;">⚠️ Esta fórmula es CORRECTA, pero solo si Z está en unidades SI puras.</p>
+        </div>
+
+        <h2>2. El Problema: Unidades Prácticas en Archivos EDI</h2>
+
+        <p>En la práctica de magnetotelúrica, NO medimos en unidades SI puras. Los archivos EDI usan:</p>
+
+        <table>
+            <tr>
+                <th>Magnitud</th>
+                <th>Unidad EDI</th>
+                <th>Unidad SI</th>
+                <th>Factor de Conversión</th>
+            </tr>
+            <tr>
+                <td><strong>Campo Eléctrico (E)</strong></td>
+                <td>mV/km</td>
+                <td>V/m</td>
+                <td>1 mV/km = 10<sup>-6</sup> V/m</td>
+            </tr>
+            <tr>
+                <td><strong>Campo Magnético (B)</strong></td>
+                <td>nT (nanotesla)</td>
+                <td>T (tesla)</td>
+                <td>1 nT = 10<sup>-9</sup> T</td>
+            </tr>
+            <tr>
+                <td><strong>Impedancia (Z)</strong></td>
+                <td>[mV/km] / [nT]</td>
+                <td>Ω (ohm)</td>
+                <td>¿? ← Esto es lo que vamos a derivar</td>
+            </tr>
+        </table>
+
+        <h2>3. Derivación Paso a Paso: Conversión de Z<sub>EDI</sub> a Z<sub>SI</sub></h2>
+
+        <div class="warning">
+            <p><strong>⚠️ Detalle Importante:</strong> En magnetotelúrica se define:</p>
+            <ul>
+                <li><strong>Z = E / H</strong> (campo eléctrico / campo magnético H)</li>
+                <li>Pero medimos <strong>B</strong> (inducción magnética), no H directamente</li>
+                <li>La relación es: <strong>H = B / μ₀</strong></li>
+            </ul>
+        </div>
+
+        <h3>Paso 1: Conversión del Campo Eléctrico</h3>
+
+        <div class="step">
+            <p>Campo eléctrico en EDI → SI:</p>
+            <div class="equation">
+                E[V/m] = E[mV/km] × 10<sup>-6</sup>
+            </div>
+            <p><strong>Ejemplo:</strong> Si E = 1 mV/km → E = 1 × 10<sup>-6</sup> V/m</p>
+        </div>
+
+        <h3>Paso 2: Conversión del Campo Magnético B → H</h3>
+
+        <div class="step">
+            <p>Primero, convertimos B de nT a T:</p>
+            <div class="equation">
+                B[T] = B[nT] × 10<sup>-9</sup>
+            </div>
+
+            <p>Luego, convertimos B a H usando la relación fundamental del electromagnetismo:</p>
+            <div class="equation">
+                <strong>H = B / μ₀</strong>
+            </div>
+
+            <p>Donde μ₀ = 4π × 10<sup>-7</sup> H/m, entonces:</p>
+
+            <div class="equation">
+                H[A/m] = B[T] / (4π × 10<sup>-7</sup>)
+            </div>
+
+            <p>Sustituyendo B[T] = B[nT] × 10<sup>-9</sup>:</p>
+
+            <div class="equation">
+                H[A/m] = (B[nT] × 10<sup>-9</sup>) / (4π × 10<sup>-7</sup>)
+            </div>
+
+            <div class="equation">
+                H[A/m] = B[nT] × 10<sup>-9</sup> × (1 / (4π × 10<sup>-7</sup>))
+            </div>
+
+            <div class="equation">
+                H[A/m] = B[nT] × 10<sup>-9+7</sup> / (4π)
+            </div>
+
+            <div class="equation">
+                H[A/m] = B[nT] × 10<sup>-2</sup> / (4π)
+            </div>
+
+            <div class="equation">
+                <strong>H[A/m] = B[nT] / (4π × 10²)</strong>
+            </div>
+        </div>
+
+        <h3>Paso 3: Cálculo de la Impedancia Z<sub>SI</sub></h3>
+
+        <div class="step">
+            <p>La impedancia en unidades SI se define como:</p>
+            <div class="equation">
+                Z<sub>SI</sub> = E[V/m] / H[A/m]
+            </div>
+
+            <p>Sustituyendo las conversiones del Paso 1 y Paso 2:</p>
+
+            <div class="equation">
+                Z<sub>SI</sub> = (E[mV/km] × 10<sup>-6</sup>) / (B[nT] / (4π × 10²))
+            </div>
+
+            <div class="equation">
+                Z<sub>SI</sub> = (E[mV/km] × 10<sup>-6</sup>) × (4π × 10²) / B[nT]
+            </div>
+
+            <div class="equation">
+                Z<sub>SI</sub> = (E[mV/km] / B[nT]) × 10<sup>-6</sup> × 4π × 10²
+            </div>
+
+            <p>Pero E[mV/km] / B[nT] = Z<sub>EDI</sub>, entonces:</p>
+
+            <div class="equation">
+                Z<sub>SI</sub> = Z<sub>EDI</sub> × 4π × 10<sup>-6+2</sup>
+            </div>
+
+            <div class="equation">
+                <strong>Z<sub>SI</sub> = Z<sub>EDI</sub> × 4π × 10<sup>-4</sup></strong>
+            </div>
+
+            <p style="margin-top: 15px;">Numéricamente:</p>
+            <div class="equation">
+                Z<sub>SI</sub> ≈ Z<sub>EDI</sub> × 1.257 × 10<sup>-3</sup>
+            </div>
+        </div>
+
+        <h3>Paso 4: Sustitución en la Fórmula de Resistividad</h3>
+
+        <div class="step">
+            <p>Ahora sustituimos Z<sub>SI</sub> en la fórmula teórica:</p>
+
+            <div class="equation">
+                ρ<sub>a</sub> = |Z<sub>SI</sub>|² / (ωμ₀)
+            </div>
+
+            <div class="equation">
+                ρ<sub>a</sub> = |Z<sub>EDI</sub> × 4π × 10<sup>-4</sup>|² / (2πf × 4π × 10<sup>-7</sup>)
+            </div>
+
+            <div class="equation">
+                ρ<sub>a</sub> = (Z<sub>EDI</sub>)² × (4π)² × 10<sup>-8</sup> / (8π² × 10<sup>-7</sup> × f)
+            </div>
+
+            <div class="equation">
+                ρ<sub>a</sub> = (Z<sub>EDI</sub>)² × 16π² × 10<sup>-8</sup> / (8π² × 10<sup>-7</sup> × f)
+            </div>
+
+            <p>Simplificando π²:</p>
+
+            <div class="equation">
+                ρ<sub>a</sub> = (Z<sub>EDI</sub>)² × 16 × 10<sup>-8</sup> / (8 × 10<sup>-7</sup> × f)
+            </div>
+
+            <div class="equation">
+                ρ<sub>a</sub> = (Z<sub>EDI</sub>)² × 2 × 10<sup>-8</sup> / (10<sup>-7</sup> × f)
+            </div>
+
+            <div class="equation">
+                ρ<sub>a</sub> = (Z<sub>EDI</sub>)² × 2 × 10<sup>-8+7</sup> / f
+            </div>
+
+            <div class="equation">
+                ρ<sub>a</sub> = (Z<sub>EDI</sub>)² × 2 × 10<sup>-1</sup> / f
+            </div>
+
+            <div class="equation">
+                <strong style="color: #4caf50; font-size: 1.3em;">ρ<sub>a</sub> = (Z<sub>EDI</sub>)² × 0.2 / f</strong>
+            </div>
+
+            <div class="equation">
+                <strong style="color: #4caf50; font-size: 1.3em;">ρ<sub>a</sub> = |Z<sub>EDI</sub>|² / (5f)</strong>
+            </div>
+        </div>
+
+        <h2>4. ¿De Dónde Viene el Factor 5?</h2>
+
+        <div class="key-point">
+            <h3>Análisis del Factor 5 = 1/0.2</h3>
+
+            <p>El factor <strong>5</strong> (o 0.2 = 1/5) es el resultado de la combinación de:</p>
+
+            <table style="margin: 15px 0;">
+                <tr>
+                    <th>Componente</th>
+                    <th>Factor</th>
+                    <th>Origen</th>
+                </tr>
+                <tr>
+                    <td>Conversión E: mV/km → V/m</td>
+                    <td>10<sup>-6</sup></td>
+                    <td>Unidades eléctricas</td>
+                </tr>
+                <tr>
+                    <td>Conversión B: nT → T</td>
+                    <td>10<sup>-9</sup></td>
+                    <td>Unidades magnéticas</td>
+                </tr>
+                <tr>
+                    <td>Relación B → H</td>
+                    <td>1/μ₀ = 1/(4π×10<sup>-7</sup>)</td>
+                    <td>Física electromagnética</td>
+                </tr>
+                <tr>
+                    <td>Frecuencia angular</td>
+                    <td>2π</td>
+                    <td>ω = 2πf</td>
+                </tr>
+                <tr>
+                    <td>Impedancia al cuadrado</td>
+                    <td>(4π×10<sup>-4</sup>)²</td>
+                    <td>De Z<sub>SI</sub> = Z<sub>EDI</sub>×4π×10<sup>-4</sup></td>
+                </tr>
+            </table>
+
+            <p><strong>Multiplicando todos los factores:</strong></p>
+
+            <div class="equation" style="background-color: #e8f5e9;">
+                (4π × 10<sup>-4</sup>)² / (2πf × 4π × 10<sup>-7</sup>) =
+                16π² × 10<sup>-8</sup> / (8π² × 10<sup>-7</sup> × f) =
+                2 × 10<sup>-1</sup> / f =
+                <strong>0.2 / f = 1 / (5f)</strong>
+            </div>
+        </div>
+
+        <h2>5. Verificación Numérica Completa</h2>
+
+        <div class="derivation">
+            <h3>Comparación Directa:</h3>
+
+            <p><strong>Fórmula SI pura:</strong></p>
+            <div class="equation">
+                ωμ₀ = 2πf × 4π × 10<sup>-7</sup> = 8π² × 10<sup>-7</sup> × f ≈ 7.89 × 10<sup>-6</sup> × f
+            </div>
+
+            <p><strong>Fórmula EDI práctica:</strong></p>
+            <div class="equation">
+                5f
+            </div>
+
+            <p><strong>Ratio entre denominadores:</strong></p>
+            <div class="equation">
+                (5f) / (7.89 × 10<sup>-6</sup> × f) = 5 / (7.89 × 10<sup>-6</sup>) ≈ <strong>6.34 × 10<sup>5</sup></strong>
+            </div>
+
+            <p>Este factor de ~634,000 proviene de <strong>(Z<sub>SI</sub> / Z<sub>EDI</sub>)² = (4π × 10<sup>-4</sup>)²</strong></p>
+
+            <div class="equation">
+                (4π × 10<sup>-4</sup>)² = 16π² × 10<sup>-8</sup> ≈ 1.58 × 10<sup>-6</sup>
+            </div>
+
+            <p>Entonces:</p>
+            <div class="equation">
+                7.89 × 10<sup>-6</sup> × (1.58 × 10<sup>-6</sup>)<sup>-1</sup> ≈ 7.89 × 10<sup>-6</sup> × 6.34 × 10<sup>5</sup> ≈ 5
+            </div>
+        </div>
+
+        <h2>6. Sentido Físico Completo</h2>
+
+        <div class="highlight-box">
+            <h3>🎯 Respuesta a la Pregunta Original:</h3>
+
+            <p><strong>"¿Qué sentido físico tiene sustituir 2πfμ₀ por 5f?"</strong></p>
+
+            <ol style="font-size: 1.05em; line-height: 2;">
+                <li><strong>NO es una sustitución arbitraria.</strong> El "5" contiene TODA la física de 2πμ₀.</li>
+
+                <li><strong>El factor 5 incluye:</strong>
+                    <ul>
+                        <li>La frecuencia angular: 2π</li>
+                        <li>La permeabilidad magnética: μ₀ = 4π × 10<sup>-7</sup></li>
+                        <li>La conversión del campo eléctrico: mV/km → V/m (factor 10<sup>-6</sup>)</li>
+                        <li>La conversión del campo magnético: nT → T (factor 10<sup>-9</sup>)</li>
+                        <li>La relación fundamental B → H: H = B/μ₀</li>
+                    </ul>
+                </li>
+
+                <li><strong>El "5" es la versión simplificada</strong> de aplicar toda la física electromagnética CON las unidades prácticas de magnetotelúrica.</li>
+
+                <li><strong>Físicamente representa:</strong> El factor de conversión total necesario para pasar de impedancia en [mV/km]/[nT] a resistividad en Ω·m, considerando la propagación de ondas electromagnéticas en un medio conductor.</li>
+
+                <li><strong>Matemáticamente:</strong>
+                    <div class="equation" style="background-color: #fff;">
+                        5 = (4π × 10<sup>-4</sup>)<sup>-2</sup> × 2πf × 4π × 10<sup>-7</sup> / f
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <h2>7. Conclusión</h2>
+
+        <div class="key-point">
+            <p style="font-size: 1.1em;"><strong>El factor "5" NO ignora la física de 2πμ₀.</strong></p>
+
+            <p>Al contrario, el "5" es el resultado matemático de aplicar correctamente:</p>
+            <ul>
+                <li>✓ La teoría electromagnética (ωμ₀ = 2πfμ₀)</li>
+                <li>✓ La relación entre B y H (H = B/μ₀)</li>
+                <li>✓ Las conversiones de unidades prácticas de MT</li>
+                <li>✓ La definición de impedancia magnetotelúrica</li>
+            </ul>
+
+            <p style="margin-top: 20px; font-size: 1.15em; color: #1976d2;">
+                <strong>El "5" es la manifestación numérica de toda la física subyacente cuando se trabaja con unidades EDI estándar.</strong>
+            </p>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <p style="text-align: center; color: #7f8c8d; font-size: 0.9em;">
+            <strong>Derivación Física Completa</strong><br>
+            Del factor 2πμ₀ al factor 5 en unidades EDI<br>
+            Diciembre 2025
+        </p>
+    </div>
+</body>
+</html>
