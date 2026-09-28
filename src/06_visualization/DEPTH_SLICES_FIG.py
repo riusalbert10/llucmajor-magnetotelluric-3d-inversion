@@ -24,14 +24,19 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 from matplotlib.ticker import MultipleLocator
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Configuration  (kept identical to the interactive viewer where relevant)
 # ---------------------------------------------------------------------------
-RHO_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_5\Run_664\mallorca_10s_dep5_NLCG_082.rho"
-DAT_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_5\Run_664\mallorca_10s_dep5_NLCG_082.dat"
-OUT_PNG  = r"C:\Users\alber\TFG\visualizations\depth_slices_figure.png"
-OUT_PDF  = r"C:\Users\alber\TFG\visualizations\depth_slices_figure.pdf"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+RHO_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_5/Run_664/mallorca_10s_dep5_NLCG_082.rho")
+DAT_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_5/Run_664/mallorca_10s_dep5_NLCG_082.dat")
+OUT_PNG  = str(TFG_DIR / "visualizations/depth_slices_figure.png")
+OUT_PDF  = str(TFG_DIR / "visualizations/depth_slices_figure.pdf")
 
 PAD_THRESHOLD_M = 5_000.0            # crop padding cells beyond this distance (m) from centre
 COLOR_VMIN, COLOR_VMAX = 1.0, 1e4    # resistivity colour-scale range (ohm·m, log)

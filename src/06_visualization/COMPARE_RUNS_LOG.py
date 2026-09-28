@@ -10,50 +10,55 @@ import json
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 # ============================ CONFIG ============================
 
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
 RUNS_BASE = [
     {
         'label': 'Raw data',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Costa_Abrupte\Run_473_results\mallorca_coast_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Costa_Abrupte/Run_473_results/mallorca_coast_inv_NLCG.log"),
         'color': "#CD6464",
         'marker': 'o',
     },
     {
         'label': 'DM 0',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_0\mallorca_coast_Bat_NO_otliers_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_0/mallorca_coast_Bat_NO_otliers_inv_NLCG.log"),
         'color': "#781494",
         'marker': 'o',
     },
     {
         'label': 'DM 0 + ef',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_0_ef\mallorca_bat_seafixed_ef5_cov_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_0_ef/mallorca_bat_seafixed_ef5_cov_inv_NLCG.log"),
         'color': '#7f7f7f',
         'marker': 'o',
     },
     {
         'label': 'DM 1',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_1\Run_664\mallorca_10s_dep5_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_1/Run_664/mallorca_10s_dep5_NLCG.log"),
         'color': "#fbff00",
         'marker': 'x',
     },
     {
         'label': 'DM 2',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_2\Run_635\mallorca_recond_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_2/Run_635/mallorca_recond_inv_NLCG.log"),
         'color': "#1F08EFFF",
         'marker': 'x',
     },
     {
         'label': 'DM 3',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_3\Depuracio_manual_6_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_3/Depuracio_manual_6_NLCG.log"),
         'color': "#62eb0086",
         'marker': 'x',
     },
     {
         'label': 'DM 4',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_4\Run_667\Depuracio_manual_7_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_4/Run_667/Depuracio_manual_7_NLCG.log"),
         'color': "#720202FF",
         'marker': 'x',
     }, 
@@ -62,25 +67,25 @@ RUNS_BASE = [
 RUNS_SMOOTH = [
     {
         'label': 'Suavitzat LOWESS 1',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth1\Run_472_results\mallorca_coast_smooth_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth1/Run_472_results/mallorca_coast_smooth_inv_NLCG.log"),
         'color': "#e714d9",
         'marker': 's',
     },
     {
         'label': 'Suavitzat LOWESS 2',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth1_Bat\Run_474_results\job_474_Mallorca_Inv_coast_bat_sm1\mallorca_coast_Bat_sm1_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth1_Bat/Run_474_results/job_474_Mallorca_Inv_coast_bat_sm1/mallorca_coast_Bat_sm1_inv_NLCG.log"),
         'color': "#55453d",
         'marker': '^',
     },
     {
         'label': 'Suavitzat Hampel',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat\Run_475_results\job_475_Mallorca_Inv_coast_bat_sm3\mallorca_coast_Bat_sm3_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat/Run_475_results/job_475_Mallorca_Inv_coast_bat_sm3/mallorca_coast_Bat_sm3_inv_NLCG.log"),
         'color': '#ff7f0e',
         'marker': 'x',
     },
 ]
 
-OUT_DIR = Path(r"C:\Users\alber\TFG\visualizations")
+OUT_DIR = Path(str(TFG_DIR / "visualizations"))
 
 
 # ============================ PARSER ============================

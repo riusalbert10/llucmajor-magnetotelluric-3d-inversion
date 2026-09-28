@@ -19,12 +19,18 @@ import numpy as np, collections
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import os
+from pathlib import Path
 
 # ============================ CONFIG ============================
 # Posa aqui les rutes als teus fitxers (mateixa parella obs/pred de la inversio)
-OBS  = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_bat_NO_otliers\Arxius_ejecució\Mall_mask_no_tip_1s_ef5"                             # dades observades
-PRED = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Comparable_Tesis_Arango\Run_632_results\mallorca_17km_seafixed_ef5_cov_inv_NLCG_067.dat"     # resposta del model
-OUTDIR = r"C:\Users\alber\TFG\visualizations"                                                # on desar les figures
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+OBS  = str(TFG_DIR / "MT_Llucmajor_results/Model_bat_NO_otliers/Arxius_ejecució/Mall_mask_no_tip_1s_ef5")                             # dades observades
+PRED = str(TFG_DIR / "MT_Llucmajor_results/Model_Comparable_Tesis_Arango/Run_632_results/mallorca_17km_seafixed_ef5_cov_inv_NLCG_067.dat")     # resposta del model
+OUTDIR = str(TFG_DIR / "visualizations")                                                # on desar les figures
 BAND = (40.0, 110.0)   # Hz: fonamental 50 Hz + ~100 Hz (1r harmonic)
 # ===============================================================
 

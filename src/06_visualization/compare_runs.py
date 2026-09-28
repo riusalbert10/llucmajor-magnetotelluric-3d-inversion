@@ -16,67 +16,72 @@ import json
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 # ============================ CONFIG ============================
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
 RUNS = [
     {
         'label': 'Raw data',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Costa_Abrupte\Run_473_results\mallorca_coast_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Costa_Abrupte/Run_473_results/mallorca_coast_inv_NLCG.log"),
         'color': '#d62728',  # Rojo
         'marker': 'o',
     },
     {
         'label': 'Suavitzat LOWESS 1',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth1\Run_472_results\mallorca_coast_smooth_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth1/Run_472_results/mallorca_coast_smooth_inv_NLCG.log"),
         'color': '#1f77b4',  # Azul
         'marker': 's',
     },
     {
         'label': 'Suavitzat LOWESS 2',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth1_Bat\Run_474_results\job_474_Mallorca_Inv_coast_bat_sm1\mallorca_coast_Bat_sm1_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth1_Bat/Run_474_results/job_474_Mallorca_Inv_coast_bat_sm1/mallorca_coast_Bat_sm1_inv_NLCG.log"),
         'color': '#2ca02c',  # Verde
         'marker': '^',
     },
     {
         'label': 'Suavitzat Hampel',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat\Run_475_results\job_475_Mallorca_Inv_coast_bat_sm3\mallorca_coast_Bat_sm3_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat/Run_475_results/job_475_Mallorca_Inv_coast_bat_sm3/mallorca_coast_Bat_sm3_inv_NLCG.log"),
         'color': '#ff7f0e',  # Naranja
         'marker': 'x',
     },
     {
         'label': 'Depuració Manual 1',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_1\mallorca_17km_seafixed_cov_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_1/mallorca_17km_seafixed_cov_inv_NLCG.log"),
         'color': "#781494",  # Lila
         'marker': 'o',
     },
     {
         'label': 'Depuració Manual 2',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_5\Run_664\mallorca_10s_dep5_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_5/Run_664/mallorca_10s_dep5_NLCG.log"),
         'color': '#7f7f7f',  # Gris
         'marker': 'o',
     },
     {
         'label': 'Depuració Manual 3',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_3\Run_635\mallorca_recond_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_3/Run_635/mallorca_recond_inv_NLCG.log"),
         'color': '#bcbd22',  # Oliva oscuro
         'marker': 'x',
     },
     {
         'label': 'Depuració Manual 4',
-        'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_4\mallorca_10s_od5_d15_inv_NLCG.log",
+        'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_4/mallorca_10s_od5_d15_inv_NLCG.log"),
         'color': "#040008FF",  # Negro
         'marker': 'x',
     },
     {
        'label': 'Depuració Manual 5',
-       'log'  : r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_2\Run_632_results\mallorca_17km_seafixed_ef5_cov_inv_NLCG.log",
+       'log'  : str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_2/Run_632_results/mallorca_17km_seafixed_ef5_cov_inv_NLCG.log"),
        'color': "#E610B4FF",  # Negro
        'marker': 'x',
     },
 ]
 
-OUT_DIR       = Path(r"C:\Users\alber\TFG\visualizations")
+OUT_DIR       = Path(str(TFG_DIR / "visualizations"))
 ZOOM_ITER_MIN = 0
 ZOOM_ITER_MAX = 130
 ZOOM_RMS_MIN  = 3

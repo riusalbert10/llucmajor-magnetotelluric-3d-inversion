@@ -25,12 +25,17 @@ import numpy as np
 import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 # ============================ CONFIG ============================
-OBS  = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_bat_NO_otliers\Arxius_ejecució\Mall_mask_no_tip_1s_ef5"
-PRED = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Comparable_Tesis_Arango\Run_632_results\mallorca_17km_seafixed_ef5_cov_inv_NLCG_067.dat"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
 
-OUT_DIR   = r"C:\Users\alber\TFG\visualizations"
+OBS  = str(TFG_DIR / "MT_Llucmajor_results/Model_bat_NO_otliers/Arxius_ejecució/Mall_mask_no_tip_1s_ef5")
+PRED = str(TFG_DIR / "MT_Llucmajor_results/Model_Comparable_Tesis_Arango/Run_632_results/mallorca_17km_seafixed_ef5_cov_inv_NLCG_067.dat")
+
+OUT_DIR   = str(TFG_DIR / "visualizations")
 TEX_STA   = os.path.join(OUT_DIR, "rms_per_station.tex")
 TEX_PER   = os.path.join(OUT_DIR, "rms_per_period.tex")
 FIG_MAP   = os.path.join(OUT_DIR, "rms_station_map.png")

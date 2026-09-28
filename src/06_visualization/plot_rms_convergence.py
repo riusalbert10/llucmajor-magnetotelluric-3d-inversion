@@ -4,9 +4,15 @@ Plot RMS convergence curve from ModEM inversion log file
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+import os
+from pathlib import Path
 
 # Path to log file
-log_file = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth1\Run_472_results\mallorca_coast_smooth_inv_NLCG.log"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+log_file = str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth1/Run_472_results/mallorca_coast_smooth_inv_NLCG.log")
 
 # Parse the log file to extract iteration numbers and RMS values
 iterations = []
@@ -54,7 +60,7 @@ plt.text(0.98, 0.95, f'Initial RMS: {rms_values[0]:.2f}\nFinal RMS: {rms_values[
 plt.tight_layout()
 
 # Save the figure
-output_file = r'C:\Users\alber\TFG\visualizations\rms_convergence.png'
+output_file = str(TFG_DIR / "visualizations/rms_convergence.png")
 plt.savefig(output_file, dpi=300, bbox_inches='tight')
 print(f'RMS convergence plot saved to: {output_file}')
 

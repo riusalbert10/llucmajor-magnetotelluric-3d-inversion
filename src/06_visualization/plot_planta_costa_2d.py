@@ -19,12 +19,18 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
+import os
+from pathlib import Path
 
 # ============================ CONFIG ============================
-MODEL = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_bat_NO_otliers\Arxius_ejecució\Model_Bat_recond"
-COAST = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat\Generar_Costa_Batimetria\Perfil_costa_Llucmajor.kml"
-SITES = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat\Generar_Costa_Batimetria\Coordenades_sites.KML"
-OUT   = r"C:\Users\alber\TFG\visualizations\model_inicial_planta_2d.png"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+MODEL = str(TFG_DIR / "MT_Llucmajor_results/Model_bat_NO_otliers/Arxius_ejecució/Model_Bat_recond")
+COAST = str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat/Generar_Costa_Batimetria/Perfil_costa_Llucmajor.kml")
+SITES = str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat/Generar_Costa_Batimetria/Coordenades_sites.KML")
+OUT   = str(TFG_DIR / "visualizations/model_inicial_planta_2d.png")
 
 LAT0, LON0 = 39.476669, 2.895278        # centre geogràfic (origen de la malla)
 LLUC_LAT, LLUC_LON = 39.491667, 2.891667  # ciutat de Llucmajor

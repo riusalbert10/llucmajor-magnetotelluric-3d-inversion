@@ -20,11 +20,16 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy.interpolate import RegularGridInterpolator
+import os
 
 # ---------------------------------------------------------------- CONFIG
-RHO_IN     = Path(r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat_opt\Mallorca_Homo2_seamask.rho")
-BATHY_CSV  = Path(r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat_opt\Mean_depth.csv")
-RHO_OUT    = Path(r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat_opt\Mallorca_Homo2_seamask_bathy.rho")
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+RHO_IN     = Path(str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat_opt/Mallorca_Homo2_seamask.rho"))
+BATHY_CSV  = Path(str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat_opt/Mean_depth.csv"))
+RHO_OUT    = Path(str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat_opt/Mallorca_Homo2_seamask_bathy.rho"))
 
 # Geographic origin (must match what was used for the .rho and the .dat)
 LAT_ORIGIN = 39.476669

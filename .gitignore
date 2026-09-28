@@ -29,3 +29,16 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# Local working folders used by the scripts when TFG_DIR is the repo root
+MT_Llucmajor_results/
+Generar_Costa_Bat_new/
+Arxius_ejecució/
+visualizations/
+1D_Inversion_Results/
+1D_Occam_Results/
+temp_occam/
+smoothing_out/
+smoothing_plots/
+depurar/
+compare/

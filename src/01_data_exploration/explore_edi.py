@@ -8,12 +8,14 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from mtpy.core.mt import MT
+from pathlib import Path
 
-# Directorio con archivos EDI (compatible con Windows y WSL)
-if sys.platform == 'win32':
-    edi_dir = r'C:\Users\alber\TFG\LLUCMAJOR_DADES_edi'
-else:
-    edi_dir = '/mnt/c/Users/alber/TFG/LLUCMAJOR_DADES_edi'
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+edi_dir = str(EDI_DIR)
 
 # Obtener lista de archivos EDI
 edi_files = sorted([f for f in os.listdir(edi_dir) if f.endswith('.edi')])

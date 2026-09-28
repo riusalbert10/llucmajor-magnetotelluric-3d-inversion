@@ -18,18 +18,23 @@ fase  = atan2(Im Z, Re Z)    (rang natural [-180, 180] graus, sense desplaçamen
 import numpy as np, math, collections, os
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 # ============================ CONFIG ============================
-VIS = r"C:\Users\alber\TFG\visualizations"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+VIS = str(TFG_DIR / "visualizations")
 
 # Referència d'escala: dades NO depurades
-REF_OBS = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Costa_Suau1\Arxius_ejecucio\Mall_Z_sense_depurar"
+REF_OBS = str(TFG_DIR / "MT_Llucmajor_results/Model_Costa_Suau1/Arxius_ejecucio/Mall_Z_sense_depurar")
 
 # Conjunts a graficar: (fitxer OBS, carpeta de sortida, etiqueta del títol, sufix del nom)
 DATASETS = [
-    (r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Costa_Suau1\Arxius_ejecucio\Mall_Z_sense_depurar",
+    (str(TFG_DIR / "MT_Llucmajor_results/Model_Costa_Suau1/Arxius_ejecucio/Mall_Z_sense_depurar"),
      os.path.join(VIS, "Dades_No_Depurades"), "no depurades", "_no_dep"),
-    (r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_bat_NO_otliers\Arxius_ejecució\Malla_Good_10s_efOD5_D15",
+    (str(TFG_DIR / "MT_Llucmajor_results/Model_bat_NO_otliers/Arxius_ejecució/Malla_Good_10s_efOD5_D15"),
      os.path.join(VIS, "Dades_Depurades"), "depurades", "_dep"),
 ]
 # ===============================================================

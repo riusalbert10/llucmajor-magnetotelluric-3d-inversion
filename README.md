@@ -92,11 +92,18 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-> **Note:** the scripts were written for the original project folder and several contain absolute
-> Windows paths (e.g. `C:\Users\alber\TFG\...`). Update the paths at the top of each script before
-> running it. The field data are not included (see [`data/README.md`](data/README.md)), so the
-> data-processing scripts need your own EDI files. The visualization scripts can read the final model
-> in `results/final_model/`.
+> **Paths:** every script resolves its inputs and outputs relative to a project folder, `TFG_DIR`,
+> which defaults to the repository root. EDI files are read from `data/edi/`; intermediate ModEM runs
+> are expected under `MT_Llucmajor_results/` and figures are written to `visualizations/` (both
+> git-ignored). To use another folder, set the environment variable before running a script:
+>
+> ```bash
+> export TFG_DIR=~/my_mt_project           # Linux/macOS
+> $env:TFG_DIR = "D:\my_mt_project"        # Windows PowerShell
+> ```
+>
+> The field data are not included (see [`data/README.md`](data/README.md)), so the data-processing
+> scripts need your own EDI files. The final model is in `results/final_model/`.
 
 ## Data availability
 

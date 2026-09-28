@@ -16,6 +16,8 @@ from matplotlib.patches import Polygon as MPoly
 from matplotlib.lines import Line2D
 from scipy.interpolate import splprep, splev
 from pyproj import Transformer
+import os
+from pathlib import Path
 
 CREAM="#FBF7EF"; INK="#2B2B2B"; TEAL="#147A72"; GRIDC="#D9D0C2"
 ROAD="#B9AE9C"; TOWN="#C9BEA9"; PROF="#7A7A7A"
@@ -24,10 +26,14 @@ plt.rcParams.update({"font.family":"DejaVu Sans","font.size":10,
     "axes.edgecolor":INK,"axes.linewidth":1.0,"text.color":INK,
     "axes.labelcolor":INK,"xtick.color":INK,"ytick.color":INK})
 
-KMLP=r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat\Generar_Costa_Batimetria\Coordenades_sites.KML"
-CSP =r"C:\Users\alber\TFG\visualizations\plot_cross_sections_profiles_figure.py"
-OUT1=r"C:\Users\alber\TFG\visualizations\mapa_estacions_modern.png"
-OUT2=r"C:\Users\alber\TFG\visualizations\mapa_gradient_modern.png"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+KMLP=str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat/Generar_Costa_Batimetria/Coordenades_sites.KML")
+CSP =str(TFG_DIR / "visualizations/plot_cross_sections_profiles_figure.py")
+OUT1=str(TFG_DIR / "visualizations/mapa_estacions_modern.png")
+OUT2=str(TFG_DIR / "visualizations/mapa_gradient_modern.png")
 
 tr=Transformer.from_crs("EPSG:4326","EPSG:32631",always_xy=True)
 MT_IDS={10:"K10",11:"K11",12:"K12",13:"K13",14:"K14",31:"K31"}

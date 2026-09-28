@@ -18,16 +18,16 @@ from scipy.optimize import least_squares
 from scipy.ndimage import gaussian_filter1d
 import shutil
 import glob
+from pathlib import Path
 
-# Detect operating system for paths
-if sys.platform == 'win32':
-    base_dir = r'C:\Users\alber\TFG\LLUCMAJOR_DADES_edi'
-    output_dir = r'C:\Users\alber\TFG\1D_Occam_Results'
-    temp_dir = r'C:\Users\alber\TFG\temp_occam'
-else:
-    base_dir = '/mnt/c/Users/alber/TFG/LLUCMAJOR_DADES_edi'
-    output_dir = '/home/alber/1D_Occam_Results'
-    temp_dir = '/home/alber/temp_occam'
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+base_dir = str(EDI_DIR)
+output_dir = str(TFG_DIR / "1D_Occam_Results")
+temp_dir = str(TFG_DIR / "temp_occam")
 
 # Create output directories
 os.makedirs(output_dir, exist_ok=True)

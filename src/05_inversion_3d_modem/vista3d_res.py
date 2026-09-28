@@ -11,9 +11,17 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import Normalize
 
-MODEL="/sessions/charming-upbeat-allen/mnt/Arxius ejecucio/Model_Bat_35km_recond"
-DATA ="/sessions/charming-upbeat-allen/mnt/Arxius_ejecució/Mall_mask_no_tip"
-OUT  ="/sessions/charming-upbeat-allen/mnt/Arxius_ejecució/vista3d_res.png"
+import os
+from pathlib import Path
+
+REPO_DIR = Path(__file__).resolve().parents[2]
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", REPO_DIR))
+
+MODEL=str(REPO_DIR / "results/final_model/modem_setup/Model_Bat_35km_recond")   # included in the repo
+DATA =str(TFG_DIR / "Arxius_ejecució/Mall_mask_no_tip")
+OUT  =str(TFG_DIR / "Arxius_ejecució/vista3d_res.png")
 
 f=open(MODEL).read().split("\n"); h=f[1].split(); Nx,Ny,Nz=int(h[0]),int(h[1]),int(h[2])
 nums=lambda s:[float(x) for x in s.split()]

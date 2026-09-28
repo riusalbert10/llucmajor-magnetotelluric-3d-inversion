@@ -27,13 +27,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from collections import Counter
+import os
 
 # -----------------------------
 # Configuration
 # -----------------------------
-INPUT_DIR  = Path(r"C:\Users\alber\TFG\LLUCMAJOR_DADES_edi")
-EDI_OUT    = Path(r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat_opt\Edis_clean_v3")
-FIG_OUT    = Path(r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat_opt\figures_cleaned_v3")
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+INPUT_DIR  = Path(str(EDI_DIR))
+EDI_OUT    = Path(str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat_opt/Edis_clean_v3"))
+FIG_OUT    = Path(str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat_opt/figures_cleaned_v3"))
 EDI_OUT.mkdir(parents=True, exist_ok=True)
 FIG_OUT.mkdir(parents=True, exist_ok=True)
 

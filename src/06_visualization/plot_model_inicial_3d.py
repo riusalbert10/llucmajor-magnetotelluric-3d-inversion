@@ -19,10 +19,16 @@ Sortida:
 """
 import numpy as np
 import pyvista as pv
+import os
+from pathlib import Path
 
 # ============================ CONFIG ============================
-MODEL = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_bat_NO_otliers\Arxius_ejecució\Model_Bat_recond"
-OUT   = r"C:\Users\alber\TFG\visualizations\model_3D.png"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+MODEL = str(TFG_DIR / "MT_Llucmajor_results/Model_bat_NO_otliers/Arxius_ejecució/Model_Bat_recond")
+OUT   = str(TFG_DIR / "visualizations/model_3D.png")
 
 # Litologies de referencia (rho en ohm.m) i el color solid que se'ls assigna.
 # L'estructura es la mes rellevant (roca sedimentaria ~500 m per sota de

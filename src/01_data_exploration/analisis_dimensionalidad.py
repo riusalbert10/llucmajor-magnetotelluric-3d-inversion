@@ -18,14 +18,15 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mtpy.core.mt import MT
+from pathlib import Path
 
-# Detectar sistema operativo para rutas
-if sys.platform == 'win32':
-    edi_file = r'C:\Users\alber\TFG\LLUCMAJOR_DADES_edi\mall67.edi'
-    output_dir = r'C:\Users\alber\TFG'
-else:
-    edi_file = '/mnt/c/Users/alber/TFG/LLUCMAJOR_DADES_edi/mall67.edi'
-    output_dir = '/home/alber'
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+edi_file = str(EDI_DIR / "mall67.edi")
+output_dir = str(TFG_DIR)
 
 print("="*80)
 print("ANALISIS DE DIMENSIONALIDAD - Estacion mall67")

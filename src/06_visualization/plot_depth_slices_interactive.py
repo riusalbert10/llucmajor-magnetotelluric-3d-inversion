@@ -24,25 +24,30 @@ import os
 import re
 import json
 import numpy as np
+from pathlib import Path
 
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 
-#RHO_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_recond_diag_dep_10s_ODef5_D15\mallorca_10s_od5_d15_inv_NLCG_086.rho"
-#DAT_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_recond_diag_dep_10s_ODef5_D15\mallorca_10s_od5_d15_inv_NLCG_086.dat"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
 
-RHO_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_recond_diag_dep_10s_ef5_ef7\Run_635\mallorca_recond_inv_NLCG_092.rho"
-DAT_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_recond_diag_dep_10s_ef5_ef7\Run_635\mallorca_recond_inv_NLCG_092.dat"
+#RHO_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_recond_diag_dep_10s_ODef5_D15/mallorca_10s_od5_d15_inv_NLCG_086.rho")
+#DAT_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_recond_diag_dep_10s_ODef5_D15/mallorca_10s_od5_d15_inv_NLCG_086.dat")
+
+RHO_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_recond_diag_dep_10s_ef5_ef7/Run_635/mallorca_recond_inv_NLCG_092.rho")
+DAT_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_recond_diag_dep_10s_ef5_ef7/Run_635/mallorca_recond_inv_NLCG_092.dat")
 
 #RHO_FILE = r"c:\Users\alber\TFG\MT_Llucmajor_results\Model_Comparable_Tesis_Arango\Run_632_results\mallorca_17km_seafixed_ef5_cov_inv_NLCG_067.rho"
-#DAT_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Comparable_Tesis_Arango\Run_632_results\mallorca_17km_seafixed_ef5_cov_inv_NLCG_067.dat"
+#DAT_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Comparable_Tesis_Arango/Run_632_results/mallorca_17km_seafixed_ef5_cov_inv_NLCG_067.dat")
 
-#RHO_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat\Run_475_results\job_475_Mallorca_Inv_coast_bat_sm3\mallorca_coast_Bat_sm3_inv_NLCG_129.rho"
-#DAT_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Smooth3_Bat\Run_475_results\job_475_Mallorca_Inv_coast_bat_sm3\mallorca_coast_Bat_sm3_inv_NLCG_129.dat"
+#RHO_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat/Run_475_results/job_475_Mallorca_Inv_coast_bat_sm3/mallorca_coast_Bat_sm3_inv_NLCG_129.rho")
+#DAT_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Smooth3_Bat/Run_475_results/job_475_Mallorca_Inv_coast_bat_sm3/mallorca_coast_Bat_sm3_inv_NLCG_129.dat")
 
-OUT_HTML = r"C:\Users\alber\TFG\visualizations\depth_slices_interactive.html"
+OUT_HTML = str(TFG_DIR / "visualizations/depth_slices_interactive.html")
 
 PAD_THRESHOLD_M = 5_000.0            # crop padding cells beyond this distance (m) from centre (as in the original)
 COLOR_VMIN, COLOR_VMAX = 1.0, 1e4    # resistivity colour-scale range (ohm·m, log)

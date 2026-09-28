@@ -11,10 +11,15 @@ import math
 import csv
 from pathlib import Path
 from collections import Counter, defaultdict
+import os
 
-DAT_IN  = "/home/claude/depurar/Mall_Z_no_tippers.dat"
-DAT_OUT = "/home/claude/depurar/Mall_Z_clean.dat"
-CSV_LOG = "/home/claude/depurar/removed_points.csv"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+DAT_IN  = str(TFG_DIR / "depurar/Mall_Z_no_tippers.dat")
+DAT_OUT = str(TFG_DIR / "depurar/Mall_Z_clean.dat")
+CSV_LOG = str(TFG_DIR / "depurar/removed_points.csv")
 
 REL_ERR_THRESHOLD = 0.50      # drop points with err/|Z| > 50%
 APPLY_TO_COMPS    = ('ZXX', 'ZXY', 'ZYX', 'ZYY')   # all Z components

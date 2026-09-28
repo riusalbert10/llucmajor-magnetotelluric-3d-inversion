@@ -11,11 +11,16 @@ rho_a = 0.2 * T * |Z|^2   (Z en [mV/km]/[nT], T en s)
 import numpy as np, math, collections, os
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 # ============================ CONFIG ============================
-OBS  = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_bat_NO_otliers\Arxius_ejecució\Mall_mask_no_tip_1s_ef5_all"
-PRED = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_6\Depuracio_manual_6_NLCG_067.dat"
-OUTDIR = r"C:\Users\alber\TFG\visualizations\ajust_rho"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+OBS  = str(TFG_DIR / "MT_Llucmajor_results/Model_bat_NO_otliers/Arxius_ejecució/Mall_mask_no_tip_1s_ef5_all")
+PRED = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_6/Depuracio_manual_6_NLCG_067.dat")
+OUTDIR = str(TFG_DIR / "visualizations/ajust_rho")
 # ===============================================================
 
 

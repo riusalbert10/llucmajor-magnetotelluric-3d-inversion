@@ -9,8 +9,8 @@ The magnetotelluric field data used in this project are **not included** in this
 - **Format:** one EDI file per station (`mallXX.edi`), converted to the ModEM data format
   (full impedance tensor) for the 3D inversion.
 
-To reproduce the processing, place your EDI files in a local folder (for example `data/edi/`, which
-is git-ignored) and update the paths in the scripts under `src/`.
+To reproduce the processing, place your EDI files in `data/edi/` (which
+is git-ignored); the scripts under `src/` read them from there.
 
 What *is* included in `results/final_model/`:
 - the final inverted resistivity model (`.rho`, ModEM format, ln ρ);

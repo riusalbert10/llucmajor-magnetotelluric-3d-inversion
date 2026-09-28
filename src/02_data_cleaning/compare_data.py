@@ -16,11 +16,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from collections import defaultdict, Counter
+import os
+from pathlib import Path
 
-DAT_ORIG = "/mnt/user-data/uploads/1778171854890_Mall_Z_no_tippers.dat"
-DAT_CLEAN = "/mnt/user-data/uploads/1778171854891_Mall_Z_clean.dat"
-PDF_OUT = "/home/claude/compare/comparison_per_station.pdf"
-PNG_OUT = "/home/claude/compare/comparison_summary.png"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+DAT_ORIG = str(TFG_DIR / "depurar/Mall_Z_no_tippers.dat")
+DAT_CLEAN = str(TFG_DIR / "depurar/Mall_Z_clean.dat")
+PDF_OUT = str(TFG_DIR / "compare/comparison_per_station.pdf")
+PNG_OUT = str(TFG_DIR / "compare/comparison_summary.png")
 
 # Apparent resistivity constant (Z in mV/km/nT, T in s -> rho_a in Ohm·m)
 APP_RES_K = 0.2
@@ -150,7 +156,7 @@ def main():
         removed_counts[site] = (len(kept), len(removed))
 
     # Save summary text
-    with open('/home/claude/compare/removed_summary.txt', 'w') as f:
+    with open(str(TFG_DIR / "compare/removed_summary.txt"), 'w') as f:
         f.write("Site     Kept   Removed   % removed\n")
         f.write("------   ----   -------   ---------\n")
         for site in sorted(sites, key=lambda s: -removed_counts[s][1]):

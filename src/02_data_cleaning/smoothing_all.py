@@ -23,14 +23,20 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+import os
 
 # =========================================================================
 # CONFIG
 # =========================================================================
-EDI_DIR        = Path(r"C:\Users\alber\TFG\LLUCMAJOR_DADES_edi")  # carpeta con .edi
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+EDI_DIR        = Path(str(EDI_DIR))  # carpeta con .edi
 GLOB_PATTERN   = "mall*.edi"                                      # patrón de archivos
-OUT_DIR        = Path(r"C:\Users\alber\TFG\smoothing_out")        # destino EDIs depurados
-PLOTS_DIR      = Path(r"C:\Users\alber\TFG\smoothing_plots")      # destino QC plots
+OUT_DIR        = Path(str(TFG_DIR / "smoothing_out"))        # destino EDIs depurados
+PLOTS_DIR      = Path(str(TFG_DIR / "smoothing_plots"))      # destino QC plots
 MAKE_PLOTS     = True    # True si quieres además generar el QC plot por estación
 
 # --- Hampel (rolling median + MAD) ---

@@ -21,11 +21,16 @@ fase  = atan2(Im Z, Re Z)    (graus, rang natural [-180, 180], sense desplaçame
 import numpy as np, math, collections, os
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 # ============================ CONFIG ============================
-OBS  = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_bat_NO_otliers\Arxius_ejecució\Mall_mask_no_tip_1s_ef5_all_depD26_52_53"
-PRED = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_4\Run_667\Depuracio_manual_7_NLCG_073.dat"
-OUTDIR = r"C:\Users\alber\TFG\visualizations\Ajust_Dades_Fase"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+OBS  = str(TFG_DIR / "MT_Llucmajor_results/Model_bat_NO_otliers/Arxius_ejecució/Mall_mask_no_tip_1s_ef5_all_depD26_52_53")
+PRED = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_4/Run_667/Depuracio_manual_7_NLCG_073.dat")
+OUTDIR = str(TFG_DIR / "visualizations/Ajust_Dades_Fase")
 # ===============================================================
 
 ANTIDIAG = ("ZXY", "ZYX")

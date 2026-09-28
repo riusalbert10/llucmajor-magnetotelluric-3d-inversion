@@ -23,16 +23,22 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-RHO_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_4\Run_667\Depuracio_manual_7_NLCG_073.rho"
-DAT_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_4\Run_667\Depuracio_manual_7_NLCG_073.dat"
-EDI_DIR  = r"C:\Users\alber\TFG\LLUCMAJOR_DADES_edi"
-REF_IMG  = r"C:\Users\alber\TFG\visualizations\arango_reference.png"
-OUT_PNG  = r"C:\Users\alber\TFG\visualizations\compare_profiles_arango_figure.png"
-OUT_PDF  = r"C:\Users\alber\TFG\visualizations\compare_profiles_arango_figure.pdf"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+RHO_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_4/Run_667/Depuracio_manual_7_NLCG_073.rho")
+DAT_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_4/Run_667/Depuracio_manual_7_NLCG_073.dat")
+EDI_DIR  = str(EDI_DIR)
+REF_IMG  = str(TFG_DIR / "visualizations/arango_reference.png")
+OUT_PNG  = str(TFG_DIR / "visualizations/compare_profiles_arango_figure.png")
+OUT_PDF  = str(TFG_DIR / "visualizations/compare_profiles_arango_figure.pdf")
 
 PAD_THRESHOLD_M = 6_000.0
 MAX_DEPTH_KM    = 0.7                 # cropped to match the reference (0-600/700 m)

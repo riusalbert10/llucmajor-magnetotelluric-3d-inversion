@@ -19,11 +19,16 @@ import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from pathlib import Path
 
-OUR_IMG = r"C:\Users\alber\TFG\visualizations\depth_slices_figure.png"
-REF_IMG = r"C:\Users\alber\TFG\visualizations\Depth_Slices_Arango.png"
-OUT_PNG = r"C:\Users\alber\TFG\visualizations\compare_depth_slices_arango_figure.png"
-OUT_PDF = r"C:\Users\alber\TFG\visualizations\compare_depth_slices_arango_figure.pdf"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+
+OUR_IMG = str(TFG_DIR / "visualizations/depth_slices_figure.png")
+REF_IMG = str(TFG_DIR / "visualizations/Depth_Slices_Arango.png")
+OUT_PNG = str(TFG_DIR / "visualizations/compare_depth_slices_arango_figure.png")
+OUT_PDF = str(TFG_DIR / "visualizations/compare_depth_slices_arango_figure.pdf")
 
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10,
                      "mathtext.default": "regular"})

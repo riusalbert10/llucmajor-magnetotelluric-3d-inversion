@@ -25,17 +25,23 @@ mpl.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Configuration  (kept identical to the interactive viewer where relevant)
 # ---------------------------------------------------------------------------
-RHO_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_4\Run_667\Depuracio_manual_7_NLCG_073.rho"
-DAT_FILE = r"C:\Users\alber\TFG\MT_Llucmajor_results\Model_Depuracio_manual_4\Run_667\Depuracio_manual_7_NLCG_073.dat"
-EDI_DIR  = r"C:\Users\alber\TFG\LLUCMAJOR_DADES_edi"
-OUT_PERP_PNG = r"C:\Users\alber\TFG\visualizations\cross_sections_perpendicular_figure.png"
-OUT_PERP_PDF = r"C:\Users\alber\TFG\visualizations\cross_sections_perpendicular_figure.pdf"
-OUT_PAR_PNG  = r"C:\Users\alber\TFG\visualizations\cross_sections_parallel_figure.png"
-OUT_PAR_PDF  = r"C:\Users\alber\TFG\visualizations\cross_sections_parallel_figure.pdf"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+RHO_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_4/Run_667/Depuracio_manual_7_NLCG_073.rho")
+DAT_FILE = str(TFG_DIR / "MT_Llucmajor_results/Model_Depuracio_manual_4/Run_667/Depuracio_manual_7_NLCG_073.dat")
+EDI_DIR  = str(EDI_DIR)
+OUT_PERP_PNG = str(TFG_DIR / "visualizations/cross_sections_perpendicular_figure.png")
+OUT_PERP_PDF = str(TFG_DIR / "visualizations/cross_sections_perpendicular_figure.pdf")
+OUT_PAR_PNG  = str(TFG_DIR / "visualizations/cross_sections_parallel_figure.png")
+OUT_PAR_PDF  = str(TFG_DIR / "visualizations/cross_sections_parallel_figure.pdf")
 
 PAD_THRESHOLD_M = 6_000.0
 MAX_DEPTH_KM    = 1.0

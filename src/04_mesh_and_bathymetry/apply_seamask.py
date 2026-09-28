@@ -15,14 +15,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as MplPoly
 from shapely.geometry import Polygon, Point
+import os
+from pathlib import Path
 
 # ---------------------------------------------------------------- USER PARAMETERS
-RHO_IN     = r"C:\Users\alber\TFG\Generar_Costa_Bat_new\Mallorca_Homo2"
-KML_POLY   = r"C:\Users\alber\TFG\Generar_Costa_Bat_new\Perfil_costa_Llucmajor.kml"
-KML_SITES  = r"C:\Users\alber\TFG\Generar_Costa_Bat_new\Coordenades_sites.KML"
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
 
-RHO_OUT    = r"C:\Users\alber\TFG\Generar_Costa_Bat_new\Mallorca_Homo2_seamask.rho"
-PNG_OUT    = r"C:\Users\alber\TFG\Generar_Costa_Bat_new\mask_check.png"
+RHO_IN     = str(TFG_DIR / "Generar_Costa_Bat_new/Mallorca_Homo2")
+KML_POLY   = str(TFG_DIR / "Generar_Costa_Bat_new/Perfil_costa_Llucmajor.kml")
+KML_SITES  = str(TFG_DIR / "Generar_Costa_Bat_new/Coordenades_sites.KML")
+
+RHO_OUT    = str(TFG_DIR / "Generar_Costa_Bat_new/Mallorca_Homo2_seamask.rho")
+PNG_OUT    = str(TFG_DIR / "Generar_Costa_Bat_new/mask_check.png")
 
 # Geographic origin (matches .dat file). Local (x=0, y=0) corresponds to this lat/lon.
 LAT_ORIGIN = 39.476669

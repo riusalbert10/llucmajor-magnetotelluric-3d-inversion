@@ -14,14 +14,15 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mtpy.core.mt import MT
+from pathlib import Path
 
-# Detect operating system for paths
-if sys.platform == 'win32':
-    base_dir = r'C:\Users\alber\TFG\LLUCMAJOR_DADES_edi'
-    output_dir = r'C:\Users\alber\TFG\1D_Inversion_Results'
-else:
-    base_dir = '/mnt/c/Users/alber/TFG/LLUCMAJOR_DADES_edi'
-    output_dir = '/home/alber/1D_Inversion_Results'
+# Project folder holding the data and ModEM runs (not included in the repo).
+# Defaults to the repository root; override it with the TFG_DIR environment variable.
+TFG_DIR = Path(os.environ.get("TFG_DIR", Path(__file__).resolve().parents[2]))
+EDI_DIR = TFG_DIR / "data" / "edi"   # one EDI file per station (see data/README.md)
+
+base_dir = str(EDI_DIR)
+output_dir = str(TFG_DIR / "1D_Inversion_Results")
 
 # Create output directory if it doesn't exist
 os.makedirs(output_dir, exist_ok=True)
